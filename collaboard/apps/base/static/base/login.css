@@ -234,8 +234,15 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.eye-off-icon {
-  display: none;
+
+/* Hide the eye-off icon by default */
+.password-toggle .eye-off-icon {
+    display: none !important;
+}
+
+/* Ensure the eye icon is visible by default */
+.password-toggle .eye-icon {
+    display: inline-block !important;
 }
 
 /* Form Row */
