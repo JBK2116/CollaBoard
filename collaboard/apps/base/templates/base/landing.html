@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CollaBoard - Professional Meeting Engagement Platform</title>
     <link rel="stylesheet" href="{% static 'base/landing.css' %}">
-    <!-- DJANGO-INTEGRATION: Add CSRF token meta tag when implementing -->
-    <!-- DJANGO-INTEGRATION: Add static files handling for CSS -->
 </head>
 <body>
     <!-- ================================
@@ -23,9 +21,8 @@
                 <h1 class="logo">CollaBoard</h1>
             </div>
             <nav class="navbar-nav">
-                <!-- DJANGO-INTEGRATION: Update The HREF for both tags -->
-                <a href="#" class="nav-link">Login</a> <!-- Update The HREF -->
-                <a href="{% url 'register' %}" class="nav-link btn btn-primary">Get Started</a> <!-- Update The HREF -->
+                <a href="{% url 'login' %}" class="nav-link">Login</a> 
+                <a href="{% url 'register' %}" class="nav-link btn btn-primary">Get Started</a>
             </nav>
         </div>
     </header>

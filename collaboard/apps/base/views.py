@@ -7,3 +7,6 @@ def landing(request) -> HttpResponse:
 
 def register(request) -> HttpResponse:
     return render(request, "base/register.html")
+
+def login(request) -> HttpResponse:
+    return render(request, "base/login.html")
