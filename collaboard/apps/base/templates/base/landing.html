@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CollaBoard - Professional Meeting Engagement Platform</title>
+    <link rel="stylesheet" href="{% static 'base/landing.css' %}">
+    <!-- DJANGO-INTEGRATION: Add CSRF token meta tag when implementing -->
+    <!-- DJANGO-INTEGRATION: Add static files handling for CSS -->
+</head>
+<body>
+    <!-- ================================
+         PAGE: Landing Page
+         PURPOSE: Conversion-focused landing page for director signup and meeting participation
+         THEME: Dark professional with glassmorphism effects
+         ================================ -->
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1 class="logo">CollaBoard</h1>
+            </div>
+            <nav class="navbar-nav">
+                <!-- DJANGO-INTEGRATION: Update The HREF for both tags -->
+                <a href="#" class="nav-link">Login</a> <!-- Update The HREF -->
+                <a href="#" class="nav-link btn btn-primary">Get Started</a> <!-- Update The HREF -->
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Transform Your Meetings with 
+                    <span class="highlight">Kahoot-Style Engagement</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Professional meeting control meets interactive Q&A. Directors create engaging sessions, 
+                    participants join instantly with unique codes.
+                </p>
+                
+                <!-- Access Code Entry - Primary CTA for Participants -->
+                <div class="access-code-section">
+                    <h2 class="section-title">Join a Meeting</h2>
+                    <form class="access-code-form" id="accessCodeForm" action="#", method="POST">
+                        {% csrf_token %} <!-- Update The Above Action HREF -->
+                        <div class="form-group">
+                            <label for="accessCode" class="form-label">Enter 8-Digit Access Code</label>
+                            <div class="code-input-group">
+                                <input 
+                                    type="text" 
+                                    id="accessCode" 
+                                    name="access_code" 
+                                    class="form-control code-input" 
+                                    maxlength="8" 
+                                    pattern="[0-9]{8}" 
+                                    placeholder="12345678"
+                                    required
+                                >
+                                <button type="submit" class="btn btn-primary">Join Meeting</button>
+                            </div>
+                            {% comment %}
+                            <!-- DJANGO-INTEGRATION: Display form errors with {{ form.access_code.errors }} -->
+                             {% endcomment %}
+                            <div class="form-error" id="codeError"></div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Director CTA Section -->
+                <div class="director-cta">
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+                    <h2 class="section-title">Create Your First Meeting</h2>
+                    <p class="cta-description">
+                        Start building engaging, professional Q&A sessions in minutes
+                    </p>
+                    <!-- DJANGO-INTEGRATION: Update The HREF -->
+                    <a href="#" class="btn btn-secondary btn-large">Create Your First Meeting</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Highlights -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose CollaBoard?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Professional Control</h3>
+                    <p class="feature-description">
+                        Directors maintain full control over meeting flow, timing, and engagement levels
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Instant Participation</h3>
+                    <p class="feature-description">
+                        Participants join seamlessly with 8-digit codes - no accounts required for public meetings
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Real-time Analytics</h3>
+                    <p class="feature-description">
+                        Live response tracking, engagement metrics, and post-meeting insights
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Secure & Private</h3>
+                    <p class="feature-description">
+                        Enterprise-grade security with optional authentication for private sessions
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="social-proof">
+        <div class="container">
+            <div class="proof-content">
+                <h2 class="section-title">Trusted by Professionals</h2>
+                <div class="proof-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">10,000+</div>
+                        <div class="stat-label">Meetings Created</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">500,000+</div>
+                        <div class="stat-label">Participants Engaged</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3 class="logo">CollaBoard</h3>
+                    <p>Professional meeting engagement platform</p>
+                </div>
+                <div class="footer-links">
+                    <!-- DJANGO-INTEGRATION: Update The HREF tags for all links -->
+                    <a href="#" class="footer-link">About</a>
+                    <a href="#" class="footer-link">Features</a>
+                    <a href="#" class="footer-link">Pricing</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- External JavaScript -->
+    <script src="{% static 'base/landing.js' %}"></script>
+</body>
+</html> 
