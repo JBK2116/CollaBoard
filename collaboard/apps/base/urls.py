@@ -5,4 +5,5 @@ from apps.base import views
 
 urlpatterns = [
     path("", views.landing, name="landing"), # Homepage Path
+    path("register/", views.register, name="register"), # Register An Account Page
 ]

@@ -25,7 +25,7 @@
             <nav class="navbar-nav">
                 <!-- DJANGO-INTEGRATION: Update The HREF for both tags -->
                 <a href="#" class="nav-link">Login</a> <!-- Update The HREF -->
-                <a href="#" class="nav-link btn btn-primary">Get Started</a> <!-- Update The HREF -->
+                <a href="{% url 'register' %}" class="nav-link btn btn-primary">Get Started</a> <!-- Update The HREF -->
             </nav>
         </div>
     </header>
@@ -81,7 +81,7 @@
                         Start building engaging, professional Q&A sessions in minutes
                     </p>
                     <!-- DJANGO-INTEGRATION: Update The HREF -->
-                    <a href="#" class="btn btn-secondary btn-large">Create Your First Meeting</a>
+                    <a href="{% url 'register' %}" class="btn btn-secondary btn-large">Create Your First Meeting</a>
                 </div>
             </div>
         </div>
