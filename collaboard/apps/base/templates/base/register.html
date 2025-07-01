@@ -55,9 +55,13 @@
                                         placeholder="Enter your first name"
                                         required
                                         autocomplete="given-name"
+                                        value="{{data.first_name|default:''}}"
                                     >
-                                    <!-- DJANGO-INTEGRATION: Display form errors with {{ form.first_name.errors }} -->
-                                    <div class="form-error" id="firstNameError"></div>
+                                    {% if form_errors.first_name %}
+                                    <div class="form-error" id="firstNameError">
+                                        {{form_errors.first_name|first}}
+                                    </div>
+                                    {% endif %}
                                 </div>
                                 
                                 <div class="form-group">
@@ -70,9 +74,13 @@
                                         placeholder="Enter your last name"
                                         required
                                         autocomplete="family-name"
+                                        value="{{data.last_name|default:''}}"
                                     >
-                                    <!-- DJANGO-INTEGRATION: Display form errors with {{ form.last_name.errors }} -->
-                                    <div class="form-error" id="lastNameError"></div>
+                                    {% if form_errors.last_name %}
+                                    <div class="form-error" id="lastNameError">
+                                        {{form_errors.last_name|first}}
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -87,9 +95,16 @@
                                     placeholder="Enter your email address"
                                     required
                                     autocomplete="email"
+                                    value="{{data.email|default:''}}"
                                 >
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.email.errors }} -->
-                                <div class="form-error" id="emailError"></div>
+                                <div class="form-error" id="emailError">
+                                    {% if user_exists %}
+                                        <p> An account already exists with that email</p>
+                                    {% elif form_errors.email %}
+                                        {{form_errors.email|first}}
+                                    {% else %}
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Password Field -->
@@ -105,6 +120,7 @@
                                         required
                                         minlength="8"
                                         autocomplete="new-password"
+                                        value="{{data.password1|default:''}}"
                                     >
                                     <button 
                                         type="button" 
@@ -151,8 +167,14 @@
                                     </div>
                                 </div>
                                 
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.password1.errors }} -->
-                                <div class="form-error" id="passwordError"></div>
+                                <div class="form-error" id="passwordError">
+                                    {% if missing_password %}
+                                        <p>Password Required!</p>
+                                    {% elif password_errors %}
+                                        {{password_errors.0}}
+                                    {% else %}
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Terms Agreement -->
