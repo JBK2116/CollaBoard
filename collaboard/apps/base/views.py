@@ -27,6 +27,10 @@ def register(request) -> HttpResponse:
         if CustomUser.objects.filter(email=data.get("email")).exists():
             context.update({"user_exists": True})
             return render(request, "base/register.html", context)
+        # Check for terms and agreement
+        if not data.get("agree_terms"):
+            context.update({"agree_terms_error": True})
+            return render(request, "base/register.html", context)
         # Create the new user
         new_user = CustomUser(
             first_name=data.get("first_name"),

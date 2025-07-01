@@ -200,8 +200,11 @@
                                         <a href="#" class="terms-link">Privacy Policy</a>
                                     </label>
                                 </div>
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.agree_terms.errors }} -->
-                                <div class="form-error" id="termsError"></div>
+                                {% if agree_terms_error %}
+                                <div class="form-error" id="termsError">
+                                    You must agree to the terms and conditions to register an account
+                                </div>
+                                {% endif %}
                             </div>
 
                             <!-- Create Account Button -->
