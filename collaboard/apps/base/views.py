@@ -1,5 +1,7 @@
 from typing import Any
 
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import HttpResponse, redirect, render
@@ -66,11 +68,31 @@ def register(request) -> HttpResponse:
                 "base/register.html",
                 context,
             )
-    return render(request, "base/register.html", context)  # Request is a simple GET request
+    return render(
+        request, "base/register.html", context
+    )  # Request is a simple GET request
 
 
-def login(request) -> HttpResponse:
+def login_user(request) -> HttpResponse:
+    context: dict[str, Any] = {}
+    just_created = request.GET.get("created") == "true"  # Used in template display
+    context.update({"just_created": just_created})
+    # Handle User login attempt
     if request.method == "POST":
-        print("POST")
-    just_created = request.GET.get("created") == "true"
-    return render(request, "base/login.html", {"just_created": just_created})
+        fields: list[str] = ["email", "password", "remember_me"]
+        data: dict[str, str] = {field: request.POST.get(field) for field in fields}
+        # Data will be used to prefill the form if an error occurred or invalid login credentials
+        context.update(data)
+        user: AbstractUser | None = authenticate(
+            request, email=data.get("email"), password=data.get("password")
+        )
+        if not user:
+            context.update({"invalid_error": "Invalid email or password"})
+            return render(request, "base/login.html", context)
+        # Log in the user and use a specific session length depending on the remember me box
+        login(request, user)
+        if not data.get("remember_me"):
+            request.session.set_expiry(0)
+            # Give the user access until they close their browser
+        return redirect("dashboard")
+    return render(request, "base/login.html", context)

@@ -66,9 +66,11 @@
                                     placeholder="Enter your email"
                                     required
                                     autocomplete="email"
+                                    value="{{email}}"
                                 >
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.email.errors }} -->
-                                <div class="form-error" id="emailError"></div>
+                                {% if invalid_error %}
+                                <div class="form-error" id="emailError">{{invalid_error}}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Password Field -->
@@ -83,6 +85,7 @@
                                         placeholder="Enter your password"
                                         required
                                         autocomplete="current-password"
+                                        value="{{password}}"
                                     >
                                     <button 
                                         type="button" 
@@ -114,6 +117,7 @@
                                         id="rememberMe" 
                                         name="remember_me" 
                                         class="form-check-input"
+                                        value="{{remember_me}}"
                                     >
                                     <label for="rememberMe" class="form-check-label">
                                         Remember me
