@@ -15,17 +15,15 @@
          THEME: Dark professional with clean form design
          ================================ -->
 
-    <!-- Header -->
-    <header class="auth-header">
+    <!-- Navigation Header (copied from landing.html) -->
+    <header class="navbar">
         <div class="container">
-            <div class="header-content">
-                <div class="brand">
-                    <h1 class="logo">CollaBoard</h1>
-                </div>
-                <nav class="auth-nav">
-                    <a href="{% url 'register' %}" class="nav-link">Create Account</a>
-                </nav>
+            <div class="navbar-brand">
+                <a href="#" class="logo-link"><h1 class="logo">CollaBoard</h1></a>
             </div>
+            <nav class="navbar-nav">
+                <a href="{% url 'register' %}" class="nav-link btn btn-primary">Get Started</a>
+            </nav>
         </div>
     </header>
 
