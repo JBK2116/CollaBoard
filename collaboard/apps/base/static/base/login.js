@@ -58,4 +58,26 @@ passwordInput.addEventListener('input', function() {
     } else if (this.validity.valueMissing) {
         passwordError.textContent = 'Password is required';
     }
+});
+
+// Login Success Card Fade-Out
+window.addEventListener('DOMContentLoaded', function() {
+    var successCard = document.getElementById('loginSuccessCard');
+    var closeBtn = document.getElementById('loginSuccessCloseBtn');
+    var fadeAndRemove = function() {
+        if (successCard) {
+            successCard.classList.add('fade-out');
+            setTimeout(function() {
+                if (successCard && successCard.parentNode) {
+                    successCard.parentNode.removeChild(successCard);
+                }
+            }, 700);
+        }
+    };
+    if (successCard) {
+        setTimeout(fadeAndRemove, 3500);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', fadeAndRemove);
+        }
+    }
 }); 

@@ -41,6 +41,20 @@
                     </div>
 
                     <div class="card-body">
+                        {% if just_created %}
+                        <div class="login-success-card" id="loginSuccessCard">
+                            <button class="success-close-btn" id="loginSuccessCloseBtn" aria-label="Close success message">&times;</button>
+                            <div class="success-icon-wrapper">
+                                <svg class="success-checkmark" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+                                    <circle cx="24" cy="24" r="22" stroke="var(--accent-success)" fill="none"/>
+                                    <path d="M14 25l7 7 13-13" stroke="var(--accent-success)" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                </svg>
+                            </div>
+                            <h2 class="success-title">Account created successfully</h2>
+                            <p class="success-subtext">You can now sign in to your account.</p>
+                        </div>
+                        {% endif %}
+
                         <form class="login-form" id="loginForm" action="#", method="POST">
                             {% csrf_token %}
                             <!-- Email Field -->
