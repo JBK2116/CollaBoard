@@ -75,7 +75,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     };
     if (successCard) {
-        setTimeout(fadeAndRemove, 3500);
+        // setTimeout(fadeAndRemove, 3500);
         if (closeBtn) {
             closeBtn.addEventListener('click', fadeAndRemove);
         }
