@@ -8,73 +8,88 @@
   <link rel="stylesheet" href="{% static 'director/dashboard.css' %}">
 </head>
 <body>
+  <!-- Navigation Header (copied from landing.html) -->
+  <header class="navbar">
+    <div class="container">
+      <div class="navbar-brand">
+        <a href="#" class="logo-link"><h1 class="logo">CollaBoard</h1></a>
+      </div>
+      <nav class="navbar-nav">
+        <a href="#" class="nav-link">Logout</a>
+        <a href="#" class="nav-link btn btn-primary">My Account</a>
+      </nav>
+    </div>
+  </header>
+
   <main class="dashboard-main">
-    <header class="dashboard-header">
-      <h1 class="dashboard-title">Welcome back, Director!</h1>
-      <p class="dashboard-subtext">Here's a quick glance at your meeting performance.</p>
-    </header>
+    <div class="container">
+      <header class="dashboard-header">
+        <h1 class="dashboard-title">Welcome back, Director!</h1>
+        <p class="dashboard-subtext">Here's a quick glance at your meeting performance.</p>
+      </header>
 
-    <!-- Stat Cards Row -->
-    <section class="dashboard-grid">
-      <div class="stat-card">
-        <span class="stat-label">Total Meetings</span>
-        <span class="stat-value">42</span>
-        <span class="stat-icon">📅</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Participants Served</span>
-        <span class="stat-value">1,234</span>
-        <span class="stat-icon">👥</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Success Rate</span>
-        <span class="stat-value">98%</span>
-        <span class="stat-icon">✅</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Avg. Answer Time</span>
-        <span class="stat-value">3.2s</span>
-        <span class="stat-icon">⏱️</span>
-      </div>
-    </section>
-
-    <!-- Action Widget Row -->
-    <section class="action-widget-row">
-      <a class="action-card create-meeting" href="#">
-        <span class="action-label">Create Meeting</span>
-      </a>
-      <a class="action-card my-meetings" href="#">
-        <span class="action-label">My Meetings</span>
-      </a>
-      <a class="action-card live-sessions" href="#">
-        <span class="action-label">Live Sessions</span>
-      </a>
-      <a class="action-card analytics" href="#">
-        <span class="action-label">Analytics</span>
-      </a>
-    </section>
-
-    <!-- Utility Widget (Next Scheduled Meeting) -->
-    <section class="utility-widget">
-      <div class="next-meeting">
-        <h2 class="utility-title">Next Scheduled Meeting</h2>
-        <div class="utility-meta">
-          <div class="meeting-title"><strong>Title:</strong> Weekly Team Sync</div>
-          <div class="meeting-questions"><strong>Questions:</strong> 12</div>
-          <div class="meeting-participants"><strong>Participants:</strong> 18</div>
+      <!-- Stat Cards Row -->
+      <section class="dashboard-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Meetings</span>
+          <span class="stat-value">42</span>
+          <span class="stat-icon">📅</span>
         </div>
-        <p class="utility-time">Today at 3:00 PM</p>
-        <button class="utility-btn">Prepare</button>
-      </div>
-      <!--
-      <div class="last-meeting-summary">
-        <h2 class="utility-title">Last Meeting Summary</h2>
-        <div class="summary-stats">Score: 87%, Participants: 30</div>
-        <a class="utility-link" href="#">View More</a>
-      </div>
-      -->
-    </section>
+        <div class="stat-card">
+          <span class="stat-label">Participants Served</span>
+          <span class="stat-value">1,234</span>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Success Rate</span>
+          <span class="stat-value">98%</span>
+          <span class="stat-icon">✅</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Avg. Answer Time</span>
+          <span class="stat-value">3.2s</span>
+          <span class="stat-icon">⏱️</span>
+        </div>
+      </section>
+
+      <!-- Action Widget Row -->
+      <section class="action-widget-row">
+        <a class="action-card create-meeting" href="#">
+          <span class="action-label">Create Meeting</span>
+        </a>
+        <a class="action-card my-meetings" href="#">
+          <span class="action-label">My Meetings</span>
+        </a>
+        <a class="action-card live-sessions" href="#">
+          <span class="action-label">Live Sessions</span>
+        </a>
+        <a class="action-card analytics" href="#">
+          <span class="action-label">Analytics</span>
+        </a>
+      </section>
+
+      <!-- Utility Widget (Next Scheduled Meeting) -->
+      <section class="utility-widget">
+        <div class="next-meeting">
+          <h2 class="utility-title">Next Scheduled Meeting</h2>
+          <div class="utility-meta">
+            <div class="meeting-title"><strong>Title:</strong> Weekly Team Sync</div>
+            <div class="meeting-questions"><strong>Questions:</strong> 12</div>
+            <div class="meeting-participants"><strong>Participants:</strong> 18</div>
+          </div>
+          <p class="utility-time">Today at 3:00 PM</p>
+          <button class="utility-btn">Prepare</button>
+        </div>
+        <!--
+        <div class="last-meeting-summary">
+          <h2 class="utility-title">Last Meeting Summary</h2>
+          <div class="summary-stats">Score: 87%, Participants: 30</div>
+          <a class="utility-link" href="#">View More</a>
+        </div>
+        -->
+      </section>
+    </div>
   </main>
-<script src="{% static 'director/dashboard.js' %}"></script>
+  <script src="{% static 'director/dashboard.js' %}"></script>
 </body>
 </html>

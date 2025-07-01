@@ -20,12 +20,17 @@
 }
 
 body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--primary-bg);
   color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .dashboard-main {
-  padding: 3rem 0 2rem 0;
+  padding-top: 6rem;
+  padding: 6rem 0 2rem 0;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -36,19 +41,23 @@ body {
 }
 
 .dashboard-title {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text-primary);
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 .dashboard-subtext {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
 }
 
 .dashboard-grid {
@@ -73,16 +82,19 @@ body {
 }
 
 .stat-label {
-  color: var(--text-secondary);
   font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.01em;
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
-  color: var(--text-primary);
   font-size: 2.1rem;
   font-weight: 600;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
+  letter-spacing: 0.01em;
 }
 
 .stat-icon {
@@ -175,16 +187,19 @@ body {
 }
 
 .utility-title {
-  font-size: 1.15rem;
+  font-size: 2rem;
   font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: left;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
 }
 
 .utility-time {
   color: var(--text-secondary);
   font-size: 1rem;
   margin-bottom: 1rem;
+  letter-spacing: 0.01em;
 }
 
 .utility-btn {
@@ -223,9 +238,10 @@ body {
   gap: 0.25rem;
 }
 .meeting-title, .meeting-questions, .meeting-participants {
-  color: var(--text-secondary);
   font-size: 1rem;
+  color: var(--text-secondary);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 .meeting-title strong, .meeting-questions strong, .meeting-participants strong {
   color: var(--accent-primary);
@@ -241,7 +257,7 @@ body {
 
 @media (max-width: 600px) {
   .dashboard-main {
-    padding: 1.5rem 0.5rem;
+    padding-top: 4.5rem;
   }
   .dashboard-grid, .action-widget-row {
     grid-template-columns: 1fr;
@@ -253,4 +269,95 @@ body {
   .utility-widget {
     gap: 1rem;
   }
+}
+
+/* --- Navbar and Container (match landing.css) --- */
+.navbar {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: auto;
+  min-height: 0;
+  padding: 0 15px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.navbar-brand .logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.nav-link:hover {
+  color: var(--text-primary);
+}
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary), #4c8cf8);
+  color: white;
+  box-shadow: 0 2px 4px rgba(88, 166, 255, 0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(88, 166, 255, 0.4);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.section-title, .utility-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: left;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.action-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.logo-link {
+  text-decoration: none;
 } 
