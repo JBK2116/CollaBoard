@@ -1,5 +1,5 @@
 // ===========================================
-// REGISTER PAGE - JAVASCRIPT
+// REGISTER PAGE - JAVASCRIPT (DJANGO FIXED)
 // ===========================================
 
 // DOM Elements
@@ -82,25 +82,19 @@ passwordInput.addEventListener('input', function() {
     checkPasswordStrength(this.value);
 });
 
-// Form Submission with Loading State
+// Form Submission To DJANGO BACKEND
 registerForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Show loading state
-    submitBtn.classList.add('loading');
-    btnText.style.display = 'none';
-    btnLoading.style.display = 'block';
-    
-    // DJANGO-INTEGRATION: Submit form to Django view
-    // This will be handled by Django form processing
-    console.log('Form submitted - Django will handle registration');
-    
-    // Simulate form submission (remove in Django implementation)
-    setTimeout(() => {
+    console.log('Form submitting to Django...');
+});
+
+// Reset loading state when page loads (in case Django returns with errors)
+window.addEventListener('load', function() {
+    if (submitBtn.classList.contains('loading')) {
         submitBtn.classList.remove('loading');
         btnText.style.display = 'block';
         btnLoading.style.display = 'none';
-    }, 2000);
+        submitBtn.disabled = false;
+    }
 });
 
 // Real-time Validation Feedback
@@ -110,15 +104,21 @@ inputs.forEach(inputId => {
     const input = document.getElementById(inputId);
     const errorDiv = document.getElementById(inputId + 'Error');
     
-    input.addEventListener('input', function() {
-        if (this.validity.valid) {
-            errorDiv.textContent = '';
-        } else if (this.validity.valueMissing) {
-            errorDiv.textContent = 'This field is required';
-        } else if (this.validity.typeMismatch && this.type === 'email') {
-            errorDiv.textContent = 'Please enter a valid email address';
-        } else if (this.validity.tooShort && this.id === 'password') {
-            errorDiv.textContent = 'Password must be at least 8 characters';
-        }
-    });
-}); 
+    if (input && errorDiv) {
+        input.addEventListener('input', function() {
+            if (this.validity.valid) {
+                errorDiv.textContent = '';
+                this.classList.remove('error');
+            } else if (this.validity.valueMissing) {
+                errorDiv.textContent = 'This field is required';
+                this.classList.add('error');
+            } else if (this.validity.typeMismatch && this.type === 'email') {
+                errorDiv.textContent = 'Please enter a valid email address';
+                this.classList.add('error');
+            } else if (this.validity.tooShort && this.id === 'password') {
+                errorDiv.textContent = 'Password must be at least 8 characters';
+                this.classList.add('error');
+            }
+        });
+    }
+});

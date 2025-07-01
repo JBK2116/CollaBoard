@@ -30,8 +30,6 @@ passwordToggle.addEventListener('click', function() {
 
 // Form Submission with Loading State
 loginForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
     // Show loading state
     submitBtn.classList.add('loading');
     btnText.style.display = 'none';
@@ -40,13 +38,7 @@ loginForm.addEventListener('submit', function(e) {
     // DJANGO-INTEGRATION: Submit form to Django view
     // This will be handled by Django form processing
     console.log('Form submitted - Django will handle authentication');
-    
-    // Simulate form submission (remove in Django implementation)
-    setTimeout(() => {
-        submitBtn.classList.remove('loading');
-        btnText.style.display = 'block';
-        btnLoading.style.display = 'none';
-    }, 2000);
+
 });
 
 // Real-time Validation Feedback
