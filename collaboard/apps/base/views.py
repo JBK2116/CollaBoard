@@ -13,10 +13,16 @@ from apps.base.models import CustomUser
 
 
 def landing(request) -> HttpResponse:
+    # Redirect the user to the dashboard if they are logged in
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     return render(request, "base/landing.html")
 
 
 def register(request) -> HttpResponse:
+    # Redirect the user to the dashboard if they are logged in
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     context: dict[str, Any] = {}
     if request.method == "POST":
         fields = ["first_name", "last_name", "email", "password1", "agree_terms"]
@@ -74,6 +80,9 @@ def register(request) -> HttpResponse:
 
 
 def login_user(request) -> HttpResponse:
+    # Redirect the user to the dashboard if they are logged in
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     context: dict[str, Any] = {}
     just_created = request.GET.get("created") == "true"  # Used in template display
     context.update({"just_created": just_created})
