@@ -1,2 +1,7 @@
-from django.contrib import admin  # noqa: F401
-from django.urls import path  # noqa: F401
+from django.urls import path
+
+from apps.director import views
+
+urlpatterns = [
+    path("dashboard/", views.dashboard, name="dashboard"),
+]
