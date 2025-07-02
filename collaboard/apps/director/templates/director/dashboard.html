@@ -15,7 +15,12 @@
         <a href="#" class="logo-link"><h1 class="logo">CollaBoard</h1></a>
       </div>
       <nav class="navbar-nav">
-        <a href="#" class="nav-link">Logout</a>
+        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="nav-link" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer;">
+                Logout
+            </button>
+        </form>
         <a href="#" class="nav-link btn btn-primary">My Account</a>
       </nav>
     </div>

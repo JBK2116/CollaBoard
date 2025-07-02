@@ -100,6 +100,7 @@ DATABASES = {
 AUTH_USER_MODEL = "base.CustomUser" # Custom User For This Project
 
 LOGIN_URL = "login"
+LOGOUT_REDIRECT_URL = "landing" # Used by the LogoutView
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
