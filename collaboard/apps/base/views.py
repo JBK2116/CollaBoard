@@ -45,18 +45,29 @@ def register(request) -> HttpResponse:
             last_name=data.get("last_name"),
             email=data.get("email"),
         )
+        password: str | None = data.get("password1")
+        if not password:
+            context.update({"missing_password": True})
+            return render(
+                request,
+                "base/register.html",
+                context,
+            )
         try:
-            password: str | None = data.get("password1")
-            if not password:
-                context.update({"missing_password": True})
-                return render(
-                    request,
-                    "base/register.html",
-                    context,
-                )
             validate_password(password, user=new_user)
             new_user.set_password(password)  # Hash the password
-            # By now all fields have been validated
+        except ValidationError as e:
+            context.update(
+                {
+                    "password_errors": e.messages,
+                }
+            )
+            return render(
+                request,
+                "base/register.html",
+                context,
+            )
+        try:
             new_user.full_clean()  # Validate firstname, lastname and email
             new_user.save()  # Save the user to the database
             return redirect(
@@ -66,7 +77,6 @@ def register(request) -> HttpResponse:
             context.update(
                 {
                     "form_errors": e.message_dict,
-                    "password_errors": e.messages,
                 }
             )
             return render(
