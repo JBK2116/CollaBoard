@@ -173,5 +173,22 @@
 
     <!-- External JavaScript -->
     <script src="{% static 'base/login.js' %}"></script>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3 class="logo">CollaBoard</h3>
+                    <p>Professional meeting engagement platform</p>
+                </div>
+                <div class="footer-links">
+                    <a href="{% url 'landing' %}" class="footer-link">About</a>
+                    <a href="{% url 'landing' %}" class="footer-link">Features</a>
+                    <a href="{% url 'landing' %}" class="footer-link">Pricing</a>
+                    <a href="{% url 'landing' %}" class="footer-link">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html> 
