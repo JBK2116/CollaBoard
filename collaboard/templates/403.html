@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Forbidden - CollaBoard</title>
+    <link rel="stylesheet" href="{% static '403.css' %}">
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <h1 class="error-code">403</h1>
+            <h2 class="error-title">Access Denied</h2>
+            <p class="error-message">
+                You do not have permission to access this page.<br>
+                <a href="{% url 'landing' %}" class="error-link">Return to homepage</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html> 
