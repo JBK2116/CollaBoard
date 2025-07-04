@@ -44,21 +44,7 @@
                 <p class="page-subtitle">Set up your engaging Q&A session</p>
             </header>
 
-            <!-- Progress Indicator -->
-            <div class="progress-indicator">
-                <div class="progress-step active" data-step="1">
-                    <div class="step-number">1</div>
-                    <div class="step-label">Meeting Info</div>
-                </div>
-                <div class="progress-step" data-step="2">
-                    <div class="step-number">2</div>
-                    <div class="step-label">Questions</div>
-                </div>
-                <div class="progress-step" data-step="3">
-                    <div class="step-number">3</div>
-                    <div class="step-label">Publish</div>
-                </div>
-            </div>
+
 
             <!-- Main Form Layout -->
             <div class="form-layout">
@@ -122,21 +108,6 @@
                                             <div class="radio-content">
                                                 <div class="radio-title">Public Meeting</div>
                                                 <div class="radio-description">Anyone with the access code can join</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div class="radio-item">
-                                        <input 
-                                            type="radio" 
-                                            id="meetingTypePrivate" 
-                                            name="meeting_type" 
-                                            value="private" 
-                                            required
-                                        >
-                                        <label for="meetingTypePrivate" class="radio-label">
-                                            <div class="radio-content">
-                                                <div class="radio-title">Private Meeting</div>
-                                                <div class="radio-description">Participants must have accounts to join</div>
                                             </div>
                                         </label>
                                     </div>
@@ -231,13 +202,7 @@
                         <section class="form-actions">
                             <div class="action-buttons">
                                 <button type="button" class="btn btn-secondary" id="saveDraftBtn">
-                                    Save as Draft
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="scheduleBtn">
-                                    Create & Schedule
-                                </button>
-                                <button type="submit" class="btn btn-primary" id="createBtn">
-                                    Create & Start
+                                    Save
                                 </button>
                             </div>
                             <!-- DJANGO-INTEGRATION: href="{% url 'dashboard' %}" -->
