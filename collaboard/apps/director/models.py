@@ -14,6 +14,7 @@ class Meeting(models.Model):
     director = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=False, blank=False
     )
+    access_code = models.CharField(max_length=8, null=False, blank=False)
     title = models.CharField(max_length=60, null=False, blank=False)
     description = models.CharField(max_length=200, null=False, blank=False)
     duration = models.IntegerField(
