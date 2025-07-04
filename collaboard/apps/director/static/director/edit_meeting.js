@@ -21,6 +21,8 @@ const mockQuestion3 = document.getElementById('mockQuestion3');
 const deleteMeetingBtn = document.getElementById('deleteMeetingBtn');
 const cancelLink = document.getElementById('cancelLink');
 
+const meetingId = window.location.pathname.split('/')[3];
+
 // Question Management
 let questionCounter = 5; // Start with 5 pre-filled questions
 const maxQuestions = 20;
@@ -267,27 +269,14 @@ function setupEventListeners() {
     });
 
     // Form submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
+    form.addEventListener('submit', function(e) {        
         // DJANGO-INTEGRATION: This will be handled by Django form processing
         console.log('Form submitted - Django will handle meeting update');
         
         // Add loading state
         const submitBtn = document.getElementById('updateBtn');
-        const originalText = submitBtn.textContent;
         submitBtn.textContent = 'Updating...';
         submitBtn.disabled = true;
-        
-        // Simulate form submission (remove in Django implementation)
-        setTimeout(() => {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            hasUnsavedChanges = false;
-            document.title = 'Edit Meeting - CollaBoard';
-            // DJANGO-INTEGRATION: Redirect to meeting detail or dashboard
-            // window.location.href = '/director/meeting/meeting-id/';
-        }, 2000);
     });
 
     // Delete meeting confirmation
@@ -296,19 +285,25 @@ function setupEventListeners() {
         
         if (confirm('Are you sure you want to permanently delete this meeting? This action cannot be undone.')) {
             if (confirm('This will delete all meeting data including questions and any responses. Are you absolutely sure?')) {
-                // DJANGO-INTEGRATION: Handle meeting deletion
-                console.log('Meeting deletion confirmed - Django will handle this');
-                
                 // Add loading state
                 deleteMeetingBtn.textContent = 'Deleting...';
                 deleteMeetingBtn.disabled = true;
                 
-                // Simulate deletion (remove in Django implementation)
-                setTimeout(() => {
-                    // DJANGO-INTEGRATION: Redirect to meetings list
-                    // window.location.href = '/director/my-meetings/';
-                    alert('Meeting deleted successfully');
-                }, 2000);
+                // Create and submit a form to Django
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/director/delete-meeting/${meetingId}/`;
+                
+                // Add CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     });
@@ -319,12 +314,10 @@ function setupEventListeners() {
         
         if (hasUnsavedChanges) {
             if (confirm('You have unsaved changes. Are you sure you want to cancel? All changes will be lost.')) {
-                // DJANGO-INTEGRATION: href="{% url 'my_meetings' %}"
-                window.location.href = '#';
+                window.location.href = "/director/my-meetings/";
             }
         } else {
-            // DJANGO-INTEGRATION: href="{% url 'my_meetings' %}"
-            window.location.href = '#';
+            window.location.href = "/director/my-meetings/";
         }
     });
 

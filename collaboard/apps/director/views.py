@@ -17,5 +17,7 @@ def create_meeting(request):
 
 def edit_meeting(request, meeting_id):
     context = {}
+    if request.method == "POST":
+        print(request.POST)
     print(meeting_id)
     return render(request, "director/edit_meeting.html", context)
