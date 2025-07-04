@@ -7,3 +7,8 @@ from django.shortcuts import render
 def dashboard(request):
     context = {}
     return render(request, "director/dashboard.html", context)
+
+@login_required
+def create_meeting(request):
+    context = {}
+    return render(request, "director/create_meeting.html", context)
