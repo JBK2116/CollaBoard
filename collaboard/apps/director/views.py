@@ -10,5 +10,7 @@ def dashboard(request):
 
 @login_required
 def create_meeting(request):
+    if request.method == "POST":
+        print(request.POST)
     context = {}
     return render(request, "director/create_meeting.html", context)

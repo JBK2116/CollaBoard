@@ -351,9 +351,7 @@ class MeetingFormManager {
     /**
      * Handle form submission
      */
-    handleFormSubmit(e) {
-        e.preventDefault();
-        
+    handleFormSubmit(e) {        
         if (!this.validateForm()) {
             this.showNotification('Please fix the errors before submitting', 'error');
             return;
@@ -363,14 +361,7 @@ class MeetingFormManager {
         
         const submitBtn = document.getElementById('createBtn');
         if (submitBtn) {
-            this.setLoadingState(submitBtn, true);
-            
-            // Simulate form submission (remove in Django implementation)
-            setTimeout(() => {
-                this.setLoadingState(submitBtn, false);
-                // DJANGO-INTEGRATION: Redirect to live control page
-                // window.location.href = '/director/live-control/meeting-id/';
-            }, 2000);
+            this.setLoadingState(submitBtn, true); // Send the form info.
         }
     }
 
@@ -381,13 +372,12 @@ class MeetingFormManager {
         e.preventDefault();
         
         if (this.hasUnsavedChanges()) {
+            // Make the links path relative to the site's root url
             if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-                // DJANGO-INTEGRATION: href="{% url 'dashboard' %}"
-                window.location.href = '#';
+                window.location.href = "/director/dashboard/";
             }
         } else {
-            // DJANGO-INTEGRATION: href="{% url 'dashboard' %}"
-            window.location.href = '#';
+            window.location.href = "/director/create-meeting/";
         }
     }
 
