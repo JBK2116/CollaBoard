@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -8,7 +10,7 @@ from apps.base.models import CustomUser
 
 
 class Meeting(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     director = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=False, blank=False
     )
