@@ -20,6 +20,7 @@ const mockQuestion2 = document.getElementById('mockQuestion2');
 const mockQuestion3 = document.getElementById('mockQuestion3');
 const deleteMeetingBtn = document.getElementById('deleteMeetingBtn');
 const cancelLink = document.getElementById('cancelLink');
+const descriptionCounter = document.getElementById('descriptionCounter');
 
 const meetingId = window.location.pathname.split('/')[3];
 
@@ -111,7 +112,7 @@ function addQuestion() {
     const charCounter = questionField.querySelector('.question-char-counter');
     
     questionInput.addEventListener('input', function() {
-        updateCharCounter(this, charCounter);
+        updateCharCounter(this, charCounter, 150);
         updatePreview();
         checkForChanges();
     });
@@ -168,13 +169,15 @@ function updateQuestionCount() {
 }
 
 // Character Counter
-function updateCharCounter(input, counter) {
+function updateCharCounter(input, counter, maxLength) {
     const count = input.value.length;
     counter.textContent = count;
-    
-    if (count > 180) {
+    if (maxLength) {
+        counter.nextSibling && (counter.nextSibling.textContent = `/${maxLength}`);
+    }
+    if (count > (maxLength ? maxLength - 20 : 180)) {
         counter.style.color = 'var(--accent-warning)';
-    } else if (count > 150) {
+    } else if (count > (maxLength ? maxLength - 50 : 150)) {
         counter.style.color = 'var(--text-secondary)';
     } else {
         counter.style.color = 'var(--text-muted)';
@@ -227,7 +230,7 @@ function setupEventListeners() {
 
     // Character counting for title
     titleInput.addEventListener('input', function() {
-        updateCharCounter(this, titleCounter);
+        updateCharCounter(this, titleCounter, 60);
         updatePreview();
         checkForChanges();
     });
@@ -236,7 +239,7 @@ function setupEventListeners() {
     document.addEventListener('input', function(e) {
         if (e.target.classList.contains('question-input')) {
             const charCounter = e.target.parentElement.querySelector('.question-char-counter');
-            updateCharCounter(e.target, charCounter);
+            updateCharCounter(e.target, charCounter, 150);
             updatePreview();
             checkForChanges();
         }
@@ -252,6 +255,7 @@ function setupEventListeners() {
 
     // Preview updates
     descriptionInput.addEventListener('input', function() {
+        updateCharCounter(this, descriptionCounter, 200);
         updatePreview();
         checkForChanges();
     });
@@ -347,6 +351,14 @@ function init() {
     
     // Update initial preview
     updatePreview();
+
+    // On page load, initialize counters
+    updateCharCounter(titleInput, titleCounter, 60);
+    updateCharCounter(descriptionInput, descriptionCounter, 200);
+    Array.from(questionsContainer.querySelectorAll('.question-input')).forEach((input, i) => {
+        const charCounter = input.parentElement.querySelector('.question-char-counter');
+        updateCharCounter(input, charCounter, 150);
+    });
 }
 
 // Start the application

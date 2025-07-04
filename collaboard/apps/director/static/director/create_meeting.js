@@ -30,6 +30,12 @@ class MeetingFormManager {
 
         this.setupEventListeners();
         this.updatePreview();
+        this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter, 60);
+        this.updateCharCounter(this.elements.meetingDescription, this.elements.descriptionCounter, 200);
+        Array.from(this.elements.questionsContainer.querySelectorAll('.question-input')).forEach((input, i) => {
+            const charCounter = input.parentElement.querySelector('.question-char-counter');
+            this.updateCharCounter(input, charCounter, 150);
+        });
         console.log('MeetingFormManager initialized successfully');
     }
 
@@ -40,6 +46,7 @@ class MeetingFormManager {
         const elementIds = [
             'meetingForm', 'questionsContainer', 'addQuestionBtn', 'meetingTitle',
             'meetingDescription', 'meetingDuration', 'questionCount', 'titleCounter',
+            'descriptionCounter',
             'previewTitle', 'previewDescription', 'previewDuration', 'previewQuestionCount',
             'mockTitle', 'mockQuestion1', 'mockQuestion2', 'mockQuestion3'
         ];
@@ -86,9 +93,9 @@ class MeetingFormManager {
             this.elements.meetingTitle, 
             'input', 
             this.debounce(() => {
-                this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter);
+                this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter, 60);
                 this.updatePreview();
-                this.validateField(this.elements.meetingTitle, { required: true, maxLength: 200 });
+                this.validateField(this.elements.meetingTitle, { required: true, maxLength: 60 });
             }, 100)
         );
 
@@ -96,7 +103,11 @@ class MeetingFormManager {
         this.eventManager.addListener(
             this.elements.meetingDescription, 
             'input', 
-            this.debounce(() => this.updatePreview(), 100)
+            this.debounce(() => {
+                this.updateCharCounter(this.elements.meetingDescription, this.elements.descriptionCounter, 200);
+                this.updatePreview();
+                this.validateField(this.elements.meetingDescription, { maxLength: 200 });
+            }, 100)
         );
 
         // Duration select
@@ -179,11 +190,11 @@ class MeetingFormManager {
                 name="questions[]" 
                 class="form-control question-input" 
                 placeholder="Enter your question..."
-                maxlength="200"
+                maxlength="150"
                 required
             >
             <div class="char-counter">
-                <span class="question-char-counter">0</span>/200
+                <span class="question-char-counter">0</span>/150
             </div>
             <div class="form-error question-error"></div>
         `;
@@ -240,17 +251,15 @@ class MeetingFormManager {
     /**
      * Update character counter with color coding
      */
-    updateCharCounter(input, counter) {
+    updateCharCounter(input, counter, maxLength) {
         const count = input.value.length;
-        const maxLength = input.getAttribute('maxlength') || 200;
-        
         counter.textContent = count;
-        
-        // Color coding based on usage
-        const percentage = (count / maxLength) * 100;
-        if (percentage > 90) {
+        if (maxLength) {
+            counter.nextSibling && (counter.nextSibling.textContent = `/${maxLength}`);
+        }
+        if (count > (maxLength ? maxLength - 20 : 180)) {
             counter.style.color = 'var(--accent-warning)';
-        } else if (percentage > 75) {
+        } else if (count > (maxLength ? maxLength - 50 : 150)) {
             counter.style.color = 'var(--text-secondary)';
         } else {
             counter.style.color = 'var(--text-muted)';
@@ -331,9 +340,9 @@ class MeetingFormManager {
     handleQuestionInput(e) {
         if (e.target.classList.contains('question-input')) {
             const charCounter = e.target.parentElement.querySelector('.question-char-counter');
-            this.updateCharCounter(e.target, charCounter);
+            this.updateCharCounter(e.target, charCounter, 150);
             this.debounce(() => this.updatePreview(), 100)();
-            this.validateField(e.target, { required: true, maxLength: 200 });
+            this.validateField(e.target, { required: true, maxLength: 150 });
         }
     }
 
@@ -400,7 +409,7 @@ class MeetingFormManager {
         let isValid = true;
         
         // Validate title
-        if (!this.validateField(this.elements.meetingTitle, { required: true, maxLength: 200 })) {
+        if (!this.validateField(this.elements.meetingTitle, { required: true, maxLength: 60 })) {
             isValid = false;
         }
         
@@ -412,7 +421,7 @@ class MeetingFormManager {
         // Validate questions
         const questionInputs = this.elements.questionsContainer.querySelectorAll('.question-input');
         questionInputs.forEach(input => {
-            if (!this.validateField(input, { required: true, maxLength: 200 })) {
+            if (!this.validateField(input, { required: true, maxLength: 150 })) {
                 isValid = false;
             }
         });

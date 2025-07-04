@@ -76,12 +76,12 @@
                                     name="title" 
                                     class="form-control" 
                                     placeholder="Enter meeting title"
-                                    maxlength="200"
+                                    maxlength="60"
                                     required
                                     value="Team Retrospective Q1 2025"
                                 >
                                 <div class="char-counter">
-                                    <span id="titleCounter">25</span>/200
+                                    <span id="titleCounter">25</span>/60
                                 </div>
                                 <!-- DJANGO-INTEGRATION: Display form errors with {{ form.title.errors }} -->
                                 <div class="form-error" id="titleError"></div>
@@ -96,7 +96,11 @@
                                     class="form-control" 
                                     rows="3"
                                     placeholder="Optional: Describe what this meeting is about..."
+                                    maxlength="200"
                                 >Quarterly team feedback and planning session</textarea>
+                                <div class="char-counter">
+                                    <span id="descriptionCounter">0</span>/200
+                                </div>
                                 <!-- DJANGO-INTEGRATION: Display form errors with {{ form.description.errors }} -->
                                 <div class="form-error" id="descriptionError"></div>
                             </div>
@@ -185,12 +189,12 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                         value="What went well this quarter?"
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">28</span>/200
+                                        <span class="question-char-counter">28</span>/150
                                     </div>
                                 </div>
 
@@ -210,12 +214,12 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                         value="What could we improve?"
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">24</span>/200
+                                        <span class="question-char-counter">24</span>/150
                                     </div>
                                 </div>
 
@@ -235,12 +239,12 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                         value="What are your priorities for Q2?"
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">32</span>/200
+                                        <span class="question-char-counter">32</span>/150
                                     </div>
                                 </div>
 
@@ -260,12 +264,12 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                         value="Any blockers or concerns?"
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">26</span>/200
+                                        <span class="question-char-counter">26</span>/150
                                     </div>
                                 </div>
 
@@ -285,12 +289,12 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                         value="Rate team collaboration (1-10)"
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">35</span>/200
+                                        <span class="question-char-counter">35</span>/150
                                     </div>
                                 </div>
                             </div>

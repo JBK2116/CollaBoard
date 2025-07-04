@@ -67,11 +67,11 @@
                                     name="title" 
                                     class="form-control" 
                                     placeholder="Enter meeting title"
-                                    maxlength="200"
+                                    maxlength="60"
                                     required
                                 >
                                 <div class="char-counter">
-                                    <span id="titleCounter">0</span>/200
+                                    <span id="titleCounter">0</span>/60
                                 </div>
                                 <!-- DJANGO-INTEGRATION: Display form errors with {{ form.title.errors }} -->
                                 <div class="form-error" id="titleError"></div>
@@ -86,7 +86,11 @@
                                     class="form-control" 
                                     rows="3"
                                     placeholder="Optional: Describe what this meeting is about..."
+                                    maxlength="200"
                                 ></textarea>
+                                <div class="char-counter">
+                                    <span id="descriptionCounter">0</span>/200
+                                </div>
                                 <!-- DJANGO-INTEGRATION: Display form errors with {{ form.description.errors }} -->
                                 <div class="form-error" id="descriptionError"></div>
                             </div>
@@ -175,11 +179,11 @@
                                         name="questions[]" 
                                         class="form-control question-input" 
                                         placeholder="Enter your question..."
-                                        maxlength="200"
+                                        maxlength="150"
                                         required
                                     >
                                     <div class="char-counter">
-                                        <span class="question-char-counter">0</span>/200
+                                        <span class="question-char-counter">0</span>/150
                                     </div>
                                 </div>
                             </div>
