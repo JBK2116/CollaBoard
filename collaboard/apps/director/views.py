@@ -14,3 +14,8 @@ def create_meeting(request):
         print(request.POST)
     context = {}
     return render(request, "director/create_meeting.html", context)
+
+def edit_meeting(request, meeting_id):
+    context = {}
+    print(meeting_id)
+    return render(request, "director/edit_meeting.html", context)
