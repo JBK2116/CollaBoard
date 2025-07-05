@@ -36,6 +36,35 @@ class Meeting(models.Model):
     def __str__(self) -> str:
         return f"ID: {self.id}|Director Name: {self.director.get_full_name()} |Meeting Name: {self.title} |description: {self.description} |Duration (minutes): {self.duration}| questions: {self.get_question_count()}"
 
-    # Get the total amount of questions in a meeting
-    def get_question_count(self) -> None:
-        pass # Logic will be implemented later
+    def get_question_count(self) -> int:
+        return Question.objects.filter(meeting=self).count()
+
+
+class Question(models.Model):
+    meeting = models.ForeignKey(
+        Meeting, on_delete=models.CASCADE, null=False, blank=False
+    )
+    description = models.CharField(max_length=150, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Belongs to Meeting: {self.meeting.title}| Description: {self.description}| Total Responses: {self.get_response_count()} "
+
+    def get_response_count(self) -> int:
+        return Response.objects.filter(question=self).count()
+
+
+class Response(models.Model):
+    user = models.ForeignKey(
+        CustomUser, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    # User deletion logic will be implemented elsewhere
+    question = models.ForeignKey(
+        Question, null=False, blank=False, on_delete=models.CASCADE
+    )
+    answer = models.TextField()  # Max length enforcement will be handled elsewhere
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Responding to question: {self.question.description} of meeting {self.question.meeting.title}"
