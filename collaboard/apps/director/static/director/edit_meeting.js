@@ -36,7 +36,6 @@ function storeOriginalData() {
         title: titleInput.value,
         description: descriptionInput.value,
         duration: durationSelect.value,
-        meetingType: document.querySelector('input[name="meeting_type"]:checked').value,
         questions: Array.from(questionsContainer.querySelectorAll('.question-input')).map(input => input.value)
     };
 }
@@ -47,7 +46,6 @@ function checkForChanges() {
         title: titleInput.value,
         description: descriptionInput.value,
         duration: durationSelect.value,
-        meetingType: document.querySelector('input[name="meeting_type"]:checked').value,
         questions: Array.from(questionsContainer.querySelectorAll('.question-input')).map(input => input.value)
     };
 
@@ -263,13 +261,6 @@ function setupEventListeners() {
     durationSelect.addEventListener('change', function() {
         updatePreview();
         checkForChanges();
-    });
-
-    // Radio button changes
-    document.addEventListener('change', function(e) {
-        if (e.target.name === 'meeting_type') {
-            checkForChanges();
-        }
     });
 
     // Form submission
