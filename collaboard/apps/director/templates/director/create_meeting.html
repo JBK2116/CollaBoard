@@ -14,6 +14,35 @@
          THEME: Dark professional with glassmorphism effects
          ================================ -->
 
+    <!-- Success/Error Modals -->
+    {% if 'created' in request.GET %}
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card success">
+            <button class="modal-close" aria-label="Close" id="closeSuccessModal">&times;</button>
+            <div class="modal-icon success">
+                <!-- Green checkmark SVG -->
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-success)" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="var(--accent-success)" stroke-width="2" fill="none"/><path d="M7 13l3 3 7-7" stroke="var(--accent-success)" stroke-width="2" fill="none"/></svg>
+            </div>
+            <h2 class="modal-title">Meeting Successfully Created</h2>
+            <p class="modal-message">Your meeting has been created.</p>
+            <a href="{% url 'create-meeting' %}" class="btn btn-primary modal-action">Create Another Meeting</a>
+        </div>
+    </div>
+    {% elif request.GET.creation_error %}
+    <div class="modal-overlay" id="errorModal">
+        <div class="modal-card error">
+            <button class="modal-close" aria-label="Close" id="closeErrorModal">&times;</button>
+            <div class="modal-icon error">
+                <!-- Red X SVG -->
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-danger)" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="var(--accent-danger)" stroke-width="2" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="var(--accent-danger)" stroke-width="2"/><line x1="16" y1="8" x2="8" y2="16" stroke="var(--accent-danger)" stroke-width="2"/></svg>
+            </div>
+            <h2 class="modal-title">Meeting Creation Failed</h2>
+            <p class="modal-message">There was a problem creating your meeting.</p>
+            <a href="{% url 'create-meeting' %}" class="btn btn-primary modal-action">Try Again</a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Navigation Header -->
     <header class="navbar">
         <div class="container">
@@ -43,8 +72,6 @@
                 <h1 class="page-title">Create New Meeting</h1>
                 <p class="page-subtitle">Set up your engaging Q&A session</p>
             </header>
-
-
 
             <!-- Main Form Layout -->
             <div class="form-layout">

@@ -587,3 +587,48 @@ window.addEventListener('beforeunload', () => {
         meetingFormManager.destroy();
     }
 });
+
+// Modal close logic for success/error overlays
+(function() {
+    function removeQueryParam(param) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete(param);
+        // Remove all params if none left, else update
+        const newUrl = url.search ? url.pathname + url.search : url.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+    function closeModal(modalId, param) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('modal-fade-out');
+            setTimeout(() => { modal.style.display = 'none'; }, 350);
+            removeQueryParam(param);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const successBtn = document.getElementById('closeSuccessModal');
+        if (successBtn) {
+            successBtn.addEventListener('click', function() {
+                closeModal('successModal', 'created');
+            });
+        }
+        const errorBtn = document.getElementById('closeErrorModal');
+        if (errorBtn) {
+            errorBtn.addEventListener('click', function() {
+                closeModal('errorModal', 'creation_error');
+            });
+        }
+    });
+})();
+
+// Optional: Fade-out animation for modal close
+const style = document.createElement('style');
+style.innerHTML = `
+.modal-fade-out {
+    animation: fadeOutModal 0.35s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes fadeOutModal {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}`;
+document.head.appendChild(style);

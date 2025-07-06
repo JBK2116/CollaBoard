@@ -852,4 +852,98 @@ details[open] .chevron-icon {
   .btn:hover {
     transform: none;
   }
+}
+
+/* Modal Overlay Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(13, 17, 23, 0.85);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInModal 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: var(--secondary-bg);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 340px;
+  max-width: 95vw;
+  text-align: center;
+  position: relative;
+  border: 1.5px solid var(--border-color);
+  animation: modalPopIn 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes modalPopIn {
+  from { transform: scale(0.95) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-card.success {
+  border-color: var(--accent-success);
+}
+.modal-card.error {
+  border-color: var(--accent-danger);
+}
+
+.modal-icon {
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+.modal-icon.success svg {
+  stroke: var(--accent-success);
+}
+.modal-icon.error svg {
+  stroke: var(--accent-danger);
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+.modal-message {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.modal-action {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 10;
+}
+.modal-close:hover {
+  color: var(--accent-danger);
+}
+
+@media (max-width: 480px) {
+  .modal-card {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    min-width: 0;
+  }
 } 
