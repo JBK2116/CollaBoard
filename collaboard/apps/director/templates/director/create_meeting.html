@@ -92,7 +92,9 @@
                                 <div class="char-counter">
                                     <span id="titleCounter">0</span>/60
                                 </div>
-                                <div class="form-error" id="titleError">{{ form.title.errors }}</div>
+                                {% if meeting_errors.title %}
+                                <div class="form-error" id="titleError">{{meeting_errors.title.0}}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Meeting Description -->
@@ -102,14 +104,18 @@
                                 <div class="char-counter">
                                     <span id="descriptionCounter">0</span>/200
                                 </div>
-                                <div class="form-error" id="descriptionError">{{ form.description.errors }}</div>
+                                {% if meeting_errors.description %}
+                                <div class="form-error" id="descriptionError">{{meeting_errors.description.0}}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Estimated Duration -->
                             <div class="form-group">
                                 <label for="meetingDuration" class="form-label">Estimated Duration <span class="required">*</span></label>
                                 {{ form.duration }}
-                                <div class="form-error" id="durationError">{{ form.duration.errors }}</div>
+                                {% if meeting_errors.duration %}
+                                <div class="form-error" id="durationError">{{meeting_errors.duration.0}}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Advanced Settings (Collapsible) -->
