@@ -90,260 +90,84 @@
             <div class="meetings-grid" id="meetingsGrid">
                 <!-- Meeting Card 1 - Completed -->
                  <!-- Create Meetings Dynamically Via Iterating Through It-->
-                <div class="meeting-card" data-status="completed" data-type="public">
-                    <div class="card-header">
-                        <h3 class="meeting-title" title="Team Retrospective Q1 2025">Team Retrospective Q1 2025</h3>
-                        <div class="card-badges">
-                            <span class="status-badge status-completed">Completed</span>
-                            <span class="type-badge type-public">Public</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <p class="meeting-description">
-                            Quarterly team feedback and planning session for reviewing our performance and setting goals for the upcoming quarter.
-                        </p>
-                        
-                        <div class="meeting-meta">
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12,6 12,12 16,14"/>
-                                </svg>
-                                <span>45 minutes</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11H1l8-8 8 8h-8v8z"/>
-                                </svg>
-                                <span>5 questions</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
-                                <span>23 participants</span>
+                {% if meetings %}
+                    {% for meeting in meetings %}
+                    <div class="meeting-card" data-status="completed" data-type="public">
+                        <div class="card-header">
+                            <h3 class="meeting-title" title="{{meeting.title}}">{{meeting.title}}</h3>
+                            <div class="card-badges">
+                                {% if meeting.published %}
+                                <span class="status-badge status-completed">Completed</span>
+                                {% else %}
+                                <span class="status-badge status-draft">Draft</span>
+                                {% endif %}
+                                <span class="type-badge type-public">Public</span>
                             </div>
                         </div>
                         
-                        <div class="meeting-dates">
-                            <div class="date-item">
-                                <span class="date-label">Created:</span>
-                                <span class="date-value">March 15, 2025</span>
+                        <div class="card-body">
+                            <p class="meeting-description">
+                                {{meeting.description}}
+                            </p>
+                            
+                            <div class="meeting-meta">
+                                <div class="meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12,6 12,12 16,14"/>
+                                    </svg>
+                                    <span>{{meeting.duration}} minutes</span>
+                                </div>
+                                <div class="meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 11H1l8-8 8 8h-8v8z"/>
+                                    </svg>
+                                    <span>{{meeting.get_question_count}} questions</span>
+                                </div>
+                                <div class="meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    {% if meeting.published %}
+                                    <!-- Add a participant field to the meeting model then {{meeting.participants}} -->
+                                    <span># participants</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="date-item">
-                                <span class="date-label">Updated:</span>
-                                <span class="date-value">March 25, 2025</span>
-                            </div>
-                            <div class="date-item">
-                                <span class="date-label">Last run:</span>
-                                <span class="date-value">March 22, 2025</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-footer">
-                        <div class="primary-actions">
-                            <!-- Replace 123 with {{meeting.id}} -->
-                            <a href="{% url 'edit-meeting' 123}" class="btn btn-secondary">Edit</a>
-                            <a href="#" class="btn btn-primary">Launch Again</a>
-                        </div>
-                        <div class="danger-action">
-                            <!-- DJANGO-INTEGRATION: data-meeting-id="{{ meeting.id }}" -->
-                            <button type="button" class="btn btn-danger btn-sm" data-meeting-id="1" data-meeting-title="Team Retrospective Q1 2025">
-                                Delete Meeting
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Meeting Card 2 - Draft -->
-                <div class="meeting-card" data-status="draft" data-type="public">
-                    <div class="card-header">
-                        <h3 class="meeting-title" title="Customer Feedback Session">Customer Feedback Session</h3>
-                        <div class="card-badges">
-                            <span class="status-badge status-draft">Draft</span>
-                            <span class="type-badge type-public">Public</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <p class="meeting-description">
-                            Gathering insights from recent product launch to improve user experience and identify key areas for enhancement.
-                        </p>
-                        
-                        <div class="meeting-meta">
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12,6 12,12 16,14"/>
-                                </svg>
-                                <span>30 minutes</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11H1l8-8 8 8h-8v8z"/>
-                                </svg>
-                                <span>8 questions</span>
+                            
+                            <div class="meeting-dates">
+                                <div class="date-item">
+                                    <span class="date-label">Created:</span>
+                                    <span class="date-value">{{meeting.get_created_at}}</span>
+                                </div>
+                                <div class="date-item">
+                                    <span class="date-label">Updated:</span>
+                                    <span class="date-value">{{meeting.get_updated_at}}</span>
+                                </div>
+                                <div class="date-item">
+                                    <span class="date-label">Last run:</span>
+                                    <span class="date-value">{{meeting.get_last_run}}</span>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="meeting-dates">
-                            <div class="date-item">
-                                <span class="date-label">Created:</span>
-                                <span class="date-value">March 20, 2025</span>
+                        <div class="card-footer">
+                            <div class="primary-actions">
+                                <a href="{% url 'edit-meeting' meeting.id %}" class="btn btn-secondary">Edit</a>
+                                <a href="#" class="btn btn-primary">Launch Again</a>
                             </div>
-                            <div class="date-item">
-                                <span class="date-label">Updated:</span>
-                                <span class="date-value">March 25, 2025</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-footer">
-                        <div class="primary-actions">
-                            <a href="#" class="btn btn-secondary">Edit</a>
-                            <a href="#" class="btn btn-primary">Publish & Launch</a>
-                        </div>
-                        <div class="danger-action">
-                            <!-- DJANGO-INTEGRATION: data-meeting-id="{{ meeting.id }}" -->
-                            <button type="button" class="btn btn-danger btn-sm" data-meeting-id="2" data-meeting-title="Customer Feedback Session">
-                                Delete Meeting
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Meeting Card 3 - Completed -->
-                <div class="meeting-card" data-status="completed" data-type="public">
-                    <div class="card-header">
-                        <h3 class="meeting-title" title="All Hands Q&A">All Hands Q&A</h3>
-                        <div class="card-badges">
-                            <span class="status-badge status-completed">Completed</span>
-                            <span class="type-badge type-public">Public</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <p class="meeting-description">
-                            Company-wide Q&A session for team updates, announcements, and open discussion about company direction.
-                        </p>
-                        
-                        <div class="meeting-meta">
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12,6 12,12 16,14"/>
-                                </svg>
-                                <span>60 minutes</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11H1l8-8 8 8h-8v8z"/>
-                                </svg>
-                                <span>12 questions</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
-                                <span>156 participants</span>
+                            <div class="danger-action">
+                                <button type="button" class="btn btn-danger btn-sm" data-meeting-id="{{meeting.id}}" data-meeting-title="{{meeting.title}}">
+                                    Delete Meeting
+                                </button>
                             </div>
                         </div>
-                        
-                        <div class="meeting-dates">
-                            <div class="date-item">
-                                <span class="date-label">Created:</span>
-                                <span class="date-value">March 10, 2025</span>
-                            </div>
-                            <div class="date-item">
-                                <span class="date-label">Updated:</span>
-                                <span class="date-value">March 25, 2025</span>
-                            </div>
-                            <div class="date-item">
-                                <span class="date-label">Last run:</span>
-                                <span class="date-value">March 18, 2025</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-footer">
-                        <div class="primary-actions">
-                            <a href="#" class="btn btn-secondary">Edit</a>
-                            <a href="#" class="btn btn-primary">Launch Again</a>
-                        </div>
-                        <div class="danger-action">
-                            <!-- DJANGO-INTEGRATION: data-meeting-id="{{ meeting.id }}" -->
-                            <button type="button" class="btn btn-danger btn-sm" data-meeting-id="3" data-meeting-title="All Hands Q&A">
-                                Delete Meeting
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Meeting Card 4 - Draft -->
-                <div class="meeting-card" data-status="draft" data-type="public">
-                    <div class="card-header">
-                        <h3 class="meeting-title" title="Product Planning Workshop">Product Planning Workshop</h3>
-                        <div class="card-badges">
-                            <span class="status-badge status-draft">Draft</span>
-                            <span class="type-badge type-public">Public</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <p class="meeting-description">
-                            Collaborative session for product team to discuss upcoming features, prioritize roadmap items, and align on development goals.
-                        </p>
-                        
-                        <div class="meeting-meta">
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12,6 12,12 16,14"/>
-                                </svg>
-                                <span>90 minutes</span>
-                            </div>
-                            <div class="meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11H1l8-8 8 8h-8v8z"/>
-                                </svg>
-                                <span>15 questions</span>
-                            </div>
-                        </div>
-                        
-                        <div class="meeting-dates">
-                            <div class="date-item">
-                                <span class="date-label">Created:</span>
-                                <span class="date-value">March 22, 2025</span>
-                            </div>
-                            <div class="date-item">
-                                <span class="date-label">Updated:</span>
-                                <span class="date-value">March 25, 2025</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-footer">
-                        <div class="primary-actions">
-                            <a href="#" class="btn btn-secondary">Edit</a>
-                            <a href="#" class="btn btn-primary">Publish & Launch</a>
-                        </div>
-                        <div class="danger-action">
-                            <!-- DJANGO-INTEGRATION: data-meeting-id="{{ meeting.id }}" -->
-                            <button type="button" class="btn btn-danger btn-sm" data-meeting-id="4" data-meeting-title="Product Planning Workshop">
-                                Delete Meeting
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    </div> 
+                    {% endfor %}    
+                {% endif %}           
 
             <!-- Empty State (Hidden by default, shown via JS when no meetings) -->
             <div class="empty-state" id="emptyState" style="display: none;">

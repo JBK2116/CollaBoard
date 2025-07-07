@@ -2,12 +2,12 @@ from secrets import randbelow
 from typing import cast
 
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
+from django.db.models import QuerySet
 from django.forms import BaseFormSet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.db import DatabaseError
-
 
 from apps.base.models import CustomUser
 from apps.director.forms import MeetingForm, QuestionForm, QuestionFormSet
@@ -93,10 +93,15 @@ def delete_meeting(request: HttpRequest, meeting_id: str):
 
 @login_required
 def my_meetings(request: HttpRequest):
-    # More logic will be implemented later
     context = {}
+    current_user = cast(CustomUser, request.user)
+    all_meetings: QuerySet[Meeting] = Meeting.objects.filter(director=current_user)
+    context.update({"meetings": all_meetings})
     return render(request, "director/my_meetings.html", context)
 
+"""
+Below are helper functions for these views
+"""
 
 def validate_meeting_form(
     request: HttpRequest, form: MeetingForm

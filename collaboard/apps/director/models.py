@@ -39,6 +39,18 @@ class Meeting(models.Model):
     def get_question_count(self) -> int:
         return Question.objects.filter(meeting=self).count()
 
+    def get_created_at(self) -> str:
+        return self.created_at.strftime("%B, %d %Y")
+
+    def get_updated_at(self) -> str:
+        return self.updated_at.strftime("%B, %d %Y")
+
+    def get_last_run(self) -> str:
+        if self.last_run is None:
+            return "No previous run"
+        else:
+            return self.last_run.strftime("%B, %d %Y")
+
 
 class Question(models.Model):
     meeting = models.ForeignKey(
