@@ -88,54 +88,28 @@
                                 <label for="meetingTitle" class="form-label">
                                     Meeting Title <span class="required">*</span>
                                 </label>
-                                <input 
-                                    type="text" 
-                                    id="meetingTitle" 
-                                    name="title" 
-                                    class="form-control" 
-                                    placeholder="Enter meeting title"
-                                    maxlength="60"
-                                    required
-                                >
+                                {{ form.title }}
                                 <div class="char-counter">
                                     <span id="titleCounter">0</span>/60
                                 </div>
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.title.errors }} -->
-                                <div class="form-error" id="titleError"></div>
+                                <div class="form-error" id="titleError">{{ form.title.errors }}</div>
                             </div>
 
                             <!-- Meeting Description -->
                             <div class="form-group">
                                 <label for="meetingDescription" class="form-label">Description</label>
-                                <textarea 
-                                    id="meetingDescription" 
-                                    name="description" 
-                                    class="form-control" 
-                                    rows="3"
-                                    placeholder="Optional: Describe what this meeting is about..."
-                                    maxlength="200"
-                                ></textarea>
+                                {{ form.description }}
                                 <div class="char-counter">
                                     <span id="descriptionCounter">0</span>/200
                                 </div>
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.description.errors }} -->
-                                <div class="form-error" id="descriptionError"></div>
+                                <div class="form-error" id="descriptionError">{{ form.description.errors }}</div>
                             </div>
 
                             <!-- Estimated Duration -->
                             <div class="form-group">
                                 <label for="meetingDuration" class="form-label">Estimated Duration <span class="required">*</span></label>
-                                <select id="meetingDuration" name="duration" class="form-control" required>
-                                    <option value="">Select duration</option>
-                                    <option value="15">15 minutes</option>
-                                    <option value="30">30 minutes</option>
-                                    <option value="45">45 minutes</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="90">1.5 hours</option>
-                                    <option value="120">2 hours</option>
-                                </select>
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.duration.errors }} -->
-                                <div class="form-error" id="durationError"></div>
+                                {{ form.duration }}
+                                <div class="form-error" id="durationError">{{ form.duration.errors }}</div>
                             </div>
 
                             <!-- Advanced Settings (Collapsible) -->
@@ -159,35 +133,31 @@
                             <div class="section-header">
                                 <h2 class="section-title">Questions</h2>
                                 <div class="question-counter">
-                                    <span id="questionCount">1</span> question
+                                    <span id="questionCount">{{ formset.total_form_count }}</span> question
                                 </div>
                             </div>
 
                             <!-- Questions Container -->
                             <div class="questions-container" id="questionsContainer">
-                                <!-- Question 1 (Initial) -->
-                                <div class="question-field" data-question="1">
-                                    <div class="question-header">
-                                        <div class="question-number">Question 1</div>
-                                        <button type="button" class="delete-question" disabled aria-label="Delete question">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                                <line x1="6" y1="6" x2="18" y2="18"/>
-                                            </svg>
-                                        </button>
+                                {{ formset.management_form }}
+                                {% for question_form in formset %}
+                                    <div class="question-field" data-question="{{ forloop.counter }}">
+                                        <div class="question-header">
+                                            <div class="question-number">Question {{ forloop.counter }}</div>
+                                            <button type="button" class="delete-question" {% if forloop.first %}disabled{% endif %} aria-label="Delete question">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        {{ question_form.text }}
+                                        <div class="char-counter">
+                                            <span class="question-char-counter">0</span>/150
+                                        </div>
+                                        <div class="form-error question-error">{{ question_form.text.errors }}</div>
                                     </div>
-                                    <input 
-                                        type="text" 
-                                        name="questions[]" 
-                                        class="form-control question-input" 
-                                        placeholder="Enter your question..."
-                                        maxlength="150"
-                                        required
-                                    >
-                                    <div class="char-counter">
-                                        <span class="question-char-counter">0</span>/150
-                                    </div>
-                                </div>
+                                {% endfor %}
                             </div>
 
                             <!-- Add Question Button -->

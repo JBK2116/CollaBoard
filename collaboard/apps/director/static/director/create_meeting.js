@@ -5,13 +5,11 @@
 
 class MeetingFormManager {
     constructor() {
-        this.questionCounter = 1;
         this.maxQuestions = 20;
         this.elements = {};
         this.eventManager = new EventManager();
         this.validators = new FormValidators();
-        
-        // Initialize when DOM is ready
+        this.formsetPrefix = 'form'; // Django default prefix unless changed in view
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initialize());
         } else {
@@ -32,10 +30,11 @@ class MeetingFormManager {
         this.updatePreview();
         this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter, 60);
         this.updateCharCounter(this.elements.meetingDescription, this.elements.descriptionCounter, 200);
-        Array.from(this.elements.questionsContainer.querySelectorAll('.question-input')).forEach((input, i) => {
+        this.elements.questionsContainer.querySelectorAll('.question-input').forEach((input, i) => {
             const charCounter = input.parentElement.querySelector('.question-char-counter');
             this.updateCharCounter(input, charCounter, 150);
         });
+        this.updateQuestionCount();
         console.log('MeetingFormManager initialized successfully');
     }
 
@@ -43,30 +42,23 @@ class MeetingFormManager {
      * Get and validate all required DOM elements
      */
     getDOMElements() {
-        const elementIds = [
+        const ids = [
             'meetingForm', 'questionsContainer', 'addQuestionBtn', 'meetingTitle',
             'meetingDescription', 'meetingDuration', 'questionCount', 'titleCounter',
             'descriptionCounter',
             'previewTitle', 'previewDescription', 'previewDuration', 'previewQuestionCount',
             'mockTitle', 'mockQuestion1', 'mockQuestion2', 'mockQuestion3'
         ];
-
-        const missing = [];
-        
-        elementIds.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                this.elements[id] = element;
-            } else {
-                missing.push(id);
-            }
+        let missing = [];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) this.elements[id] = el;
+            else missing.push(id);
         });
-
         if (missing.length > 0) {
             console.error('Missing required elements:', missing);
             return false;
         }
-
         return true;
     }
 
@@ -74,74 +66,27 @@ class MeetingFormManager {
      * Setup all event listeners
      */
     setupEventListeners() {
-        // Add question button
-        this.eventManager.addListener(
-            this.elements.addQuestionBtn, 
-            'click', 
-            () => this.addQuestion()
-        );
-
-        // Form submission
-        this.eventManager.addListener(
-            this.elements.meetingForm, 
-            'submit', 
-            (e) => this.handleFormSubmit(e)
-        );
-
-        // Title input with debounced preview update
-        this.eventManager.addListener(
-            this.elements.meetingTitle, 
-            'input', 
-            this.debounce(() => {
-                this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter, 60);
-                this.updatePreview();
-                this.validateField(this.elements.meetingTitle, { required: true, maxLength: 60 });
-            }, 100)
-        );
-
-        // Description input
-        this.eventManager.addListener(
-            this.elements.meetingDescription, 
-            'input', 
-            this.debounce(() => {
-                this.updateCharCounter(this.elements.meetingDescription, this.elements.descriptionCounter, 200);
-                this.updatePreview();
-                this.validateField(this.elements.meetingDescription, { maxLength: 200 });
-            }, 100)
-        );
-
-        // Duration select
-        this.eventManager.addListener(
-            this.elements.meetingDuration, 
-            'change', 
-            () => {
-                this.updatePreview();
-                this.validateField(this.elements.meetingDuration, { required: true });
-            }
-        );
-
-        // Event delegation for dynamic question inputs
-        this.eventManager.addListener(
-            this.elements.questionsContainer, 
-            'input', 
-            (e) => this.handleQuestionInput(e)
-        );
-
-        // Event delegation for delete buttons
-        this.eventManager.addListener(
-            this.elements.questionsContainer, 
-            'click', 
-            (e) => this.handleQuestionDelete(e)
-        );
-
-        // Cancel link with confirmation
+        this.eventManager.addListener(this.elements.addQuestionBtn, 'click', () => this.addQuestion());
+        this.eventManager.addListener(this.elements.meetingForm, 'submit', (e) => this.handleFormSubmit(e));
+        this.eventManager.addListener(this.elements.meetingTitle, 'input', this.debounce(() => {
+            this.updateCharCounter(this.elements.meetingTitle, this.elements.titleCounter, 60);
+            this.updatePreview();
+            this.validateField(this.elements.meetingTitle, { required: true, maxLength: 60 });
+        }, 100));
+        this.eventManager.addListener(this.elements.meetingDescription, 'input', this.debounce(() => {
+            this.updateCharCounter(this.elements.meetingDescription, this.elements.descriptionCounter, 200);
+            this.updatePreview();
+            this.validateField(this.elements.meetingDescription, { maxLength: 200 });
+        }, 100));
+        this.eventManager.addListener(this.elements.meetingDuration, 'change', () => {
+            this.updatePreview();
+            this.validateField(this.elements.meetingDuration, { required: true });
+        });
+        this.eventManager.addListener(this.elements.questionsContainer, 'input', (e) => this.handleQuestionInput(e));
+        this.eventManager.addListener(this.elements.questionsContainer, 'click', (e) => this.handleQuestionDelete(e));
         const cancelLink = document.getElementById('cancelLink');
         if (cancelLink) {
-            this.eventManager.addListener(
-                cancelLink, 
-                'click', 
-                (e) => this.handleCancel(e)
-            );
+            this.eventManager.addListener(cancelLink, 'click', (e) => this.handleCancel(e));
         }
     }
 
@@ -149,57 +94,43 @@ class MeetingFormManager {
      * Add a new question field
      */
     addQuestion() {
-        if (this.questionCounter >= this.maxQuestions) {
+        const totalForms = this.getTotalForms();
+        if (totalForms >= this.maxQuestions) {
             this.elements.addQuestionBtn.disabled = true;
             this.showNotification('Maximum questions reached', 'warning');
             return;
         }
-
-        this.questionCounter++;
-        const questionField = this.createQuestionElement();
-        
-        this.elements.questionsContainer.appendChild(questionField);
-        this.animateElementIn(questionField);
-        
+        // Clone the empty form template (last form, or use a hidden template if you have one)
+        const formIdx = totalForms;
+        const managementForm = this.elements.questionsContainer.querySelector('input[name$="-TOTAL_FORMS"]');
+        let emptyForm = this.elements.questionsContainer.querySelector('.question-field:last-child');
+        if (!emptyForm) return;
+        const newForm = emptyForm.cloneNode(true);
+        // Clear input value and errors
+        const input = newForm.querySelector('.question-input');
+        input.value = '';
+        newForm.querySelector('.question-char-counter').textContent = '0';
+        newForm.querySelector('.form-error').textContent = '';
+        // Update all name/id attributes for Django formset
+        this.updateFormAttributes(newForm, formIdx);
+        // Enable delete button
+        newForm.querySelector('.delete-question').disabled = false;
+        // Insert new form
+        this.elements.questionsContainer.appendChild(newForm);
+        // Update management form
+        managementForm.value = formIdx + 1;
         this.updateQuestionCount();
-        this.updatePreview();
+        this.renumberQuestions();
     }
 
-    /**
-     * Create a new question element
-     */
-    createQuestionElement() {
-        const questionField = document.createElement('div');
-        questionField.className = 'question-field';
-        questionField.dataset.question = this.questionCounter;
-        questionField.style.opacity = '0';
-        questionField.style.transform = 'translateY(20px)';
-
-        questionField.innerHTML = `
-            <div class="question-header">
-                <div class="question-number">Question ${this.questionCounter}</div>
-                <button type="button" class="delete-question" aria-label="Delete question">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-            <input 
-                type="text" 
-                name="questions[]" 
-                class="form-control question-input" 
-                placeholder="Enter your question..."
-                maxlength="150"
-                required
-            >
-            <div class="char-counter">
-                <span class="question-char-counter">0</span>/150
-            </div>
-            <div class="form-error question-error"></div>
-        `;
-
-        return questionField;
+    updateFormAttributes(formElem, idx) {
+        // Update input name/id for Django formset
+        const input = formElem.querySelector('.question-input');
+        input.name = `${this.formsetPrefix}-${idx}-text`;
+        input.id = `${this.formsetPrefix}-${idx}-text`;
+        // Update error div if needed
+        const errorDiv = formElem.querySelector('.form-error');
+        if (errorDiv) errorDiv.id = `error_${this.formsetPrefix}_${idx}_text`;
     }
 
     /**
@@ -228,14 +159,11 @@ class MeetingFormManager {
      * Renumber all questions after deletion
      */
     renumberQuestions() {
-        const questions = this.elements.questionsContainer.querySelectorAll('.question-field');
-        questions.forEach((question, index) => {
-            const number = index + 1;
-            question.dataset.question = number;
-            question.querySelector('.question-number').textContent = `Question ${number}`;
-            
-            const deleteBtn = question.querySelector('.delete-question');
-            deleteBtn.disabled = number === 1;
+        const questionFields = Array.from(this.elements.questionsContainer.querySelectorAll('.question-field'));
+        questionFields.forEach((field, i) => {
+            field.dataset.question = i + 1;
+            field.querySelector('.question-number').textContent = `Question ${i + 1}`;
+            this.updateFormAttributes(field, i);
         });
     }
 
@@ -243,26 +171,21 @@ class MeetingFormManager {
      * Update question count display
      */
     updateQuestionCount() {
-        this.elements.questionCount.textContent = this.questionCounter;
-        this.elements.previewQuestionCount.textContent = 
-            `${this.questionCounter} question${this.questionCounter !== 1 ? 's' : ''}`;
+        const count = this.getTotalForms();
+        this.elements.questionCount.textContent = count;
+        this.elements.previewQuestionCount.textContent = `${count} question${count > 1 ? 's' : ''}`;
     }
 
     /**
      * Update character counter with color coding
      */
     updateCharCounter(input, counter, maxLength) {
-        const count = input.value.length;
-        counter.textContent = count;
-        if (maxLength) {
-            counter.nextSibling && (counter.nextSibling.textContent = `/${maxLength}`);
-        }
-        if (count > (maxLength ? maxLength - 20 : 180)) {
-            counter.style.color = 'var(--accent-warning)';
-        } else if (count > (maxLength ? maxLength - 50 : 150)) {
-            counter.style.color = 'var(--text-secondary)';
+        if (!input || !counter) return;
+        counter.textContent = input.value.length;
+        if (input.value.length > maxLength) {
+            counter.classList.add('over-limit');
         } else {
-            counter.style.color = 'var(--text-muted)';
+            counter.classList.remove('over-limit');
         }
     }
 
@@ -294,22 +217,8 @@ class MeetingFormManager {
      * Update duration preview
      */
     updateDurationPreview() {
-        const duration = this.elements.meetingDuration.value;
-        if (duration) {
-            const hours = Math.floor(duration / 60);
-            const minutes = duration % 60;
-            let durationText = '';
-            
-            if (hours > 0) {
-                durationText = `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
-            } else {
-                durationText = `${minutes}m`;
-            }
-            
-            this.elements.previewDuration.textContent = durationText;
-        } else {
-            this.elements.previewDuration.textContent = 'Duration';
-        }
+        const duration = this.elements.meetingDuration.options[this.elements.meetingDuration.selectedIndex]?.text || 'Duration';
+        this.elements.previewDuration.textContent = duration;
     }
 
     /**
@@ -317,20 +226,9 @@ class MeetingFormManager {
      */
     updateQuestionsPreview() {
         const questionInputs = this.elements.questionsContainer.querySelectorAll('.question-input');
-        const mockQuestions = [
-            this.elements.mockQuestion1, 
-            this.elements.mockQuestion2, 
-            this.elements.mockQuestion3
-        ];
-        
-        mockQuestions.forEach((mock, index) => {
-            if (index < questionInputs.length) {
-                const questionText = questionInputs[index].value || `Question ${index + 1} will appear here...`;
-                mock.textContent = questionText;
-                mock.style.display = 'block';
-            } else {
-                mock.style.display = 'none';
-            }
+        questionInputs.forEach((input, i) => {
+            const mockQ = this.elements[`mockQuestion${i + 1}`];
+            if (mockQ) mockQ.textContent = input.value || `Question ${i + 1} will appear here...`;
         });
     }
 
@@ -341,8 +239,7 @@ class MeetingFormManager {
         if (e.target.classList.contains('question-input')) {
             const charCounter = e.target.parentElement.querySelector('.question-char-counter');
             this.updateCharCounter(e.target, charCounter, 150);
-            this.debounce(() => this.updatePreview(), 100)();
-            this.validateField(e.target, { required: true, maxLength: 150 });
+            this.updateQuestionsPreview();
         }
     }
 
@@ -350,10 +247,16 @@ class MeetingFormManager {
      * Handle question delete button clicks
      */
     handleQuestionDelete(e) {
-        const deleteBtn = e.target.closest('.delete-question');
-        if (deleteBtn) {
-            const questionField = deleteBtn.closest('.question-field');
-            this.deleteQuestion(questionField);
+        if (e.target.closest('.delete-question')) {
+            const questionFields = Array.from(this.elements.questionsContainer.querySelectorAll('.question-field'));
+            if (questionFields.length <= 1) return; // Always keep at least one
+            const field = e.target.closest('.question-field');
+            field.remove();
+            // Update management form
+            const managementForm = this.elements.questionsContainer.querySelector('input[name$="-TOTAL_FORMS"]');
+            managementForm.value = questionFields.length - 1;
+            this.updateQuestionCount();
+            this.renumberQuestions();
         }
     }
 
@@ -520,6 +423,11 @@ class MeetingFormManager {
     destroy() {
         this.eventManager.cleanup();
         console.log('MeetingFormManager destroyed');
+    }
+
+    getTotalForms() {
+        const managementForm = this.elements.questionsContainer.querySelector('input[name$="-TOTAL_FORMS"]');
+        return parseInt(managementForm.value, 10);
     }
 }
 
