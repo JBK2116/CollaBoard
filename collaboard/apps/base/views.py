@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
 from django.shortcuts import HttpResponse, redirect, render
 from django.urls import reverse
 
@@ -12,14 +13,14 @@ from apps.base.models import CustomUser
 # Create your views here.
 
 
-def landing(request) -> HttpResponse:
+def landing(request: HttpRequest) -> HttpResponse:
     # Redirect the user to the dashboard if they are logged in
     if request.user.is_authenticated:
         return redirect("dashboard")
     return render(request, "base/landing.html")
 
 
-def register(request) -> HttpResponse:
+def register(request: HttpRequest) -> HttpResponse:
     # Redirect the user to the dashboard if they are logged in
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -89,7 +90,7 @@ def register(request) -> HttpResponse:
     )  # Request is a simple GET request
 
 
-def login_user(request) -> HttpResponse:
+def login_user(request: HttpRequest) -> HttpResponse:
     # Redirect the user to the dashboard if they are logged in
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -98,8 +99,14 @@ def login_user(request) -> HttpResponse:
     context.update({"just_created": just_created})
     # Handle User login attempt
     if request.method == "POST":
-        fields: list[str] = ["email", "password", "remember_me"]
-        data: dict[str, str] = {field: request.POST.get(field) for field in fields}
+        print(request.POST)
+        fields: list[str] = ["email", "password"]
+        if not all(request.POST.get(field) for field in fields):
+            context.update({"missing_fields": "Missing required fields"})
+            return render(request, "base/login.html", context)
+        data: dict[str, str | None] = {
+            field: request.POST.get(field) for field in fields
+        }
         # Data will be used to prefill the form if an error occurred or invalid login credentials
         context.update(data)
         user: AbstractUser | None = authenticate(
@@ -110,7 +117,7 @@ def login_user(request) -> HttpResponse:
             return render(request, "base/login.html", context)
         # Log in the user and use a specific session length depending on the remember me box
         login(request, user)
-        if not data.get("remember_me"):
+        if not request.POST.get("remember_me"):
             request.session.set_expiry(0)
             # Give the user access until they close their browser
         return redirect("dashboard")

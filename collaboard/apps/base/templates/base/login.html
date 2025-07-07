@@ -70,6 +70,8 @@
                                 >
                                 {% if invalid_error %}
                                 <div class="form-error" id="emailError">{{invalid_error}}</div>
+                                {% elif missing_fields %}
+                                <div class="form-error" id="emailError">{{missing_fields}}</div>
                                 {% endif %}
                             </div>
 
@@ -103,10 +105,9 @@
                                         </svg>
                                     </button>
                                 </div>
-                                {% comment %}
-                                <!-- DJANGO-INTEGRATION: Display form errors with {{ form.password.errors }} -->
-                                 {% endcomment %}
-                                <div class="form-error" id="passwordError"></div>
+                                {% if missing_fields %}
+                                <div class="form-error" id="passwordError">{{missing_fields}}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Remember Me & Forgot Password Row -->
