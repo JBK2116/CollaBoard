@@ -1,11 +1,12 @@
 from secrets import randbelow
 from typing import cast
+from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
 from django.db.models import QuerySet
 from django.forms import BaseFormSet
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -44,7 +45,7 @@ def create_meeting(request: HttpRequest):
             new_meeting = Meeting(
                 director=user,
                 access_code=generate_meeting_code(),
-                title = meeting_form.cleaned_data["title"],
+                title=meeting_form.cleaned_data["title"],
                 description=meeting_form.cleaned_data["description"],
                 duration=int(meeting_form.cleaned_data["duration"]),
             )  # No need to rerun isvalid, the meeting form has already been cleaned
@@ -73,11 +74,65 @@ def create_meeting(request: HttpRequest):
 
 @login_required
 def edit_meeting(request: HttpRequest, meeting_id: str):
-    # More logic will be implemented later
-    context = {}
+    try:
+        meeting = Meeting.objects.get(id=UUID(meeting_id))
+    except Meeting.DoesNotExist:
+        raise Http404("Meeting not found...")  # noqa: B904
+
     if request.method == "POST":
-        print(request.POST)
-    print(meeting_id)
+        meeting_form: MeetingForm | HttpResponse = validate_meeting_form(
+            request, MeetingForm(request.POST)
+        )
+        if isinstance(meeting_form, HttpResponse):
+            return meeting_form
+        # meeting_form is valid by now
+        questions_formset: BaseFormSet[QuestionForm] | HttpResponse = (
+            validate_questions_formset(request, QuestionFormSet(request.POST))
+        )
+        if isinstance(questions_formset, HttpResponse):
+            return questions_formset
+        # Both forms are valid by now
+        try:
+            # Update meeting details
+            meeting.title = meeting_form.cleaned_data["title"]
+            meeting.description = meeting_form.cleaned_data["description"]
+            meeting.duration = int(meeting_form.cleaned_data["duration"])
+            meeting.save()
+
+            # Delete existing questions and create new ones
+            Question.objects.filter(meeting=meeting).delete()
+            for question in questions_formset:
+                new_question = Question(
+                    meeting=meeting, description=question.cleaned_data["text"]
+                )
+                new_question.save()
+        except DatabaseError:
+            return redirect(
+                f"{reverse('edit-meeting', args=[meeting_id])}?update_error=true"
+            )
+        return redirect(f"{reverse('edit-meeting', args=[meeting_id])}?updated=true")
+    else:
+        # Pre-fill the meeting form with existing data
+        initial_meeting_data = {
+            "title": meeting.title,
+            "description": meeting.description,
+            "duration": str(meeting.duration),
+        }
+        meeting_form = MeetingForm(initial=initial_meeting_data)
+
+        # Pre-fill the questions formset with existing questions
+        existing_questions = Question.objects.filter(meeting=meeting)
+        initial_questions_data = []
+        for question in existing_questions:
+            initial_questions_data.append({"text": question.description})
+
+        questions_formset = QuestionFormSet(initial=initial_questions_data)
+
+    context = {
+        "form": meeting_form,
+        "formset": questions_formset,
+        "meeting": meeting,
+    }
     return render(request, "director/edit_meeting.html", context)
 
 
@@ -99,9 +154,11 @@ def my_meetings(request: HttpRequest):
     context.update({"meetings": all_meetings})
     return render(request, "director/my_meetings.html", context)
 
+
 """
 Below are helper functions for these views
 """
+
 
 def validate_meeting_form(
     request: HttpRequest, form: MeetingForm

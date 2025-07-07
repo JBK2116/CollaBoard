@@ -5,9 +5,9 @@
 const form = document.getElementById('meetingForm');
 const questionsContainer = document.getElementById('questionsContainer');
 const addQuestionBtn = document.getElementById('addQuestionBtn');
-const titleInput = document.getElementById('meetingTitle');
-const descriptionInput = document.getElementById('meetingDescription');
-const durationSelect = document.getElementById('meetingDuration');
+const titleInput = document.getElementById('id_title');
+const descriptionInput = document.getElementById('id_description');
+const durationSelect = document.getElementById('id_duration');
 const questionCount = document.getElementById('questionCount');
 const titleCounter = document.getElementById('titleCounter');
 const previewTitle = document.getElementById('previewTitle');
@@ -15,9 +15,7 @@ const previewDescription = document.getElementById('previewDescription');
 const previewDuration = document.getElementById('previewDuration');
 const previewQuestionCount = document.getElementById('previewQuestionCount');
 const mockTitle = document.getElementById('mockTitle');
-const mockQuestion1 = document.getElementById('mockQuestion1');
-const mockQuestion2 = document.getElementById('mockQuestion2');
-const mockQuestion3 = document.getElementById('mockQuestion3');
+const mockQuestions = document.getElementById('mockQuestions');
 const deleteMeetingBtn = document.getElementById('deleteMeetingBtn');
 const cancelLink = document.getElementById('cancelLink');
 const descriptionCounter = document.getElementById('descriptionCounter');
@@ -25,7 +23,7 @@ const descriptionCounter = document.getElementById('descriptionCounter');
 const meetingId = window.location.pathname.split('/')[3];
 
 // Question Management
-let questionCounter = 5; // Start with 5 pre-filled questions
+let questionCounter = 0; // Will be set based on existing questions
 const maxQuestions = 20;
 let hasUnsavedChanges = false;
 let originalFormData = {};
@@ -36,7 +34,7 @@ function storeOriginalData() {
         title: titleInput.value,
         description: descriptionInput.value,
         duration: durationSelect.value,
-        questions: Array.from(questionsContainer.querySelectorAll('.question-input')).map(input => input.value)
+        questions: Array.from(questionsContainer.querySelectorAll('input[name*="text"]')).map(input => input.value)
     };
 }
 
@@ -46,7 +44,7 @@ function checkForChanges() {
         title: titleInput.value,
         description: descriptionInput.value,
         duration: durationSelect.value,
-        questions: Array.from(questionsContainer.querySelectorAll('.question-input')).map(input => input.value)
+        questions: Array.from(questionsContainer.querySelectorAll('input[name*="text"]')).map(input => input.value)
     };
 
     hasUnsavedChanges = JSON.stringify(originalFormData) !== JSON.stringify(currentData);
@@ -85,14 +83,14 @@ function addQuestion() {
         </div>
         <input 
             type="text" 
-            name="questions[]" 
+            name="form-${questionCounter}-text" 
             class="form-control question-input" 
             placeholder="Enter your question..."
-            maxlength="200"
+            maxlength="150"
             required
         >
         <div class="char-counter">
-            <span class="question-char-counter">0</span>/200
+            <span class="question-char-counter">0</span>/150
         </div>
     `;
 
@@ -208,16 +206,18 @@ function updatePreview() {
     }
 
     // Update questions in preview
-    const questionInputs = questionsContainer.querySelectorAll('.question-input');
-    const mockQuestions = [mockQuestion1, mockQuestion2, mockQuestion3];
+    const questionInputs = questionsContainer.querySelectorAll('input[name*="text"]');
     
-    mockQuestions.forEach((mock, index) => {
-        if (index < questionInputs.length) {
-            const questionText = questionInputs[index].value || `Question ${index + 1} will appear here...`;
-            mock.textContent = questionText;
-        } else {
-            mock.textContent = `Question ${index + 1} will appear here...`;
-        }
+    // Clear existing mock questions
+    mockQuestions.innerHTML = '';
+    
+    questionInputs.forEach((input, index) => {
+        const questionText = input.value || `Question ${index + 1} will appear here...`;
+        const mockQuestion = document.createElement('div');
+        mockQuestion.className = 'mock-question';
+        mockQuestion.id = `mockQuestion${index + 1}`;
+        mockQuestion.textContent = questionText;
+        mockQuestions.appendChild(mockQuestion);
     });
 }
 
@@ -265,9 +265,6 @@ function setupEventListeners() {
 
     // Form submission
     form.addEventListener('submit', function(e) {        
-        // DJANGO-INTEGRATION: This will be handled by Django form processing
-        console.log('Form submitted - Django will handle meeting update');
-        
         // Add loading state
         const submitBtn = document.getElementById('updateBtn');
         submitBtn.textContent = 'Updating...';
@@ -334,6 +331,9 @@ function init() {
         return;
     }
 
+    // Set initial question counter based on existing questions
+    questionCounter = questionsContainer.querySelectorAll('.question-field').length;
+
     // Setup event listeners
     setupEventListeners();
     
@@ -346,7 +346,7 @@ function init() {
     // On page load, initialize counters
     updateCharCounter(titleInput, titleCounter, 60);
     updateCharCounter(descriptionInput, descriptionCounter, 200);
-    Array.from(questionsContainer.querySelectorAll('.question-input')).forEach((input, i) => {
+    Array.from(questionsContainer.querySelectorAll('input[name*="text"]')).forEach((input, i) => {
         const charCounter = input.parentElement.querySelector('.question-char-counter');
         updateCharCounter(input, charCounter, 150);
     });
