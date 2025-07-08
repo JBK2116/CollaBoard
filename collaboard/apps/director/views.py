@@ -12,14 +12,24 @@ from django.urls import reverse
 
 from apps.base.models import CustomUser
 from apps.director.forms import MeetingForm, QuestionForm, QuestionFormSet
-from apps.director.models import Meeting, Question
+from apps.director.models import Meeting, Question, Response
 
 # Create your views here.
 
 
 @login_required
 def dashboard(request: HttpRequest):
-    context = {}
+    user = cast(CustomUser, request.user)
+    total_meetings = Meeting.count_published_for_director(user)
+    participant_count = Meeting.get_total_responses(user)
+    success_rate = Meeting.get_meeting_success_rate(user)
+    average_response_time = Response.get_average_response_time(user)
+    context = {
+        "total_meetings": total_meetings,
+        "participant_count": participant_count,
+        "success_rate": success_rate,
+        "response_time": average_response_time,
+    }
     return render(request, "director/dashboard.html", context)
 
 
@@ -146,7 +156,7 @@ def delete_meeting(request: HttpRequest, meeting_id: str):
             raise Http404("Meeting not found")  # noqa: B904
         # By now the meeting obj exists
         meeting.delete()
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": True})
         else:
             return redirect("my-meetings")

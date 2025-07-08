@@ -29,7 +29,7 @@
   <main class="dashboard-main">
     <div class="container">
       <header class="dashboard-header">
-        <h1 class="dashboard-title">Welcome back, Director!</h1>
+        <h1 class="dashboard-title">Welcome back, {{request.user.first_name}}!</h1>
         <p class="dashboard-subtext">Here's a quick glance at your meeting performance.</p>
       </header>
 
@@ -37,22 +37,22 @@
       <section class="dashboard-grid">
         <div class="stat-card">
           <span class="stat-label">Total Meetings</span>
-          <span class="stat-value">42</span>
+          <span class="stat-value">{{total_meetings}}</span>
           <span class="stat-icon">📅</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Participants Served</span>
-          <span class="stat-value">1,234</span>
+          <span class="stat-value">{{participant_count}}</span>
           <span class="stat-icon">👥</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Success Rate</span>
-          <span class="stat-value">98%</span>
+          <span class="stat-value">{{success_rate}}%</span>
           <span class="stat-icon">✅</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Avg. Answer Time</span>
-          <span class="stat-value">3.2s</span>
+          <span class="stat-value">{{response_time}}s</span>
           <span class="stat-icon">⏱️</span>
         </div>
       </section>
@@ -77,6 +77,8 @@
       <section class="utility-widget">
         <div class="next-meeting">
           <h2 class="utility-title">Last Meeting Summary</h2>
+          {% if total_meetings %}
+          <!-- Make this DYNAMIC... -->
           <div class="utility-meta">
             <div class="meeting-title"><strong>Title:</strong> Weekly Team Sync</div>
             <div class="meeting-questions"><strong>Questions:</strong> 12</div>
@@ -85,6 +87,14 @@
           <p class="utility-time">When: 3:00 PM</p>
           <a class="utility-btn" href="{% url 'create-meeting' %}" style="text-decoration: none;">View</a>
         </div>
+        {% else %}
+          <div class="next-meeting no-meetings">
+            <div class="meeting-title"><strong>
+              No published meetings found. Ready to run your first one?
+            </strong></div>
+            <a class="utility-btn" href="{% url 'my-meetings' %}" style="text-decoration: none;">Let's Go</a>
+          </div>
+        {% endif %}
         <!--
         <div class="last-meeting-summary">
           <h2 class="utility-title">Last Meeting Summary</h2>

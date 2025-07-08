@@ -157,7 +157,13 @@
                         <div class="card-footer">
                             <div class="primary-actions">
                                 <a href="{% url 'edit-meeting' meeting.id %}" class="btn btn-secondary">Edit</a>
-                                <a href="#" class="btn btn-primary">Launch Again</a>
+                                <a href="#" class="btn btn-primary">
+                                    {% if meeting.published %}
+                                    Launch Again
+                                    {% else %}
+                                    Launch
+                                    {% endif %}
+                                </a>
                             </div>
                             <div class="danger-action">
                                 <button type="button" class="btn btn-danger btn-sm" data-meeting-id="{{meeting.id}}" data-meeting-title="{{meeting.title}}">

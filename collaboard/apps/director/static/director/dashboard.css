@@ -249,6 +249,28 @@ body {
   margin-right: 0.25em;
 }
 
+.next-meeting.no-meetings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  text-align: center;
+}
+.next-meeting.no-meetings .meeting-title {
+  margin-bottom: 1.25rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+.next-meeting.no-meetings .utility-btn {
+  margin-top: 0.5rem;
+  margin-left: 0;
+  margin-right: 0;
+  min-width: 120px;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px rgba(88,166,255,0.13);
+}
+
 @media (max-width: 1024px) {
   .dashboard-grid, .action-widget-row {
     grid-template-columns: repeat(2, 1fr);

@@ -2,6 +2,7 @@ import uuid
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.timezone import localtime
 
 from apps.base.models import CustomUser
 
@@ -38,18 +39,33 @@ class Meeting(models.Model):
 
     def get_question_count(self) -> int:
         return Question.objects.filter(meeting=self).count()
-
+    """
+    To do: return the timezone that corresponds to the current user
+    """
     def get_created_at(self) -> str:
-        return self.created_at.strftime("%B, %d %Y")
+        return localtime(self.created_at).strftime("%B, %d %Y %H:%M:%S")
 
     def get_updated_at(self) -> str:
-        return self.updated_at.strftime("%B, %d %Y")
+        return localtime(self.updated_at).strftime("%B, %d %Y %H:%M:%S")
 
     def get_last_run(self) -> str:
         if self.last_run is None:
             return "No previous run"
         else:
-            return self.last_run.strftime("%B, %d %Y")
+            return localtime(self.last_run).strftime("%B, %d %Y %H:%M:%S")
+
+    @classmethod
+    def count_published_for_director(cls, director: CustomUser):
+        return cls.objects.filter(published=True, director=director).count()
+
+    @classmethod
+    def get_total_responses(cls, director: CustomUser) -> int:
+        return Response.objects.filter(question__meeting__director=director).count()
+
+    @classmethod
+    def get_meeting_success_rate(cls, director: CustomUser) -> int:
+        # More logic will be implemented later
+        return 0
 
 
 class Question(models.Model):
@@ -80,3 +96,8 @@ class Response(models.Model):
 
     def __str__(self) -> str:
         return f"Responding to question: {self.question.description} of meeting {self.question.meeting.title}"
+
+    @classmethod
+    def get_average_response_time(cls, director: CustomUser) -> float:
+        # More logic will be implemented later
+        return 0.0
