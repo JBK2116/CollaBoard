@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
 from django.db.models import QuerySet
 from django.forms import BaseFormSet
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -138,11 +138,18 @@ def edit_meeting(request: HttpRequest, meeting_id: str):
 
 @login_required
 def delete_meeting(request: HttpRequest, meeting_id: str):
-    # More logic will be implemented later
     context = {}
     if request.method == "POST":
-        print(request.POST)
-    print(meeting_id)
+        try:
+            meeting = Meeting.objects.get(id=UUID(meeting_id))
+        except Meeting.DoesNotExist:
+            raise Http404("Meeting not found")  # noqa: B904
+        # By now the meeting obj exists
+        meeting.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({"success": True})
+        else:
+            return redirect("my-meetings")
     return render(request, "director/my_meetings.html", context)
 
 

@@ -304,6 +304,7 @@ class MeetingsManager {
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
             },
             credentials: 'same-origin' // Include cookies for Django session
         })
