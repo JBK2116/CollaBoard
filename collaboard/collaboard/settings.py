@@ -18,7 +18,6 @@ load_dotenv() # load variables from .env file
 apps = [
     "apps.director",
     "apps.meeting",
-    "apps.participant",
     "apps.base",
 ]
 
