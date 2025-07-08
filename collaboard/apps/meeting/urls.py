@@ -1,2 +1,7 @@
-from django.contrib import admin  # noqa: F401
-from django.urls import path  # noqa: F401
+from django.urls import path
+
+from apps.meeting import views
+
+urlpatterns = [
+    path("host/<str:meeting_id>/", views.host_meeting, name="host-meeting"),
+]

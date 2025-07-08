@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Meeting Control - CollaBoard</title>
+    <link rel="stylesheet" href="{% static 'meeting/live_control.css' %}">
+    <!-- DJANGO-INTEGRATION: Add CSRF token meta tag when implementing -->
+</head>
+<body>
+    <!-- ================================
+         PAGE: Live Meeting Control
+         PURPOSE: Real-time Q&A session control interface
+         THEME: Dark professional with focus on live interaction
+         ================================ -->
+
+    <!-- Meeting Header -->
+    <header class="meeting-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="meeting-info">
+                    <h1 class="meeting-title">Team Retrospective Q1 2025</h1>
+                    <p class="meeting-description">Quarterly team feedback session for planning improvements</p>
+                    <div class="session-meta">
+                        <div class="meta-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                            <span id="sessionDuration">00:15:32</span>
+                        </div>
+                        <div class="meta-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            <span id="participantCount">23 participants</span>
+                        </div>
+                        <div class="meta-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 11H1l8-8 8 8h-8v8z"/>
+                            </svg>
+                            <span id="responseCount">15 responses</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="access-code-display">
+                        <span class="code-label">Access Code</span>
+                        <div class="code-value" id="accessCode">ABC-1234</div>
+                        <button type="button" class="copy-code-btn" id="copyCodeBtn" title="Copy access code">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="connection-status">
+                        <div class="status-indicator connected" id="connectionStatus">
+                            <div class="status-dot"></div>
+                            <span class="status-text">Connected</span>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-danger end-meeting-btn" id="endMeetingBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        End Meeting
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="content-layout">
+            <!-- Question Display Area (Left 60%) -->
+            <section class="question-section">
+                <div class="question-container">
+                    <div class="question-progress">
+                        <span class="progress-text" id="questionProgress">Question 3 of 5</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="current-question">
+                        <h2 class="question-text" id="currentQuestionText">
+                            What could we improve next quarter?
+                        </h2>
+                    </div>
+                    
+                    <div class="question-navigation">
+                        <div class="nav-controls">
+                            <button type="button" class="btn btn-secondary" id="prevQuestionBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15,18 9,12 15,6"/>
+                                </svg>
+                                Previous
+                            </button>
+                            
+                            <div class="question-jump">
+                                <select id="questionJumpSelect" class="jump-select">
+                                    <option value="0">Question 1</option>
+                                    <option value="1">Question 2</option>
+                                    <option value="2" selected>Question 3</option>
+                                    <option value="3">Question 4</option>
+                                    <option value="4">Question 5</option>
+                                </select>
+                            </div>
+                            
+                            <button type="button" class="btn btn-secondary" id="skipQuestionBtn">
+                                Skip Question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Response Feed Area (Right 40%) -->
+            <section class="response-section">
+                <div class="response-header">
+                    <h3 class="response-title">Live Responses</h3>
+                    <div class="response-controls">
+                        <button type="button" class="refresh-btn" id="refreshResponsesBtn" title="Refresh responses">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,4 23,10 17,10"/>
+                                <polyline points="1,20 1,14 7,14"/>
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="clear-btn" id="clearResponsesBtn" title="Clear responses">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3,6 5,6 21,6"/>
+                                <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="response-feed" id="responseFeed">
+                    <!-- Sample responses for development -->
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="participant-id">Participant #1</span>
+                            <span class="response-time">2 minutes ago</span>
+                        </div>
+                        <div class="response-text">
+                            Great collaboration between teams, especially on the new product launch.
+                        </div>
+                    </div>
+                    
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="participant-id">Participant #2</span>
+                            <span class="response-time">1 minute ago</span>
+                        </div>
+                        <div class="response-text">
+                            Need better communication tools and more regular check-ins.
+                        </div>
+                    </div>
+                    
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="participant-id">Participant #3</span>
+                            <span class="response-time">1 minute ago</span>
+                        </div>
+                        <div class="response-text">
+                            Project deadlines were realistic and we delivered on time.
+                        </div>
+                    </div>
+                    
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="participant-id">Participant #4</span>
+                            <span class="response-time">30 seconds ago</span>
+                        </div>
+                        <div class="response-text">
+                            Would like to see more cross-team training opportunities.
+                        </div>
+                    </div>
+                    
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="participant-id">Participant #5</span>
+                            <span class="response-time">15 seconds ago</span>
+                        </div>
+                        <div class="response-text">
+                            The new workflow system has been really helpful for productivity.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="response-footer">
+                    <div class="response-stats">
+                        <span class="stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 11H1l8-8 8 8h-8v8z"/>
+                            </svg>
+                            <span id="liveResponseCount">15 responses</span>
+                        </span>
+                        <span class="stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            <span id="activeParticipants">23 active</span>
+                        </span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Control Panel (Fixed Bottom) -->
+    <footer class="control-panel">
+        <div class="container">
+            <div class="panel-content">
+                <div class="panel-left">
+                    <div class="session-status">
+                        <span class="status-text">Session Active</span>
+                        <div class="status-indicator">
+                            <div class="pulse-dot"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel-center">
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bottomProgressFill" style="width: 60%"></div>
+                        </div>
+                        <span class="progress-text" id="bottomProgressText">3 of 5 questions</span>
+                    </div>
+                </div>
+                
+                <div class="panel-right">
+                    <button type="button" class="btn btn-secondary" id="pauseSessionBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="6" y="4" width="4" height="16"/>
+                            <rect x="14" y="4" width="4" height="16"/>
+                        </svg>
+                        Pause
+                    </button>
+                    
+                    <button type="button" class="btn btn-primary" id="nextQuestionBtn">
+                        <span class="btn-text">Next Question</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,18 15,12 9,6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="{% static 'meeting/live_control.js' %}"></script>    
+</body>
+</html> 

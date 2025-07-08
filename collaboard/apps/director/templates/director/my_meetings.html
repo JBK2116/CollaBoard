@@ -157,7 +157,7 @@
                         <div class="card-footer">
                             <div class="primary-actions">
                                 <a href="{% url 'edit-meeting' meeting.id %}" class="btn btn-secondary">Edit</a>
-                                <a href="#" class="btn btn-primary">
+                                <a href="{% url 'host-meeting' meeting.id %}" class="btn btn-primary">
                                     {% if meeting.published %}
                                     Launch Again
                                     {% else %}
