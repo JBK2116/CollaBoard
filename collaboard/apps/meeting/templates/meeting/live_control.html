@@ -20,15 +20,15 @@
         <div class="container">
             <div class="header-content">
                 <div class="meeting-info">
-                    <h1 class="meeting-title">Team Retrospective Q1 2025</h1>
-                    <p class="meeting-description">Quarterly team feedback session for planning improvements</p>
+                    <h1 class="meeting-title">{{meeting.title}}</h1>
+                    <p class="meeting-description">{{meeting.description}}</p>
                     <div class="session-meta">
                         <div class="meta-item">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"/>
                                 <polyline points="12,6 12,12 16,14"/>
                             </svg>
-                            <span id="sessionDuration">00:15:32</span>
+                            <span id="sessionDuration">00:00</span>
                         </div>
                         <div class="meta-item">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,13 +37,13 @@
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                             </svg>
-                            <span id="participantCount">23 participants</span>
+                            <span id="participantCount">0 participants</span>
                         </div>
                         <div class="meta-item">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 11H1l8-8 8 8h-8v8z"/>
                             </svg>
-                            <span id="responseCount">15 responses</span>
+                            <span id="responseCount">0 responses</span>
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                 <div class="header-actions">
                     <div class="access-code-display">
                         <span class="code-label">Access Code</span>
-                        <div class="code-value" id="accessCode">ABC-1234</div>
+                        <div class="code-value" id="accessCode">{{meeting.access_code}}</div>
                         <button type="button" class="copy-code-btn" id="copyCodeBtn" title="Copy access code">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -67,6 +67,12 @@
                         </div>
                     </div>
                     
+                    <button type="button" class="btn btn-success" id="startMeetingBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5,3 19,12 5,21 5,3"/>
+                        </svg>
+                        Start Meeting
+                    </button>
                     <button type="button" class="btn btn-danger end-meeting-btn" id="endMeetingBtn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -87,15 +93,15 @@
             <section class="question-section">
                 <div class="question-container">
                     <div class="question-progress">
-                        <span class="progress-text" id="questionProgress">Question 3 of 5</span>
+                        <span class="progress-text" id="questionProgress">Question – / –</span>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill" style="width: 60%"></div>
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                         </div>
                     </div>
                     
                     <div class="current-question">
                         <h2 class="question-text" id="currentQuestionText">
-                            What could we improve next quarter?
+                            No questions yet
                         </h2>
                     </div>
                     
@@ -109,12 +115,8 @@
                             </button>
                             
                             <div class="question-jump">
-                                <select id="questionJumpSelect" class="jump-select">
-                                    <option value="0">Question 1</option>
-                                    <option value="1">Question 2</option>
-                                    <option value="2" selected>Question 3</option>
-                                    <option value="3">Question 4</option>
-                                    <option value="4">Question 5</option>
+                                <select id="questionJumpSelect" class="jump-select" disabled>
+                                    <option>No questions</option>
                                 </select>
                             </div>
                             
@@ -150,56 +152,7 @@
                 </div>
                 
                 <div class="response-feed" id="responseFeed">
-                    <!-- Sample responses for development -->
-                    <div class="response-card">
-                        <div class="response-header">
-                            <span class="participant-id">Participant #1</span>
-                            <span class="response-time">2 minutes ago</span>
-                        </div>
-                        <div class="response-text">
-                            Great collaboration between teams, especially on the new product launch.
-                        </div>
-                    </div>
-                    
-                    <div class="response-card">
-                        <div class="response-header">
-                            <span class="participant-id">Participant #2</span>
-                            <span class="response-time">1 minute ago</span>
-                        </div>
-                        <div class="response-text">
-                            Need better communication tools and more regular check-ins.
-                        </div>
-                    </div>
-                    
-                    <div class="response-card">
-                        <div class="response-header">
-                            <span class="participant-id">Participant #3</span>
-                            <span class="response-time">1 minute ago</span>
-                        </div>
-                        <div class="response-text">
-                            Project deadlines were realistic and we delivered on time.
-                        </div>
-                    </div>
-                    
-                    <div class="response-card">
-                        <div class="response-header">
-                            <span class="participant-id">Participant #4</span>
-                            <span class="response-time">30 seconds ago</span>
-                        </div>
-                        <div class="response-text">
-                            Would like to see more cross-team training opportunities.
-                        </div>
-                    </div>
-                    
-                    <div class="response-card">
-                        <div class="response-header">
-                            <span class="participant-id">Participant #5</span>
-                            <span class="response-time">15 seconds ago</span>
-                        </div>
-                        <div class="response-text">
-                            The new workflow system has been really helpful for productivity.
-                        </div>
-                    </div>
+                    <!-- No responses yet -->
                 </div>
                 
                 <div class="response-footer">
@@ -208,7 +161,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 11H1l8-8 8 8h-8v8z"/>
                             </svg>
-                            <span id="liveResponseCount">15 responses</span>
+                            <span id="liveResponseCount">0 responses</span>
                         </span>
                         <span class="stat-item">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -217,7 +170,7 @@
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                             </svg>
-                            <span id="activeParticipants">23 active</span>
+                            <span id="activeParticipants">0 active</span>
                         </span>
                     </div>
                 </div>
@@ -231,7 +184,7 @@
             <div class="panel-content">
                 <div class="panel-left">
                     <div class="session-status">
-                        <span class="status-text">Session Active</span>
+                        <span class="status-text">Session Not Started</span>
                         <div class="status-indicator">
                             <div class="pulse-dot"></div>
                         </div>
@@ -241,9 +194,9 @@
                 <div class="panel-center">
                     <div class="progress-container">
                         <div class="progress-bar">
-                            <div class="progress-fill" id="bottomProgressFill" style="width: 60%"></div>
+                            <div class="progress-fill" id="bottomProgressFill" style="width: 0%"></div>
                         </div>
-                        <span class="progress-text" id="bottomProgressText">3 of 5 questions</span>
+                        <span class="progress-text" id="bottomProgressText">0 of 0 questions</span>
                     </div>
                 </div>
                 

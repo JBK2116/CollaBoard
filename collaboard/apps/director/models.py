@@ -32,6 +32,7 @@ class Meeting(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_run = models.DateTimeField(null=True)
+    participant_count = models.IntegerField(default=0, null=False)
 
     # Below are object instance methods
     def __str__(self) -> str:

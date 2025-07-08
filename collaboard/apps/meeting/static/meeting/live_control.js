@@ -21,24 +21,19 @@
     const copyCodeBtn = document.getElementById('copyCodeBtn');
     const refreshResponsesBtn = document.getElementById('refreshResponsesBtn');
     const clearResponsesBtn = document.getElementById('clearResponsesBtn');
+    const startMeetingBtn = document.getElementById('startMeetingBtn');
 
     // Meeting State
-    let currentQuestionIndex = 2; // Starting at question 3 (0-indexed)
-    let totalQuestions = 5;
-    let responseCountValue = 15;
-    let participantCountValue = 23;
-    let sessionStartTime = new Date();
+    let currentQuestionIndex = -1;
+    let totalQuestions = 0;
+    let responseCountValue = 0;
+    let participantCountValue = 0;
+    let sessionStartTime = null;
     let isPaused = false;
-    let isConnected = true;
+    let isConnected = false;
 
-    // Sample questions for development
-    const questions = [
-        "What went well this quarter?",
-        "What challenges did we face?",
-        "What could we improve next quarter?",
-        "What new initiatives should we consider?",
-        "Rate your overall satisfaction (1-10)"
-    ];
+    // No questions or responses at start
+    const questions = [];
 
     // WebSocket Simulation (replace with actual Django Channels)
     let wsConnection = null;
@@ -48,44 +43,6 @@
         // wsConnection = new WebSocket(`ws://${window.location.host}/ws/meeting/${meetingId}/`);
         
         console.log('WebSocket connection initialized (simulated)');
-        
-        // Simulate real-time updates
-        setInterval(() => {
-            if (isConnected && !isPaused) {
-                simulateNewResponse();
-            }
-        }, 3000);
-        
-        setInterval(() => {
-            if (isConnected && !isPaused) {
-                updateParticipantCount();
-            }
-        }, 5000);
-    }
-
-    function simulateNewResponse() {
-        const sampleResponses = [
-            "The team collaboration has been excellent this quarter.",
-            "We need better project management tools.",
-            "Communication between departments could improve.",
-            "The new processes are working well.",
-            "More training opportunities would be helpful.",
-            "Deadlines were realistic and achievable.",
-            "The feedback system is very effective.",
-            "We should have more team building activities."
-        ];
-        
-        const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
-        const participantId = Math.floor(Math.random() * 30) + 1;
-        
-        addNewResponse(`Participant #${participantId}`, randomResponse);
-        updateResponseCount();
-    }
-
-    function updateParticipantCount() {
-        const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
-        participantCountValue = Math.max(15, Math.min(30, participantCountValue + change));
-        updateParticipantDisplay();
     }
 
     // Question Navigation
@@ -195,13 +152,16 @@
 
     // Session Timer
     function updateSessionTimer() {
+        if (!sessionStartTime || isNaN(sessionStartTime.getTime())) {
+            sessionDuration.textContent = '00:00';
+            return;
+        }
         const now = new Date();
         const elapsed = now - sessionStartTime;
         const hours = Math.floor(elapsed / (1000 * 60 * 60));
         const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-        
-        sessionDuration.textContent = 
+        sessionDuration.textContent =
             `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
@@ -257,13 +217,23 @@
     }
 
     // End Meeting
+    let timerInterval = null;
+
     function endMeeting() {
         if (confirm('Are you sure you want to end this meeting? This action cannot be undone.')) {
-            // DJANGO-INTEGRATION: Send end meeting message and redirect
-            // wsConnection.send(JSON.stringify({type: 'end_meeting'}));
-            // window.location.href = '/director/post-meeting/meeting-id/';
-            
-            console.log('Meeting ended');
+            // Stop all intervals
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            // Disable controls
+            prevQuestionBtn.disabled = true;
+            nextQuestionBtn.disabled = true;
+            skipQuestionBtn.disabled = true;
+            endMeetingBtn.disabled = true;
+            pauseSessionBtn.disabled = true;
+            // Update session status
+            document.querySelector('.session-status .status-text').textContent = 'Session Ended';
+            // Optionally, show a message or redirect
             alert('Meeting ended successfully');
         }
     }
@@ -297,10 +267,64 @@
     updateParticipantDisplay();
     
     // Start timer
-    setInterval(updateSessionTimer, 1000);
+    timerInterval = setInterval(updateSessionTimer, 1000);
     
     // DJANGO-INTEGRATION: Load initial meeting data
     // meeting = {{ meeting|safe }};
     // currentQuestionIndex = {{ current_question_index }};
     // totalQuestions = {{ total_questions }};
     // questions = {{ questions|safe }};
+
+    function initializeUIForNotStarted() {
+        currentQuestionText.textContent = 'No questions yet';
+        questionProgress.textContent = 'Question – / –';
+        progressFill.style.width = '0%';
+        bottomProgressFill.style.width = '0%';
+        bottomProgressText.textContent = '0 of 0 questions';
+        questionJumpSelect.innerHTML = '<option>No questions</option>';
+        questionJumpSelect.disabled = true;
+        responseFeed.innerHTML = '<!-- No responses yet -->';
+        responseCount.textContent = '0 responses';
+        liveResponseCount.textContent = '0 responses';
+        participantCount.textContent = '0 participants';
+        activeParticipants.textContent = '0 active';
+        sessionDuration.textContent = '00:00';
+        connectionStatus.classList.remove('connected');
+        connectionStatus.classList.add('disconnected');
+        connectionStatus.querySelector('.status-text').textContent = 'Not Connected';
+        prevQuestionBtn.disabled = true;
+        nextQuestionBtn.disabled = true;
+        skipQuestionBtn.disabled = true;
+        endMeetingBtn.disabled = true;
+        pauseSessionBtn.disabled = true;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeUIForNotStarted();
+    });
+
+    function startMeeting() {
+        // Set the session start time
+        sessionStartTime = new Date();
+        isConnected = true;
+        // Enable controls
+        prevQuestionBtn.disabled = false;
+        nextQuestionBtn.disabled = false;
+        skipQuestionBtn.disabled = false;
+        endMeetingBtn.disabled = false;
+        pauseSessionBtn.disabled = false;
+        // Update connection status
+        connectionStatus.classList.remove('disconnected');
+        connectionStatus.classList.add('connected');
+        connectionStatus.querySelector('.status-text').textContent = 'Connected';
+        // Hide the start button
+        startMeetingBtn.style.display = 'none';
+        // Change session status text
+        document.querySelector('.session-status .status-text').textContent = 'Session Active';
+        // Optionally, initialize first question, etc.
+        // DJANGO-CHANNELS: Here you will broadcast meeting started event
+    }
+
+    if (startMeetingBtn) {
+        startMeetingBtn.addEventListener('click', startMeeting);
+    }
