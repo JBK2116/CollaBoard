@@ -1,0 +1,112 @@
+/* Inherit dashboard styles for navbar, etc. */
+
+.breadcrumb-nav {
+  background: #181c24;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #23283a;
+}
+.breadcrumb {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #b0b8c9;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumb li:not(:last-child)::after {
+  content: '›';
+  margin: 0 0.5rem;
+  color: #6c738a;
+}
+.breadcrumb a {
+  color: #6c9cff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.breadcrumb a:hover {
+  color: #4a7bd8;
+}
+
+.live-sessions-main {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.centered-card-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.live-session-card {
+  background: rgba(24, 28, 36, 0.98);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.12);
+  padding: 2.5rem 2rem 2rem 2rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  margin: 2rem 0;
+}
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+.access-code-form .form-group {
+  margin-bottom: 1rem;
+}
+.form-label {
+  color: #b0b8c9;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  text-align: left;
+}
+.code-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.code-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #23283a;
+  background: #23283a;
+  color: #fff;
+  font-size: 1.1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.code-input:focus {
+  border: 1.5px solid #6c9cff;
+}
+.btn.btn-primary {
+  background: linear-gradient(90deg, #6c9cff 0%, #4a7bd8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn.btn-primary:hover {
+  background: linear-gradient(90deg, #4a7bd8 0%, #6c9cff 100%);
+}
+.form-error {
+  color: #ff6b6b;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  min-height: 1.2em;
+}
+@media (max-width: 600px) {
+  .live-session-card {
+    padding: 1.5rem 0.5rem;
+    max-width: 98vw;
+  }
+} 

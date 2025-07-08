@@ -171,6 +171,11 @@ def my_meetings(request: HttpRequest):
     context.update({"meetings": all_meetings})
     return render(request, "director/my_meetings.html", context)
 
+@login_required
+def live_session(request: HttpRequest):
+    context = {}
+    return render(request, "director/live_sessions.html", context)
+
 
 """
 Below are helper functions for these views

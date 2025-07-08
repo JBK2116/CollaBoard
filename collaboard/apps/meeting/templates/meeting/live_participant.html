@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Session - CollaBoard</title>
+    <link rel="stylesheet" href="{% static 'meeting/live_participant.css' %}">
+    <!-- DJANGO-INTEGRATION: Add CSRF token meta tag when implementing -->
+    <!-- DJANGO-INTEGRATION: Add static files handling for CSS -->
+</head>
+<body>
+    <!-- ================================
+         PAGE: Participant Live Session
+         PURPOSE: Ultra-simple Q&A interface for anonymous participation
+         THEME: Distraction-free, focused on question and response
+         ================================ -->
+
+    <!-- Minimal Header -->
+    <header class="session-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="meeting-info">
+                    <h1 class="meeting-title">{{meeting.title}}</h1>
+                    <div class="director-label">
+                        <span class="label">Director:</span>
+                        <span class="director-name" id="directorName">{{meeting.director.get_full_name}}</span>
+                    </div>
+                    <div class="session-meta">
+                        <span class="progress-indicator" id="progressIndicator">Question 0 of {{meeting.get_question_count}}</span>
+                        <span class="participant-count" id="participantCount">0 participants</span>
+                    </div>
+                </div>
+                
+                <div class="connection-status">
+                    <div class="status-indicator connected" id="connectionStatus">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Connected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content - Centered Layout -->
+    <main class="main-content">
+        <div class="container">
+            <div class="session-container">
+                <!-- Question Display Area -->
+                <section class="question-section">
+                    <div class="question-container">
+                        <div class="question-display" id="questionDisplay">
+                            <h2 class="current-question" id="currentQuestion">
+                            </h2>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Response Input Section -->
+                <section class="response-section">
+                    <div class="response-container">
+                        <form class="response-form" id="responseForm">
+                            <div class="input-group">
+                                <textarea 
+                                    class="response-input" 
+                                    id="responseInput"
+                                    placeholder="Type your response here..."
+                                    maxlength="500"
+                                    rows="4"
+                                    required
+                                ></textarea>
+                                
+                                <div class="input-footer">
+                                    <div class="character-counter" id="characterCounter">
+                                        <span class="counter-text">0/500 characters</span>
+                                    </div>
+                                    
+                                    <button type="submit" class="submit-btn" id="submitBtn">
+                                        <span class="btn-text">Submit Response</span>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="22" y1="2" x2="11" y2="13"/>
+                                            <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Status Messages -->
+                <section class="status-section">
+                    <div class="status-container">
+                        <div class="status-message" id="statusMessage">
+                            <!-- Status messages will be inserted here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Meeting End Overlay -->
+    <div class="meeting-end-overlay" id="meetingEndOverlay">
+        <div class="end-content">
+            <div class="end-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+            </div>
+            <h2 class="end-title">Meeting Completed!</h2>
+            <p class="end-message">Thank you for participating in this session.</p>
+            <div class="end-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Questions Answered</span>
+                    <span class="stat-value" id="questionsAnswered">3</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Participants</span>
+                    <span class="stat-value" id="totalParticipants">23</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS-NEEDS: WebSocket connection, form handling, question transitions, status updates -->
+    <script src="{% static 'meeting/live_participant.js' %}"></script>
+</body>
+</html> 
