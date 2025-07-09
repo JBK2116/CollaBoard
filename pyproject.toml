@@ -1,0 +1,56 @@
+[project]
+name = "collaboard"
+version = "0.1.0"
+authors = [
+  { name = "Jovani Badinga", email = "jovani.badinga7@gmail.com" }
+]
+
+[tool.ruff]
+# Match Black's style.
+line-length = 88
+indent-width = 4
+# Target Python 3.12
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable pycodestyle (E) and Pyflakes (F) rules.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+# Allow fixing all enabled rules.
+fixable = ["ALL"]
+unfixable = []
+[tool.ruff.format]
+# Use double quotes and spaces (Black style).
+quote-style = "double"
+indent-style = "space"
+# Respect trailing commas and auto line endings.
+skip-magic-trailing-comma = false
+line-ending = "auto"
+# Docstring formatting (off by default).
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.pydocstyle]
+# Enforce Google-style docstrings.
+convention = "google"
+[tool.mypy]
+# Warn when functions return 'Any'.
+warn_return_any = true
+# Warn for unused config options in mypy.ini/pyproject.toml.
+warn_unused_configs = true
+# Enable strict optional typing (None is not allowed unless specified).
+strict_optional = true
+# Don’t raise errors for missing imports (e.g., C extensions).
+ignore_missing_imports = true
+# Disallow use of 'Any' from unimported modules.
+disallow_any_unimported = true
+# Type-check function bodies even if not explicitly typed.
+check_untyped_defs = true
+# Disallow defining functions without type annotations.
+disallow_untyped_defs = true
+# Forces explicit `Optional[...]` for values that can be None.
+no_implicit_optional = true
+# Show error codes in messages.
+show_error_codes = true
+# Warn for ignored `# type: ignore` comments that aren’t needed.
+warn_unused_ignores = true
