@@ -1,0 +1,30 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard</title>
+    <link rel="stylesheet" href="{% static 'navbar.css' %}">
+</head>
+{% django_browser_reload_script %}
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">C</div>
+            <span class="app-name">Collaboard</span>
+        </div>
+        
+        <div class="auth-buttons">
+            <a href="#" class="btn btn-login">Log In</a>
+            <a href="#" class="btn btn-signup">Create Account</a>
+        </div>
+    </nav>
+    
+    <main class="content">
+        <h1>Welcome to Collaboard</h1>
+        <p>Your collaborative meeting space</p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard - Simple Meeting Hosting</title>
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Simple Meetings.<br>
+                <span class="highlight">Powerful Insights.</span>
+            </h1>
+            <p class="hero-description">
+                Host flexible meetings with ease and gather valuable data to improve your team's collaboration. 
+                No complex setup, no learning curve - just effective meetings that work.
+            </p>
+            <div class="hero-actions">
+                <a href="#" class="btn btn-primary">Start Free Meeting</a>
+                <a href="#join" class="btn btn-secondary">Join Meeting</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Join Meeting Section -->
+    <section id="join" class="join-section">
+        <div class="container">
+            <div class="join-content">
+                <h2>Join a Meeting</h2>
+                <p>Enter your 8-digit access code to join an ongoing meeting</p>
+                <form class="join-form" id="joinForm">
+                    <div class="code-input-container">
+                        <input 
+                            type="text"
+                            id="accessCode"
+                            placeholder="12345678"
+                            maxlength="8"
+                            pattern="[0-9]{8}"
+                            class="code-input"
+                            required
+                        >
+                        <button type="submit" class="btn btn-join">Join Meeting</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Collaboard. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
