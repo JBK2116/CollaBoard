@@ -25,7 +25,7 @@
                 No complex setup, no learning curve - just effective meetings that work.
             </p>
             <div class="hero-actions">
-                <a href="#" class="btn btn-primary">Start Free Meeting</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Start Free Meeting</a>
                 <a href="#join" class="btn btn-secondary">Join Meeting</a>
             </div>
         </div>
@@ -37,7 +37,8 @@
             <div class="join-content">
                 <h2>Join a Meeting</h2>
                 <p>Enter your 8-digit access code to join an ongoing meeting</p>
-                <form class="join-form" id="joinForm">
+                <!-- Update the action HREF once the join meeting logic is made -->
+                <form class="join-form" id="joinForm" method="POST", action="#">
                     <div class="code-input-container">
                         <input 
                             type="text"

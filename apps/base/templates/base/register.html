@@ -1,0 +1,83 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard - Create Account</title>
+    <link rel="stylesheet" href="{% static 'base/register.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar.css' %}">
+</head>
+{% django_browser_reload_script %}
+<body>
+    {% include 'navbar.html' %}
+    
+    <main class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1>Create Account</h1>
+                <p>Join Collaboard and start collaborating</p>
+            </div>
+            
+            <form method="POST" class="register-form" action="{% url 'register' %}">
+                {% csrf_token %}
+                
+                <!-- General form errors -->
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ form.first_name.value|default:'' }}" required>
+                        {% if form.first_name.errors %}
+                            <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ form.last_name.value|default:'' }}" required>
+                        {% if form.last_name.errors %}
+                            <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ form.email.value|default:'' }}" required>
+                    {% if form.email.errors %}
+                        <div class="field-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="password1">Password</label>
+                    <input type="password" id="password1" name="password1" required>
+                    {% if form.password1.errors %}
+                        <div class="field-error">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="password2">Confirm Password</label>
+                    <input type="password" id="password2" name="password2" required>
+                    {% if form.password2.errors %}
+                        <div class="field-error">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn-register">Create Account</button>
+                
+                <div class="register-footer">
+                    <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
