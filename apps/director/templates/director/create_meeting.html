@@ -19,7 +19,7 @@
             <p>Set up your collaborative meeting space</p>
         </div>
 
-        <form method="post" class="create-meeting-form" id="createMeetingForm">
+        <form method="POST" class="create-meeting-form" id="createMeetingForm" action="{% url 'create-meeting' %}">
             {% csrf_token %}
             
             <!-- Meeting Details Section -->

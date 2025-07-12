@@ -8,6 +8,7 @@ django = "==5.2.3"
 python-dotenv = "*"
 psycopg2-binary = "*"
 django-browser-reload = "*"
+django-stubs = {extras = ["compatible-mypy"], version = "*"}
 
 [dev-packages]
 

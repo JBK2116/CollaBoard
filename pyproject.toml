@@ -33,7 +33,11 @@ docstring-code-line-length = "dynamic"
 [tool.ruff.lint.pydocstyle]
 # Enforce Google-style docstrings.
 convention = "google"
+
 [tool.mypy]
+mypy_path = "."
+# plugins = ["mypy_django_plugin.main"]
+#External pypi package used to help mypy type check DJANGO tools
 # Warn when functions return 'Any'.
 warn_return_any = true
 # Warn for unused config options in mypy.ini/pyproject.toml.
@@ -54,3 +58,12 @@ no_implicit_optional = true
 show_error_codes = true
 # Warn for ignored `# type: ignore` comments that aren’t needed.
 warn_unused_ignores = true
+
+explicit_package_bases = true
+
+
+[tool.django-stubs]
+django_settings_module = "collaboard.settings"
+
+[tool.mypy_django_plugin]
+django_settings_module = "collaboard.settings"

@@ -20,6 +20,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path("", include("apps.base.urls")),
+    path("director/", include("apps.director.urls")),
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
     # Reload is used in development for live updates to template changes
