@@ -22,10 +22,12 @@ def register_user(request: HttpRequest) -> HttpResponse:
         )
         if isinstance(form_result, HttpResponse):
             return form_result  # User inputted invalid info or an error occurred
-        
+
         # At this point, we know form_result is a UserRegisterForm
         form = form_result
-        if user_exists(form.cleaned_data["email"]):  # Fixed: was using password1 instead of email
+        if user_exists(
+            form.cleaned_data["email"]
+        ):  # Fixed: was using password1 instead of email
             return render(
                 request,
                 template_name="base/register.html",
@@ -57,7 +59,7 @@ def login_user(request: HttpRequest) -> HttpResponse:
         form_result = validate_login_form(request, form=UserLoginForm(request.POST))
         if isinstance(form_result, HttpResponse):
             return form_result  # User inputted invalid info or an error occurred
-        
+
         # At this point, we know form_result is a UserLoginForm
         form = form_result
         user = authenticate(
