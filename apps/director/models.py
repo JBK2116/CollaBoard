@@ -3,7 +3,6 @@ from apps.base.models import CustomUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
-# Create your models here.
 class Meeting(models.Model):
     director = models.ForeignKey(to=CustomUser, null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=40, null=False, blank=False)
@@ -16,12 +15,27 @@ class Meeting(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.title
+
 
 class Question(models.Model):
-    meeting = models.ForeignKey(Meeting, null=False, on_delete=models.CASCADE)
+    meeting = models.ForeignKey(Meeting, null=False, on_delete=models.CASCADE, related_name='questions')
     description = models.CharField(max_length=300, null=False, blank=False)
-    position = models.IntegerField(
-        null=False, help_text="Question's index position in the meeting"
-    )
+    position = models.PositiveIntegerField(null=False, help_text="Question's index position in the meeting")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['meeting', 'position']
+        ordering = ['position']
+
+    def __str__(self):
+        return f"Q{self.position}: {self.description[:50]}..."
+
+    def save(self, *args, **kwargs):
+        # Auto-assign position if not provided
+        if not self.position:
+            last_question = Question.objects.filter(meeting=self.meeting).order_by('-position').first()
+            self.position = (last_question.position + 1) if last_question else 1
+        super().save(*args, **kwargs)

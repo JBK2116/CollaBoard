@@ -1,224 +1,241 @@
-// Create Meeting JavaScript functionality
+// Clean, efficient JavaScript for create meeting form
 document.addEventListener('DOMContentLoaded', function() {
-    const addQuestionBtn = document.getElementById('addQuestionBtn');
-    const questionsContainer = document.getElementById('questionsContainer');
-    const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
+    let questionCount = document.querySelectorAll('.question-item').length;
     
-    let questionCount = 1; // Start with 1 question
+    // Initialize everything
+    setupCharacterCounters();
+    setupValidation();
+    setupQuestionManagement();
     
-    // Initialize character counters
-    initializeCharacterCounters();
-    
-    // Add question functionality
-    addQuestionBtn.addEventListener('click', function() {
-        if (questionCount < 20) { // Maximum 20 questions
-            addNewQuestion();
-        } else {
-            alert('Maximum 20 questions allowed');
-        }
-    });
-    
-    function addNewQuestion() {
-        // Clone the first question item
-        const firstQuestion = questionsContainer.querySelector('.question-item');
-        const newQuestion = firstQuestion.cloneNode(true);
+    // Character counter setup - works for any input/textarea
+    function setupCharacterCounters() {
+        const fields = [
+            { element: '#id_title', counter: '#titleCount', max: 40 },
+            { element: '#id_description', counter: '#descriptionCount', max: 300 }
+        ];
         
-        // Update the question index
-        newQuestion.setAttribute('data-question-index', questionCount);
-        
-        // Update question number
-        const questionNumber = newQuestion.querySelector('.question-number');
-        questionNumber.textContent = `Question ${questionCount + 1}`;
-        
-        // Update form field names and IDs
-        updateFormFields(newQuestion, questionCount);
-        
-        // Clear the textarea value
-        const textarea = newQuestion.querySelector('textarea');
-        textarea.value = '';
-        
-        // Reset character counter
-        const charCounter = newQuestion.querySelector('.char-count');
-        charCounter.textContent = '0/300';
-        
-        // Add remove button if it doesn't exist
-        const questionHeader = newQuestion.querySelector('.question-header');
-        if (!questionHeader.querySelector('.btn-remove-question')) {
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn-remove-question';
-            removeBtn.innerHTML = '<span class="btn-icon">×</span>';
-            removeBtn.onclick = function() { removeQuestion(this); };
-            questionHeader.appendChild(removeBtn);
-        }
-        
-        // Add the new question to the container
-        questionsContainer.appendChild(newQuestion);
-        
-        // Update question count and total forms
-        questionCount++;
-        totalFormsInput.value = questionCount;
-        
-        // Update position values
-        updatePositions();
-        
-        // Initialize character counter for the new question
-        initializeCharacterCounter(textarea);
-    }
-    
-    function updateFormFields(questionElement, index) {
-        const textarea = questionElement.querySelector('textarea');
-        const positionInput = questionElement.querySelector('input[type="hidden"]');
-        
-        // Update textarea
-        textarea.name = `form-${index}-description`;
-        textarea.id = `id_form-${index}-description`;
-        
-        // Update position input
-        if (positionInput) {
-            positionInput.name = `form-${index}-position`;
-            positionInput.id = `id_form-${index}-position`;
-            positionInput.value = index + 1;
-        }
-    }
-    
-    function updatePositions() {
-        const questions = questionsContainer.querySelectorAll('.question-item');
-        questions.forEach((question, index) => {
-            const positionInput = question.querySelector('input[type="hidden"]');
-            if (positionInput) {
-                positionInput.value = index + 1;
+        fields.forEach(field => {
+            const element = document.querySelector(field.element);
+            const counter = document.querySelector(field.counter);
+            if (element && counter) {
+                setupCounter(element, counter, field.max);
             }
-            
-            // Update question number display
-            const questionNumber = question.querySelector('.question-number');
-            questionNumber.textContent = `Question ${index + 1}`;
-            
-            // Update form field names
-            updateFormFields(question, index);
         });
+        
+        // Setup counters for existing questions
+        document.querySelectorAll('.question-input').forEach(setupQuestionCounter);
     }
     
-    function initializeCharacterCounters() {
-        // Initialize counters for meeting form fields
-        const titleInput = document.getElementById('id_title');
-        const descriptionTextarea = document.getElementById('id_description');
-        const durationInput = document.getElementById('id_duration');
+    function setupCounter(element, counter, maxLength) {
+        const updateCounter = () => {
+            const length = element.value.length;
+            counter.textContent = `${length}/${maxLength}`;
+            
+            // Update counter color based on usage
+            counter.className = 'char-count';
+            if (length > maxLength * 0.9) counter.classList.add('danger');
+            else if (length > maxLength * 0.8) counter.classList.add('warning');
+        };
         
-        if (titleInput) {
-            initializeCharacterCounter(titleInput, 'titleCount', 40);
-        }
-        
-        if (descriptionTextarea) {
-            initializeCharacterCounter(descriptionTextarea, 'descriptionCount', 300);
-        }
-        
-        // Initialize counters for existing question textareas
-        const questionTextareas = document.querySelectorAll('.question-item textarea');
-        questionTextareas.forEach(textarea => {
-            initializeCharacterCounter(textarea);
-        });
+        element.addEventListener('input', updateCounter);
+        updateCounter(); // Initialize
     }
     
-    function initializeCharacterCounter(element, counterId = null, maxLength = 300) {
-        const counter = counterId ? 
-            document.getElementById(counterId) : 
-            element.closest('.form-group').querySelector('.char-count');
-        
+    function setupQuestionCounter(textarea) {
+        const counter = textarea.closest('.form-group').querySelector('.char-count');
         if (counter) {
-            // Update counter on input
-            element.addEventListener('input', function() {
-                const currentLength = this.value.length;
-                counter.textContent = `${currentLength}/${maxLength}`;
-                
-                // Add warning color if approaching limit
-                if (currentLength > maxLength * 0.9) {
-                    counter.style.color = '#e53e3e';
-                } else if (currentLength > maxLength * 0.8) {
-                    counter.style.color = '#ed8936';
-                } else {
-                    counter.style.color = '#a0aec0';
-                }
-            });
-            
-            // Initialize counter
-            const currentLength = element.value.length;
-            counter.textContent = `${currentLength}/${maxLength}`;
+            setupCounter(textarea, counter, 300);
         }
     }
     
-    // Form validation
+    // Real-time validation
+    function setupValidation() {
+        const fields = [
+            { element: '#id_title', error: '#titleError', validator: validateTitle },
+            { element: '#id_description', error: '#descriptionError', validator: validateDescription },
+            { element: '#id_duration', error: '#durationError', validator: validateDuration }
+        ];
+        
+        fields.forEach(field => {
+            const element = document.querySelector(field.element);
+            const errorDiv = document.querySelector(field.error);
+            
+            if (element && errorDiv) {
+                element.addEventListener('blur', () => {
+                    const error = field.validator(element.value);
+                    showError(element, errorDiv, error);
+                });
+                
+                element.addEventListener('input', () => {
+                    if (element.classList.contains('error')) {
+                        const error = field.validator(element.value);
+                        if (!error) clearError(element, errorDiv);
+                    }
+                });
+            }
+        });
+    }
+    
+    // Validation functions
+    function validateTitle(value) {
+        if (!value.trim()) return 'Meeting title is required';
+        if (value.length > 40) return 'Title must be 40 characters or less';
+        return null;
+    }
+    
+    function validateDescription(value) {
+        if (!value.trim()) return 'Meeting description is required';
+        if (value.length > 300) return 'Description must be 300 characters or less';
+        return null;
+    }
+    
+    function validateDuration(value) {
+        const num = parseInt(value);
+        if (!num || num < 1 || num > 60) return 'Duration must be between 1 and 60 minutes';
+        return null;
+    }
+    
+    function validateQuestion(value) {
+        if (!value.trim()) return 'Question is required';
+        if (value.length > 300) return 'Question must be 300 characters or less';
+        return null;
+    }
+    
+    function showError(element, errorDiv, message) {
+        if (message) {
+            element.classList.add('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        } else {
+            clearError(element, errorDiv);
+        }
+    }
+    
+    function clearError(element, errorDiv) {
+        element.classList.remove('error');
+        errorDiv.style.display = 'none';
+    }
+    
+    // Question management
+    function setupQuestionManagement() {
+        document.getElementById('addQuestionBtn').addEventListener('click', addQuestion);
+    }
+    
+    function addQuestion() {
+        if (questionCount >= 20) {
+            alert('Maximum 20 questions allowed');
+            return;
+        }
+        
+        const template = document.getElementById('questionTemplate');
+        const clone = template.content.cloneNode(true);
+        const questionItem = clone.querySelector('.question-item');
+        
+        // Set up the new question
+        questionItem.setAttribute('data-form-index', questionCount);
+        questionItem.querySelector('.question-number').textContent = `Question ${questionCount + 1}`;
+        
+        // Set up form field
+        const textarea = questionItem.querySelector('textarea');
+        textarea.name = `form-${questionCount}-description`;
+        textarea.id = `id_form-${questionCount}-description`;
+        
+        // Add to container
+        document.getElementById('questionsContainer').appendChild(questionItem);
+        
+        // Update management form
+        document.getElementById('id_form-TOTAL_FORMS').value = questionCount + 1;
+        questionCount++;
+        
+        // Setup counter for new question
+        setupQuestionCounter(textarea);
+        
+        // Setup validation for new question
+        const errorDiv = questionItem.querySelector('.error-message');
+        textarea.addEventListener('blur', () => {
+            const error = validateQuestion(textarea.value);
+            showError(textarea, errorDiv, error);
+        });
+        
+        textarea.addEventListener('input', () => {
+            if (textarea.classList.contains('error')) {
+                const error = validateQuestion(textarea.value);
+                if (!error) clearError(textarea, errorDiv);
+            }
+        });
+        
+        // Focus the new question
+        textarea.focus();
+    }
+    
+    // Form submission validation
     document.getElementById('createMeetingForm').addEventListener('submit', function(e) {
         let isValid = true;
         const errors = [];
         
-        // Validate meeting title
-        const titleInput = document.getElementById('id_title');
-        if (!titleInput.value.trim()) {
-            errors.push('Meeting title is required');
-            titleInput.classList.add('error');
+        // Validate meeting fields
+        const titleError = validateTitle(document.getElementById('id_title').value);
+        const descriptionError = validateDescription(document.getElementById('id_description').value);
+        const durationError = validateDuration(document.getElementById('id_duration').value);
+        
+        if (titleError) {
+            showError(document.getElementById('id_title'), document.getElementById('titleError'), titleError);
             isValid = false;
-        } else {
-            titleInput.classList.remove('error');
         }
         
-        // Validate meeting description
-        const descriptionTextarea = document.getElementById('id_description');
-        if (!descriptionTextarea.value.trim()) {
-            errors.push('Meeting description is required');
-            descriptionTextarea.classList.add('error');
+        if (descriptionError) {
+            showError(document.getElementById('id_description'), document.getElementById('descriptionError'), descriptionError);
             isValid = false;
-        } else {
-            descriptionTextarea.classList.remove('error');
         }
         
-        // Validate duration
-        const durationInput = document.getElementById('id_duration');
-        const duration = parseInt(durationInput.value);
-        if (!duration || duration < 1 || duration > 60) {
-            errors.push('Duration must be between 1 and 60 minutes');
-            durationInput.classList.add('error');
+        if (durationError) {
+            showError(document.getElementById('id_duration'), document.getElementById('durationError'), durationError);
             isValid = false;
-        } else {
-            durationInput.classList.remove('error');
         }
         
         // Validate questions
-        const questionTextareas = document.querySelectorAll('.question-item textarea');
+        const questionTextareas = document.querySelectorAll('.question-input');
         let hasValidQuestion = false;
         
         questionTextareas.forEach(textarea => {
-            if (textarea.value.trim()) {
+            const error = validateQuestion(textarea.value);
+            const errorDiv = textarea.closest('.form-group').querySelector('.error-message');
+            
+            if (error) {
+                showError(textarea, errorDiv, error);
+                isValid = false;
+            } else {
                 hasValidQuestion = true;
-                textarea.classList.remove('error');
+                clearError(textarea, errorDiv);
             }
         });
         
         if (!hasValidQuestion) {
-            errors.push('At least one question is required');
-            questionTextareas.forEach(textarea => {
-                if (!textarea.value.trim()) {
-                    textarea.classList.add('error');
-                }
-            });
             isValid = false;
+            errors.push('At least one question is required');
         }
         
         if (!isValid) {
             e.preventDefault();
-            alert('Please fix the following errors:\n' + errors.join('\n'));
+            if (errors.length > 0) {
+                alert(errors.join('\n'));
+            }
+        } else {
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Meeting...';
         }
     });
 });
 
-// Global function for removing questions (called from HTML)
+// Global function for removing questions
 function removeQuestion(button) {
     const questionItem = button.closest('.question-item');
     const questionsContainer = document.getElementById('questionsContainer');
-    const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
-    
-    // Don't remove if it's the only question
     const questionItems = questionsContainer.querySelectorAll('.question-item');
+    
+    // Don't allow removing the last question
     if (questionItems.length <= 1) {
         alert('At least one question is required');
         return;
@@ -227,47 +244,27 @@ function removeQuestion(button) {
     // Remove the question
     questionItem.remove();
     
-    // Update question count
-    const remainingQuestions = questionsContainer.querySelectorAll('.question-item');
-    totalFormsInput.value = remainingQuestions.length;
+    // Update form count
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+    totalForms.value = parseInt(totalForms.value) - 1;
     
-    // Update positions and form field names
-    updatePositions();
-    
-    // Hide remove button on first question if only one remains
-    if (remainingQuestions.length === 1) {
-        const removeBtn = remainingQuestions[0].querySelector('.btn-remove-question');
-        if (removeBtn) {
-            removeBtn.remove();
-        }
-    }
+    // Renumber remaining questions
+    renumberQuestions();
 }
 
-function updatePositions() {
-    const questionsContainer = document.getElementById('questionsContainer');
-    const questions = questionsContainer.querySelectorAll('.question-item');
+function renumberQuestions() {
+    const questions = document.querySelectorAll('.question-item');
     
     questions.forEach((question, index) => {
-        // Update question index attribute
-        question.setAttribute('data-question-index', index);
+        // Update visual numbering
+        question.querySelector('.question-number').textContent = `Question ${index + 1}`;
         
-        // Update question number display
-        const questionNumber = question.querySelector('.question-number');
-        questionNumber.textContent = `Question ${index + 1}`;
-        
-        // Update form field names and IDs
+        // Update form field names
         const textarea = question.querySelector('textarea');
-        const positionInput = question.querySelector('input[type="hidden"]');
+        textarea.name = `form-${index}-description`;
+        textarea.id = `id_form-${index}-description`;
         
-        if (textarea) {
-            textarea.name = `form-${index}-description`;
-            textarea.id = `id_form-${index}-description`;
-        }
-        
-        if (positionInput) {
-            positionInput.name = `form-${index}-position`;
-            positionInput.id = `id_form-${index}-position`;
-            positionInput.value = index + 1;
-        }
+        // Update data attribute
+        question.setAttribute('data-form-index', index);
     });
 }
