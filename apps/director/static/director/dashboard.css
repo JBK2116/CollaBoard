@@ -1,0 +1,330 @@
+/* Dashboard Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f8fafc;
+    padding-top: 80px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Main Dashboard Layout */
+.dashboard-main {
+    padding: 40px 0;
+}
+
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.welcome-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.welcome-title {
+    font-size: clamp(2.5rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.welcome-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+    color: #718096;
+    line-height: 1.6;
+}
+
+/* Action Cards Section */
+.action-section {
+    margin-bottom: 60px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.primary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.primary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+}
+
+.secondary-card {
+    background: white;
+    color: #2d3748;
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.secondary-card .card-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.primary-card .card-icon {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.card-title {
+    font-size: clamp(1.4rem, 2.5vw, 1.6rem);
+    font-weight: 600;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.card-description {
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+.secondary-card .card-description {
+    color: #718096;
+    opacity: 1;
+}
+
+.btn {
+    display: inline-block;
+    padding: 16px 32px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    position: relative;
+    z-index: 1;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-card-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-card-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-card-secondary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.btn-card-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Stats Section */
+.stats-section {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.stats-title {
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+}
+
+.tips-list li {
+    padding: 12px 0;
+    color: #718096;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    line-height: 1.6;
+    position: relative;
+    padding-left: 24px;
+}
+
+.tips-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    .dashboard-main {
+        padding: 30px 0;
+    }
+    
+    .welcome-section {
+        margin-bottom: 40px;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        max-width: 100%;
+    }
+    
+    .action-card {
+        padding: 30px 20px;
+    }
+    
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 20px;
+    }
+    
+    .card-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .action-section {
+        margin-bottom: 40px;
+    }
+    
+    .stats-card {
+        padding: 24px;
+        margin: 0 16px;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-main {
+        padding: 20px 0;
+    }
+    
+    .welcome-section {
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        padding: 24px 16px;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 16px;
+    }
+    
+    .card-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .btn {
+        padding: 14px 24px;
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .action-section {
+        margin-bottom: 30px;
+    }
+}
+
+/* Large screens optimization */
+@media (min-width: 1400px) {
+    .welcome-title {
+        font-size: 3.5rem;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.4rem;
+    }
+    
+    .action-grid {
+        max-width: 900px;
+    }
+    
+    .action-card {
+        padding: 50px 40px;
+    }
+}
