@@ -35,6 +35,8 @@
                     <input type="email" id="email" name="email" value="{{ form.email.value|default:'' }}" required>
                     {% if form.email.errors %}
                         <div class="field-error">{{ form.email.errors.0 }}</div>
+                    {% elif invalid_error %}
+                        <div class="field-error">{{ invalid_error }}</div>
                     {% endif %}
                 </div>
                 

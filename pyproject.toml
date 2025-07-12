@@ -36,7 +36,7 @@ convention = "google"
 
 [tool.mypy]
 mypy_path = "."
-# plugins = ["mypy_django_plugin.main"]
+plugins = ["mypy_django_plugin.main"]
 #External pypi package used to help mypy type check DJANGO tools
 # Warn when functions return 'Any'.
 warn_return_any = true
