@@ -33,6 +33,9 @@ ALLOWED_HOSTS: list[str] = []
 
 
 # Application definition
+LOGIN_URL = "login"
+LOGOUT_REDIRECT_URL = "landing"
+
 collaboard_apps: list[str] = [
     "apps.base",
     "apps.director",

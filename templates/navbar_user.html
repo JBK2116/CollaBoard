@@ -17,7 +17,10 @@
         </a>
         
         <div class="auth-buttons">
-            <a href="#" class="btn btn-login">Logout</a>
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-login">Logout</button>
+            </form>
             <a href="#" class="btn btn-signup">My Account</a>
         </div>
     </nav>
