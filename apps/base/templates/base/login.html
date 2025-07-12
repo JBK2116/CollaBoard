@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Collaboard - Log In</title>
     <link rel="stylesheet" href="{% static 'base/login.css' %}">
-    <link rel="stylesheet" href="{% static 'navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar_guest.css' %}">
 </head>
 {% django_browser_reload_script %}
 <body>
-    {% include 'navbar.html' %}
+    {% include 'navbar_guest.html' %}
     
     <main class="login-container">
         <div class="login-card">
@@ -56,7 +56,7 @@
                     <a href="#" class="forgot-password">Forgot password?</a>
                 </div>
                 
-                <button type="submit" class="btn-login">Sign In</button>
+                <button type="submit" class="form-btn-login">Sign In</button>
                 
                 <div class="login-footer">
                     <p>Don't have an account? <a href="{% url 'register' %}">Create one</a></p>

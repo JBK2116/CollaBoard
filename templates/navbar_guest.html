@@ -1,0 +1,25 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard</title>
+    <link rel="stylesheet" href="{% static 'navbar_guest.css' %}">
+</head>
+{% django_browser_reload_script %}
+<body>
+    <nav class="navbar">
+        <a href="{% url 'landing' %}" class="logo-container" style="text-decoration: none;">
+            <div class="logo">C</div>
+            <span class="app-name">Collaboard</span>
+        </a>
+        
+        <div class="auth-buttons">
+            <a href="{% url 'login' %}" class="btn btn-login">Log In</a>
+            <a href="{% url 'register' %}" class="btn btn-signup">Create Account</a>
+        </div>
+    </nav>
+</body>
+</html>

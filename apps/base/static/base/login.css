@@ -124,7 +124,7 @@
     text-decoration: underline;
 }
 
-.btn-login {
+.form-btn-login {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 14px 24px;
@@ -137,12 +137,12 @@
     margin-top: 8px;
 }
 
-.btn-login:hover {
+.form-btn-login:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
 }
 
-.btn-login:active {
+.form-btn-login:active {
     transform: translateY(0);
 }
 

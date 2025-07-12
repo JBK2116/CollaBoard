@@ -252,6 +252,57 @@
     }
 }
 
+@media (max-width: 400px) {
+    .hero {
+        padding: 40px 0 20px;
+        min-height: 50vh;
+    }
+    .hero-title {
+        font-size: 2rem;
+    }
+    .hero-description {
+        font-size: 1rem;
+    }
+    .hero-content {
+        padding: 0 8px;
+    }
+    .join-section {
+        padding: 24px 0;
+    }
+    .join-form {
+        margin: 0 4px;
+        padding: 16px 4px;
+    }
+    .footer {
+        padding: 16px 0;
+    }
+}
+
+/* Ensure main content is not hidden behind navbar on all screens */
+body {
+    padding-top: 80px;
+}
+@media (max-width: 768px) {
+    body {
+        padding-top: 70px;
+    }
+}
+@media (max-width: 480px) {
+    body {
+        padding-top: 60px;
+    }
+}
+
+/* Add spacing between sections for clarity on mobile */
+@media (max-width: 600px) {
+    .hero {
+        margin-bottom: 24px;
+    }
+    .join-section {
+        margin-bottom: 24px;
+    }
+}
+
 /* Large screens optimization */
 @media (min-width: 1400px) {
     .hero-content {

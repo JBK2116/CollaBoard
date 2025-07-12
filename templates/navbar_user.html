@@ -6,25 +6,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Collaboard</title>
-    <link rel="stylesheet" href="{% static 'navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar_user.css' %}">
 </head>
 {% django_browser_reload_script %}
 <body>
     <nav class="navbar">
-        <div class="logo-container">
+        <a href="#" class="logo-container" style="text-decoration: none;">
             <div class="logo">C</div>
             <span class="app-name">Collaboard</span>
-        </div>
+        </a>
         
         <div class="auth-buttons">
-            <a href="{% url 'login' %}" class="btn btn-login">Log In</a>
-            <a href="{% url 'register' %}" class="btn btn-signup">Create Account</a>
+            <a href="#" class="btn btn-login">Logout</a>
+            <a href="#" class="btn btn-signup">My Account</a>
         </div>
     </nav>
-    
-    <main class="content">
-        <h1>Welcome to Collaboard</h1>
-        <p>Your collaborative meeting space</p>
-    </main>
 </body>
-</html>
+</html> 
