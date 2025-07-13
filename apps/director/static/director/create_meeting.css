@@ -325,3 +325,62 @@ input[type="hidden"] {
     margin-top: 4px;
     display: block;
 }
+
+.user-response-cards {
+    position: fixed;
+    top: 90px;
+    right: 32px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.user-response-card {
+    min-width: 260px;
+    max-width: 340px;
+    padding: 16px 24px;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    animation: fadeIn 0.5s;
+}
+
+.success-card {
+    border-color: #38a169;
+    background: linear-gradient(90deg, #e6fffa 0%, #c6f6d5 100%);
+    color: #276749;
+}
+
+.error-card {
+    border-color: #e53e3e;
+    background: linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%);
+    color: #9b2c2c;
+}
+
+.user-response-card .icon {
+    font-size: 1.3em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .user-response-cards {
+        top: 75px;
+        right: 12px;
+    }
+    .user-response-card {
+        min-width: 180px;
+        max-width: 90vw;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+}

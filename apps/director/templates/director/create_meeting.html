@@ -80,6 +80,22 @@
 <body>
     {% include 'navbar_user.html' %}
 
+    <!-- User Response Cards (show/hide via logic or URL param) -->
+    <div class="user-response-cards">
+        {% if request.GET.just_created %}
+        <div class="user-response-card success-card" onclick="this.style.display='none'">
+            <span class="icon">✔</span>
+            Meeting successfully created
+        </div>
+        {% endif %}
+        {% if request.GET.creation_error %}
+        <div class="user-response-card error-card" onclick="this.style.display='none'">
+            <span class="icon">✖</span>
+            Error occurred creating meeting
+        </div>
+        {% endif %}
+    </div>
+
     <main class="create-meeting-container">
         <div class="form-header">
             <h1>Create New Meeting</h1>

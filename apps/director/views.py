@@ -1,34 +1,77 @@
-from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
-from apps.director.forms import CreateMeetingForm, QuestionFormSet
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from typing import cast
 
+from apps.director.forms import CreateMeetingForm, QuestionFormSet
+from apps.director.models import Meeting, Question
+from apps.base.models import CustomUser
 
 # Create your views here.
 
+
 @login_required
 def create_meeting(request: HttpRequest) -> HttpResponse:
-    context = {}
     if request.method == "POST":
         # More handling will be done later
         meeting_form = CreateMeetingForm(request.POST)
-        question_forms = QuestionFormSet(request.POST)
-        print(meeting_form)
-        print(question_forms)
-        return redirect("create-meeting")
+        question_formset = QuestionFormSet(request.POST)
+        if not meeting_form.is_valid() or not question_formset.is_valid():
+            return render(
+                request,
+                template_name="director/create_meeting.html",
+                context={
+                    "meeting_form": meeting_form,
+                    "question_formset": question_formset,
+                },
+            )
+        user = cast(CustomUser, request.user)
+        try:
+            meeting = Meeting(
+                director=user,
+                title=meeting_form.cleaned_data["title"],
+                description=meeting_form.cleaned_data["description"],
+                duration=int(meeting_form.cleaned_data["duration"]),
+            )
+            meeting.save()
+        except (IntegrityError, ValidationError):
+            return redirect(f"{reverse(viewname='create-meeting')}?creation_error=true")
+
+        try:
+            with transaction.atomic():
+                for index, question in enumerate(question_formset, start=1):
+                    new_question = Question(
+                        meeting=meeting,
+                        description=question.cleaned_data["description"],
+                        position=index,
+                    )
+                    new_question.save()
+        except (IntegrityError, ValidationError):
+            return redirect(f"{reverse(viewname='create-meeting')}?creation_error=true")
+
+        return redirect(to=f"{reverse('create-meeting')}?just_created=true")
     else:
         # Simple get request
         meeting_form = CreateMeetingForm()
         question_formset = QuestionFormSet()
-        context.update({"meeting_form": meeting_form, "question_formset": question_formset})
-        return render(request, template_name="director/create_meeting.html", context=context)
+        return render(
+            request,
+            template_name="director/create_meeting.html",
+            context={
+                "meeting_form": meeting_form,
+                "question_formset": question_formset,
+            },
+        )
+
+
 @login_required
 def dashboard(request: HttpRequest) -> HttpResponse:
-    context = {}
-    return render(request, template_name="director/dashboard.html", context=context)
+    return render(request, template_name="director/dashboard.html", context={})
+
 
 @login_required
 def account(request: HttpRequest) -> HttpResponse:
-    context = {}
-    return render(request, template_name="director/account.html", context=context)
-    
+    return render(request, template_name="director/account.html", context={})
