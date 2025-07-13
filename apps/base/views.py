@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login
-from apps.base.forms import UserRegisterForm, UserLoginForm
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+
+from apps.base.forms import UserLoginForm, UserRegisterForm
 from apps.base.models import CustomUser
 
 # Create your views here.

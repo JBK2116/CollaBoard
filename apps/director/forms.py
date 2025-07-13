@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import modelformset_factory
+
 from apps.director.models import Meeting, Question
 
 
@@ -27,14 +28,14 @@ class CreateMeetingForm(forms.ModelForm):
             })
         }
 
-    def clean_title(self):
-        title = self.cleaned_data.get('title')
+    def clean_title(self) -> str:
+        title: str | None = self.cleaned_data.get('title')
         if not title or not title.strip():
             raise forms.ValidationError("Meeting title is required")
         return title.strip()
 
-    def clean_description(self):
-        description = self.cleaned_data.get('description')
+    def clean_description(self) -> str:
+        description: str | None = self.cleaned_data.get('description')
         if not description or not description.strip():
             raise forms.ValidationError("Meeting description is required")
         return description.strip()
@@ -53,8 +54,8 @@ class QuestionForm(forms.ModelForm):
             })
         }
 
-    def clean_description(self):
-        description = self.cleaned_data.get('description')
+    def clean_description(self) -> str:
+        description: str | None = self.cleaned_data.get('description')
         if not description or not description.strip():
             raise forms.ValidationError("Question description is required")
         return description.strip()

@@ -1,6 +1,7 @@
-from django.urls import path
-from apps.base import views
 from django.contrib.auth.views import LogoutView
+from django.urls import path
+
+from apps.base import views
 
 urlpatterns = [
     path("", views.landing_page, name="landing"),

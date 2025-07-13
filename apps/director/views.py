@@ -1,14 +1,15 @@
+from typing import cast
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from typing import cast
 
+from apps.base.models import CustomUser
 from apps.director.forms import CreateMeetingForm, QuestionFormSet
 from apps.director.models import Meeting, Question
-from apps.base.models import CustomUser
 
 # Create your views here.
 

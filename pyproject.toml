@@ -14,7 +14,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 # Enable pycodestyle (E) and Pyflakes (F) rules.
-select = ["E4", "E7", "E9", "F"]
+select = ["E4", "E7", "E9", "F", "I"]
 ignore = []
 # Allow fixing all enabled rules.
 fixable = ["ALL"]

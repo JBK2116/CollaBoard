@@ -3,3 +3,4 @@
 
 #Cache Files
 .ruff_cache
+.mypy_cache

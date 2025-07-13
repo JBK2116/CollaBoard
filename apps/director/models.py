@@ -1,6 +1,9 @@
-from django.db import models
-from apps.base.models import CustomUser
+from typing import Any
+
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from apps.base.models import CustomUser
 
 
 class Meeting(models.Model):
@@ -15,7 +18,7 @@ class Meeting(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
 
@@ -30,10 +33,10 @@ class Question(models.Model):
         unique_together = ['meeting', 'position']
         ordering = ['position']
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Q{self.position}: {self.description[:50]}..."
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         # Auto-assign position if not provided
         if not self.position:
             last_question = Question.objects.filter(meeting=self.meeting).order_by('-position').first()

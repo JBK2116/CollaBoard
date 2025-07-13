@@ -1,5 +1,6 @@
-from django import forms
 from typing import Any
+
+from django import forms
 
 
 # Forms used in the frontend for user authentication

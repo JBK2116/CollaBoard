@@ -1,6 +1,7 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
 from typing import Any, Optional
+
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 
 
 class CustomUserManager(BaseUserManager["CustomUser"]):
