@@ -45,6 +45,7 @@ additional_dev_apps: list[str] = [
     "django_browser_reload",
 ]
 INSTALLED_APPS = [
+    "daphne", # IMPORTANT: used for channels
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -86,6 +87,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "collaboard.wsgi.application"
+ASGI_APPLICATION = "collaboard.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # Database
