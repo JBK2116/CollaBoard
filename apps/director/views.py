@@ -1,3 +1,4 @@
+from secrets import randbelow
 from typing import cast
 
 from django.contrib.auth.decorators import login_required
@@ -33,6 +34,7 @@ def create_meeting(request: HttpRequest) -> HttpResponse:
         try:
             meeting = Meeting(
                 director=user,
+                access_code=generate_access_code(),
                 title=meeting_form.cleaned_data["title"],
                 description=meeting_form.cleaned_data["description"],
                 duration=int(meeting_form.cleaned_data["duration"]),
@@ -76,3 +78,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 @login_required
 def account(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="director/account.html", context={})
+
+
+def generate_access_code() -> str:
+    return "".join(str(randbelow(10)) for _ in range(8))
