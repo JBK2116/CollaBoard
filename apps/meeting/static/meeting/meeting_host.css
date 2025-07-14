@@ -1,0 +1,106 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+.meeting-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.control-panel {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.question-display {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.participants-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+button:hover {
+    background-color: #0056b3;
+}
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.start-button {
+    background-color: #28a745;
+}
+.start-button:hover {
+    background-color: #218838;
+}
+.end-button {
+    background-color: #dc3545;
+}
+.end-button:hover {
+    background-color: #c82333;
+}
+.status {
+    color: #666;
+    font-style: italic;
+}
+.meeting-detail {
+    margin: 5px 0;
+}
+.participant-count {
+    font-size: 18px;
+    color: #007bff;
+}
+.question-counter {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+.current-question {
+    font-size: 16px;
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+.access-code {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+    background-color: #e7f3ff;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    letter-spacing: 2px;
+    margin: 10px 0;
+}
+.host-name {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin: 10px 0;
+}
+.code-section {
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    background-color: #f8f9fa;
+}

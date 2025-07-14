@@ -38,12 +38,14 @@
                 <h2>Join a Meeting</h2>
                 <p>Enter your 8-digit access code to join an ongoing meeting</p>
                 <!-- Update the action HREF once the join meeting logic is made -->
-                <form class="join-form" id="joinForm" method="POST", action="#">
+                <form class="join-form" id="joinForm" method="POST" action="#">
+                    {% csrf_token %}
                     <div class="code-input-container">
                         <input 
                             type="text"
                             id="accessCode"
                             placeholder="12345678"
+                            name="accessCode"
                             maxlength="8"
                             pattern="[0-9]{8}"
                             class="code-input"
@@ -64,5 +66,15 @@
             </div>
         </div>
     </footer>
+<script>
+    document.getElementById("joinForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const code = document.getElementById("accessCode").value;
+        if (code.length === 8) {
+            this.action = `/meeting/${code}/participant/`;
+            this.submit();
+        }
+    });
+</script>
 </body>
 </html>

@@ -55,7 +55,9 @@ def create_meeting(request: HttpRequest) -> HttpResponse:
         except (IntegrityError, ValidationError):
             return redirect(f"{reverse(viewname='create-meeting')}?creation_error=true")
 
-        return redirect(to=f"{reverse('create-meeting')}?just_created=true")
+        return redirect(
+            to=f"{reverse('host-meeting', kwargs={'meeting_id': str(meeting.id)})}"
+        )
     else:
         # Simple get request
         meeting_form = CreateMeetingForm()

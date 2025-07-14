@@ -1,0 +1,36 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'meeting/meeting_participant.css' %}">
+    <title>Meeting - Participant</title>
+</head>
+{% django_browser_reload_script %}
+<body>
+    <div class="meeting-info">
+        <h1>{{ meeting.title }}</h1>
+        <div class="host-name">👨‍💼 Host: {{ meeting.director.first_name }}</div>
+        <div class="meeting-detail"><strong>Description:</strong> {{ meeting.description|truncatechars:50 }}</div>
+        <div class="meeting-detail"><strong>Date:</strong> {{ meeting.created_at|date:"F j Y" }}</div>
+        <div class="meeting-detail"><strong>Duration:</strong> <span id="duration">{{meeting.duration}}</span> minutes</div>
+        <div class="meeting-detail"><strong>Total Questions:</strong> {{ meeting.questions.count }}</div>
+        <div class="status" id="meeting-status">Waiting for meeting to start...</div>
+    </div>
+
+    <div class="question-section">
+        <h2>Current Question</h2>
+        <p id="current-question">Question: Waiting for host to start the meeting...</p>
+    </div>
+
+    <div class="question-form">
+        <form id="answer-form">
+            <input type="text" id="answer-input" placeholder="Enter your answer here..." disabled>
+            <button type="submit" id="submit-btn" disabled>Submit Answer</button>
+        </form>
+    </div>
+    <script src="{% static 'meeting/meeting_participant.js' %}"></script>
+</body>
+</html>

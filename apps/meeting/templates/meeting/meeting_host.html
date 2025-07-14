@@ -1,0 +1,63 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'meeting/meeting_host.css' %}">
+    <title>Meeting - Host Control</title>
+</head>
+{% django_browser_reload_script %}
+<body>
+    <div class="meeting-info">
+        <h1>{{ meeting.title }} - Host Control</h1>
+        <div class="host-name">🎯 Host: {{ meeting.director.first_name }}</div>
+        <div class="meeting-detail"><strong>Description:</strong> {{ meeting.description|truncatechars:50 }}</div>
+        <div class="meeting-detail"><strong>Date:</strong> {{ meeting.created_at|date:"F j Y" }}</div>
+        <div class="meeting-detail"><strong>Duration:</strong> <span id="duration">{{meeting.duration}}</span> minutes</div>
+        <div class="meeting-detail"><strong>Meeting Code:</strong> {{ meeting.access_code }}</div>
+        
+        <div class="code-section">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <strong>🔐 Access Code for Participants</strong>
+            </div>
+            <div class="access-code" id="access-code">{{ meeting.access_code }}</div>
+            <div style="text-align: center; color: #666; font-size: 14px;">
+                Share this code with participants to join the meeting
+            </div>
+        </div>
+        
+        <div class="status" id="meeting-status">Meeting not started</div>
+    </div>
+
+    <div class="control-panel">
+        <h2>Meeting Controls</h2>
+        <button id="start-btn" class="start-button">Start Meeting</button>
+        <button id="next-btn" disabled>Next Question</button>
+        <button id="end-btn" class="end-button" disabled>End Meeting</button>
+        
+        <div class="participant-count">
+            <strong>Participants: <span id="participant-count">0</span></strong>
+        </div>
+    </div>
+
+    <div class="question-display">
+        <h2>Current Question</h2>
+        <div class="question-counter">
+            Question <span id="current-question-num">0</span> / <span id="total-questions">{{ meeting.questions.count }}</span>
+        </div>
+        <div class="current-question" id="question-content">
+            <strong>Question:</strong> <span id="question-text">Meeting not started</span>
+        </div>
+    </div>
+
+    <div class="participants-section">
+        <h2>Participant Status</h2>
+        <div id="participants-list">
+            <p class="status">No participants yet</p>
+        </div>
+    </div>
+    <script src="{% static 'meeting/meeting_host.js' %}"></script>
+</body>
+</html>
