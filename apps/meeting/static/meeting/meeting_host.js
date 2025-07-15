@@ -46,11 +46,13 @@ ws.onmessage = function(event) {
     
     // Message handling
     if (data.type === 'questions') {
-        // Just testing to see if it's received
+        // This will be the first payload received after the first connection
         for (const question of data.questions) {
             questions.push(question)
             console.log(question)
         }
+        accessCode = data.access_code
+        console.log(accessCode)
     }
     if (data.type === 'participant_joined') {
         participants.push(data.participant);
@@ -145,7 +147,7 @@ function updateParticipantsList() {
         listElement.innerHTML = '<p class="status">No participants yet</p>';
     } else {
         listElement.innerHTML = participants.map(p => 
-            `<p>Participant ${p.id} - <span class="status">${p.status || 'Waiting'}</span></p>`
+            `<p>Participant ${p.name} - <span class="status">${p.status || 'Waiting'}</span></p>`
         ).join('');
     }
 }
