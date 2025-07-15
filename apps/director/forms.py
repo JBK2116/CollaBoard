@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import modelformset_factory
+from django.forms import formset_factory
 
 from apps.director.models import Meeting, Question
 
@@ -62,10 +62,8 @@ class QuestionForm(forms.ModelForm):
 
 
 # Create formset with better configuration
-QuestionFormSet = modelformset_factory(
-    model=Question,
+QuestionFormSet = formset_factory(
     form=QuestionForm,
-    fields=["description"],
     extra=1,
     can_delete=True,
     min_num=1,

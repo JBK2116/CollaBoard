@@ -1,6 +1,9 @@
 // WebSocket connection placeholder
-const meetingID = None // Parse this from the url
-const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meetingID}/`);
+const pathParts = window.location.pathname.split('/');
+// pathParts = ["", "meeting", "access_code", "host", ""]
+// Assuming url is http(s):://domainname/meeting/access_code/participant/
+const access_code = pathParts[2] // Parse this from the url
+const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${access_code}/participant/`);
 
 ws.onopen = function(event) {
     console.log('WebSocket connected');

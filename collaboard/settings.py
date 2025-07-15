@@ -66,6 +66,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+# Session configuration for WebSocket compatibility
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
+SESSION_COOKIE_SAMESITE = "Lax"
 
 ROOT_URLCONF = "collaboard.urls"
 

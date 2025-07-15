@@ -1,19 +1,39 @@
 // WebSocket connection placeholder
-const meetingID = None; // Parse this from the url;
-const accessCode = None; //Get this from an element;
-const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meetingID}/host/`);
+const pathParts = window.location.pathname.split('/');
+// pathParts = ["", "meeting", "meeting_id", "host", ""]
+// Assuming url is http(s):://domainname/meeting/meeting_id/host/
+const meeting_id = pathParts[2];
+
+// Function to get cookie value by name
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Get session ID from cookies
+const sessionId = getCookie('sessionid');
+
+// Create WebSocket with session as query parameter (most reliable method)
+const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meeting_id}/host/?session=${sessionId}`);
+// IN PROD, DO NOT pass the sessionID via a url query
 
 let currentQuestionIndex = 0;
-let totalQuestions = None; // Get this from an element
+let totalQuestions = null; // Get this from an element
 let meetingStarted = false;
 let participants = [];
 
-// Sample questions for testing (replace with actual data)
-const questions = [
-    "What is your name?",
-    "How did you hear about this meeting?",
-    "What are your expectations for today?"
-];
+// Meeting questions: will be filled with info from websocket
+const questions = [];
 
 ws.onopen = function(event) {
     console.log('Host WebSocket connected');
@@ -24,7 +44,14 @@ ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     console.log('Host received:', data);
     
-    // Placeholder message handling
+    // Message handling
+    if (data.type === 'questions') {
+        // Just testing to see if it's received
+        for (const question of data.questions) {
+            questions.push(question)
+            console.log(question)
+        }
+    }
     if (data.type === 'participant_joined') {
         participants.push(data.participant);
         updateParticipantCount();
@@ -42,6 +69,7 @@ ws.onmessage = function(event) {
         // Update participant status in the list
         updateParticipantAnswer(data.participant_id, data.answer);
     }
+
 };
 
 ws.onclose = function(event) {

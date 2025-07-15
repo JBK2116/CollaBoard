@@ -1,6 +1,8 @@
-from django.urls import re_path
-from apps.meeting.consumers import ChatConsumer
+from django.urls import re_path, path
+from apps.meeting.consumers import HostMeetingConsumer, ParticipantMeetingConsumer
 
 websocket_urlpatterns = [
-    re_path(r'^ws/chat/$', ChatConsumer.as_asgi()), # type: ignore
+    path("ws/meeting/<uuid:meeting_id>/host/", HostMeetingConsumer.as_asgi()),  # type: ignore
+    re_path(r'^ws/meeting/(?P<access_code>[^/]+)/participant/$', ParticipantMeetingConsumer.as_asgi()), #type: ignore
+
 ]
