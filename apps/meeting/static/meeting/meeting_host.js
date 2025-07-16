@@ -51,8 +51,10 @@ ws.onmessage = function(event) {
             questions.push(question)
             console.log(question)
         }
+        totalQuestions = questions.length
         accessCode = data.access_code
         console.log(accessCode)
+        showCurrentQuestion()
     }
     if (data.type === 'participant_joined') {
         participants.push(data.participant);
@@ -92,6 +94,7 @@ document.getElementById('start-btn').addEventListener('click', function() {
         
         ws.send(JSON.stringify({
             'type': 'start_meeting',
+            'question': questions[0],
             'access_code': accessCode
         }));
         
@@ -111,6 +114,7 @@ document.getElementById('next-btn').addEventListener('click', function() {
         
         ws.send(JSON.stringify({
             'type': 'next_question',
+            'access_code': accessCode,
             'question': questions[currentQuestionIndex] || `Question ${currentQuestionIndex + 1}`,
             'question_number': currentQuestionIndex + 1
         }));

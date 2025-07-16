@@ -99,12 +99,14 @@ class HostMeetingConsumer(AsyncWebsocketConsumer):
     ) -> None:
         if not text_data:
             return
-        text_data_json = json.loads(text_data)
+        text_data_json: dict[str, Any] = json.loads(text_data)
         message_type: str = text_data_json["type"]
         if (
             message_type == "start_meeting"
         ):  # Hard-Coded values will be refactored into an ENUM later
             await self.start_meeting(event=text_data_json)
+        elif message_type == "next_question":
+            await self.next_question(event=text_data_json)
 
     async def participant_joined(self, event: dict[str, Any]) -> None:
         participant_channel = event["participant_channel"]
@@ -124,9 +126,20 @@ class HostMeetingConsumer(AsyncWebsocketConsumer):
 
     async def start_meeting(self, event: dict[str, Any]) -> None:
         access_code: str = event["access_code"]
+        first_question: str = event["question"]
+        first_question = first_question.strip()
         await self.channel_layer.group_send(
             group=f"{participant_group}{access_code}",
-            message={"type": "meeting_started"},
+            message={"type": "meeting_started", "question": first_question},
+        )
+
+    async def next_question(self, event: dict[str, Any]) -> None:
+        access_code: str = event["access_code"]
+        question: str = event["question"]
+        question = question.strip()
+        await self.channel_layer.group_send(
+            group=f"{participant_group}{access_code}",
+            message={"type": "new_question", "question": question},
         )
 
 
@@ -139,7 +152,7 @@ class ParticipantMeetingConsumer(AsyncWebsocketConsumer):
             return
         access_code: str = url_route["kwargs"]["access_code"]
         self.group_name: str = f"{participant_group}{access_code}"
-        self.host_group_name = f"{host_group}{access_code}"
+        self.host_group_name: str = f"{host_group}{access_code}"
         # Define's the group name: Will be something like meeting(_host)_12345678
         await self.channel_layer.group_add(
             group=self.group_name, channel=self.channel_name
@@ -167,7 +180,18 @@ class ParticipantMeetingConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"message": message}))
 
     async def meeting_started(self, event: dict[str, Any]) -> None:
-        await self.send(text_data=json.dumps({"type": "meeting_started"}))
+        await self.send(
+            text_data=json.dumps(
+                {"type": "meeting_started", "question": event["question"]}
+            )
+        )
+    async def new_question(self, event: dict[str, Any]) -> None:
+        await self.send(
+            text_data=json.dumps({
+                "type": "new_question",
+                "question": event["question"]
+            })
+        )
 
 
 """

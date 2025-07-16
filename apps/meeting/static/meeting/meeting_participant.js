@@ -17,6 +17,8 @@ ws.onmessage = function(event) {
     // Placeholder message handling
     if (data.type === 'meeting_started') {
         document.getElementById('meeting-status').textContent = 'Meeting in progress';
+        document.getElementById('current-question').textContent = `Question: ${data.question}`;
+        document.getElementById('answer-input').value = '';
         document.getElementById('answer-input').disabled = false;
         document.getElementById('submit-btn').disabled = false;
     }
