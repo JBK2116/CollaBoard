@@ -1,4 +1,14 @@
-// WebSocket connection placeholder
+// Used to route websocket messages received from the backend
+// to the appropriate handler
+const MessageTypes = Object.freeze({
+    START_MEETING: "start_meeting",
+    END_MEETING: "end_meeting",
+    ANSWER_SUBMITTED: "answer_submitted",
+    NEXT_QUESTION: "next_question",
+    PARTICIPANT_JOINED: "participant_joined",
+    PARTICIPANT_LEFT: "participant_left",
+    MEETING_ENDED: "meeting_ended",
+});
 const pathParts = window.location.pathname.split('/');
 // pathParts = ["", "meeting", "meeting_id", "host", ""]
 // Assuming url is http(s):://domainname/meeting/meeting_id/host/
@@ -27,6 +37,7 @@ const sessionId = getCookie('sessionid');
 const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meeting_id}/host/?session=${sessionId}`);
 // IN PROD, DO NOT pass the sessionID via a url query
 
+const accessCode = null; // To be 
 let currentQuestionIndex = 0;
 let totalQuestions = null; // Get this from an element
 let meetingStarted = false;
@@ -45,7 +56,7 @@ ws.onmessage = function(event) {
     console.log('Host received:', data);
     
     // Message handling
-    if (data.type === 'questions') {
+    if (data.type === MessageTypes.START_MEETING) {
         // This will be the first payload received after the first connection
         for (const question of data.questions) {
             questions.push(question)
@@ -56,19 +67,23 @@ ws.onmessage = function(event) {
         console.log(accessCode)
         showCurrentQuestion()
     }
-    if (data.type === 'participant_joined') {
+    if (data.type === MessageTypes.PARTICIPANT_JOINED) {
+        // This will be the second payload received after the first connection
         participants.push(data.participant);
         updateParticipantCount();
         updateParticipantsList();
     }
     
-    if (data.type === 'participant_left') {
+    if (data.type === MessageTypes.PARTICIPANT_LEFT) {
+        // This payload can be received at random.
+        // Most of it though will be handled at the end of the meeting
         participants = participants.filter(p => p.id !== data.participant_id);
         updateParticipantCount();
         updateParticipantsList();
     }
     
     if (data.type === 'answer_submitted') {
+        // This payload will be received at most, once per user per question
         console.log('Answer received:', data.answer);
         // Update participant status in the list
         updateParticipantAnswer(data.participant_id, data.answer);
@@ -93,7 +108,7 @@ document.getElementById('start-btn').addEventListener('click', function() {
         currentQuestionIndex = 0;
         
         ws.send(JSON.stringify({
-            'type': 'start_meeting',
+            'type': MessageTypes.START_MEETING,
             'question': questions[0],
             'access_code': accessCode
         }));
@@ -113,7 +128,7 @@ document.getElementById('next-btn').addEventListener('click', function() {
         showCurrentQuestion();
         
         ws.send(JSON.stringify({
-            'type': 'next_question',
+            'type': MessageTypes.NEXT_QUESTION,
             'access_code': accessCode,
             'question': questions[currentQuestionIndex] || `Question ${currentQuestionIndex + 1}`,
             'question_number': currentQuestionIndex + 1
@@ -127,14 +142,22 @@ document.getElementById('next-btn').addEventListener('click', function() {
 
 document.getElementById('end-btn').addEventListener('click', function() {
     ws.send(JSON.stringify({
-        'type': 'end_meeting'
+        'type': MessageTypes.END_MEETING
+        // Add more info
     }));
-    
+    handleEndMeeting()
+});
+
+function handleStartMeeting() {
+
+}
+
+function handleEndMeeting() {
     document.getElementById('start-btn').disabled = true;
     document.getElementById('next-btn').disabled = true;
     document.getElementById('end-btn').disabled = true;
     document.getElementById('meeting-status').textContent = 'Meeting ended';
-});
+}
 
 function showCurrentQuestion() {
     document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;

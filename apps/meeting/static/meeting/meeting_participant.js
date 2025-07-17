@@ -1,3 +1,13 @@
+// Used to route websocket messages received from the backend
+// to the appropriate handler
+const MessageTypes = Object.freeze({
+    MEETING_STARTED: "meeting_started",
+    NEXT_QUESTION: "next_question",
+    SUBMIT_ANSWER: "submit_answer",
+    MEETING_ENDED: "meeting_ended",
+});
+
+
 // WebSocket connection placeholder
 const pathParts = window.location.pathname.split('/');
 // pathParts = ["", "meeting", "access_code", "host", ""]
@@ -15,25 +25,16 @@ ws.onmessage = function(event) {
     console.log('Received:', data);
     
     // Placeholder message handling
-    if (data.type === 'meeting_started') {
-        document.getElementById('meeting-status').textContent = 'Meeting in progress';
-        document.getElementById('current-question').textContent = `Question: ${data.question}`;
-        document.getElementById('answer-input').value = '';
-        document.getElementById('answer-input').disabled = false;
-        document.getElementById('submit-btn').disabled = false;
+    if (data.type === MessageTypes.MEETING_STARTED) {
+        handleMeetingStarted()
     }
     
-    if (data.type === 'new_question') {
-        document.getElementById('current-question').textContent = `Question: ${data.question}`;
-        document.getElementById('answer-input').value = '';
-        document.getElementById('answer-input').disabled = false;
-        document.getElementById('submit-btn').disabled = false;
+    if (data.type === MessageTypes.NEXT_QUESTION) {
+        handleNextQuestion()
     }
     
-    if (data.type === 'meeting_ended') {
-        document.getElementById('meeting-status').textContent = 'Meeting ended';
-        document.getElementById('answer-input').disabled = true;
-        document.getElementById('submit-btn').disabled = true;
+    if (data.type === MessageTypes.MEETING_ENDED) {
+        handleMeetingEnded()
     }
 };
 
@@ -54,16 +55,38 @@ document.getElementById('answer-form').addEventListener('submit', function(e) {
     
     if (answer) {
         ws.send(JSON.stringify({
-            'type': 'submit_answer',
+            'type': MessageTypes.SUBMIT_ANSWER,
             'answer': answer
         }));
-        
-        // Disable input after submission
-        document.getElementById('answer-input').disabled = true;
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('submit-btn').textContent = 'Answer Submitted';
+        handlePostSubmission()
     }
 });
+
+function handleMeetingStarted() {
+        document.getElementById('meeting-status').textContent = 'Meeting in progress';
+        document.getElementById('current-question').textContent = `Question: ${data.question}`;
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').disabled = false;
+        document.getElementById('submit-btn').disabled = false;
+    }
+
+function handleNextQuestion() {
+    document.getElementById('current-question').textContent = `Question: ${data.question}`;
+    document.getElementById('answer-input').value = '';
+    document.getElementById('answer-input').disabled = false;
+    document.getElementById('submit-btn').disabled = false;
+}
+
+function handlePostSubmission() {
+    document.getElementById('answer-input').disabled = true;
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Answer Submitted';
+}
+function handleMeetingEnded() {
+    document.getElementById('meeting-status').textContent = 'Meeting ended';
+    document.getElementById('answer-input').disabled = true;
+    document.getElementById('submit-btn').disabled = true;
+}
 
 // Timer placeholder - will be updated via WebSocket
 let duration = 0;
