@@ -37,7 +37,7 @@ ws.onmessage = function(event) {
         handleNextQuestionUI(data)
     }
     
-    if (data.type === MessageTypes.MEETING_ENDED) {
+    if (data.type === MessageTypes.END_MEETING) {
         handleMeetingEndedUI()
     }
 };

@@ -113,6 +113,8 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             await self.start_meeting(event=text_data_json)
         elif message_type == MessageTypes.NEXT_QUESTION:
             await self.next_question(event=text_data_json)
+        elif message_type == MessageTypes.END_MEETING:
+            await self.end_meeting(event=text_data_json)
 
     # BELOW ARE HANDLER METHODS FOR THIS HOST CONSUMER
 
@@ -138,15 +140,29 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         participant_channel = event["participant_channel"]
         await self._send_json(
             data={
-                "type": "participant_joined",
+                "type": MessageTypes.PARTICIPANT_JOINED,
                 "participant": {
                     "id": participant_channel,
                     "name": "Anon",
-                    "status": "Waiting",
+                    "status": "Connected",
                 },
                 "channel": participant_channel,
             }
         )
+    async def participant_left(self, event: dict[str, Any]) -> None:
+        participant_channel = event["id"]
+        await self._send_json(
+            data={
+                "type": MessageTypes.PARTICIPANT_LEFT,
+                "id": participant_channel
+            }
+        )
+    async def end_meeting(self, event: dict[str, Any]) -> None:
+        await self.channel_layer.group_send(
+            group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
+            message={"type": MessageTypes.END_MEETING}
+        )
+        await self.close()
 
 
 """
@@ -186,7 +202,10 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         )
 
     async def disconnect(self, code: int) -> None:
-        pass
+        await self.channel_layer.group_send(
+            group=self.host_group_name,
+            message={"type": MessageTypes.PARTICIPANT_LEFT, "id": self.channel_name}
+        )
 
     async def receive(
         self, text_data: str | None = None, bytes_data: bytes | None = None
@@ -199,14 +218,15 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
     # BELOW ARE HANDLER METHODS FOR THIS PARTCIPANT CONSUMER
     async def start_meeting(self, event: dict[str, Any]) -> None:
         await self._send_json(
-            data=
-                {"type": MessageTypes.START_MEETING, "question": event["question"]}
-            
+            data={"type": MessageTypes.START_MEETING, "question": event["question"]}
+        )
+    
+    async def end_meeting(self, event: dict[str, Any]) -> None:
+        await self._send_json(
+            data={"type": MessageTypes.END_MEETING}
         )
 
     async def next_question(self, event: dict[str, Any]) -> None:
         await self._send_json(
-            data=
-                {"type": MessageTypes.NEXT_QUESTION, "question": event["question"]}
-            
+            data={"type": MessageTypes.NEXT_QUESTION, "question": event["question"]}
         )

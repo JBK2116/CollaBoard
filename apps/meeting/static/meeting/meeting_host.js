@@ -67,7 +67,8 @@ ws.onmessage = function(event) {
     
     if (data.type === MessageTypes.PARTICIPANT_LEFT) {
         // This payload can be received at random.
-        participants = participants.filter(p => p.id !== data.participant_id);
+        participants = participants.filter(p => p.id !== data.id);
+        console.log(data)
         updateParticipantCount();
         updateParticipantsList();
     }
@@ -239,8 +240,4 @@ function pauseCountdown() {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
-}
-
-function resumeCountdown() {
-    startCountdown();
 }
