@@ -1,17 +1,14 @@
 import json
 import uuid
 from typing import Any, cast
-from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.sessions.models import Session
 
 from apps.base.models import CustomUser
-from apps.director.models import Meeting, Question
-from apps.meeting.constants import MessageTypes, GroupPrefixes, CloseCodes
+from apps.director.models import Question
 from apps.meeting import utils
 from apps.meeting.base import BaseMeetingConsumer
+from apps.meeting.constants import CloseCodes, GroupPrefixes, MessageTypes
 
 """
 HOST CONSUMER HERE
@@ -89,7 +86,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         # Send all questions to the host (Questions used for entire meeting length)
         await self._send_json(
             data={
-                "type": MessageTypes.MEETING_STARTED,
+                "type": MessageTypes.START_MEETING,
                 "questions": questions,
                 "access_code": self.access_code,
             }
@@ -112,6 +109,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
 
         # Chose proper function to handle message type
         if message_type == MessageTypes.START_MEETING:
+            print(text_data_json)
             await self.start_meeting(event=text_data_json)
         elif message_type == MessageTypes.NEXT_QUESTION:
             await self.next_question(event=text_data_json)
@@ -133,7 +131,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         question = question.strip()
         await self.channel_layer.group_send(
             group=f"{GroupPrefixes.PARTICIPANT}{access_code}",
-            message={"type": "new_question", "question": question},
+            message={"type": MessageTypes.NEXT_QUESTION, "question": question},
         )
 
     async def participant_joined(self, event: dict[str, Any]) -> None:
@@ -199,16 +197,16 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         message_type: str = text_data_json["type"]
 
     # BELOW ARE HANDLER METHODS FOR THIS PARTCIPANT CONSUMER
-    async def meeting_started(self, event: dict[str, Any]) -> None:
-        await self.send(
-            text_data=json.dumps(
-                {"type": "meeting_started", "question": event["question"]}
-            )
+    async def start_meeting(self, event: dict[str, Any]) -> None:
+        await self._send_json(
+            data=
+                {"type": MessageTypes.START_MEETING, "question": event["question"]}
+            
         )
 
-    async def new_question(self, event: dict[str, Any]) -> None:
-        await self.send(
-            text_data=json.dumps(
-                {"type": "new_question", "question": event["question"]}
-            )
+    async def next_question(self, event: dict[str, Any]) -> None:
+        await self._send_json(
+            data=
+                {"type": MessageTypes.NEXT_QUESTION, "question": event["question"]}
+            
         )

@@ -14,9 +14,6 @@ class MessageTypes:
     END_MEETING = "end_meeting"
     NEXT_QUESTION = "next_question"
     PARTICIPANT_JOINED = "participant_joined"
-    MEETING_STARTED = "meeting_started"
-    MEETING_ENDED = "meeting_ended"
-    NEW_QUESTION = "new_question"
     QUESTIONS = "questions"
 
 
