@@ -24,6 +24,7 @@ class GroupPrefixes:
     """
     HOST = "meeting_host_"
     PARTICIPANT = "meeting_"
+    MEETING_LOCKED = "meeting_locked_"
 
 
 class CloseCodes(Enum):

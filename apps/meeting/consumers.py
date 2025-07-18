@@ -1,10 +1,10 @@
 import json
 import uuid
-from typing import Any, cast
+from typing import Any
 
 from channels.db import database_sync_to_async
+from django.core.cache import cache
 
-from apps.base.models import CustomUser
 from apps.director.models import Question
 from apps.meeting import utils
 from apps.meeting.base import BaseMeetingConsumer
@@ -19,7 +19,6 @@ class HostMeetingConsumer(BaseMeetingConsumer):
     async def connect(self) -> None:
         url_route: dict[str, Any] | None = self._get_url_route()
         if not url_route:
-            print("No URL route - closing")
             await self._close_with_log(
                 code=CloseCodes.NO_URL_ROUTE.code,
                 message=CloseCodes.NO_URL_ROUTE.message,
@@ -31,7 +30,6 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         # Get session ID from query parameters
         session_id: str | None = self._get_session_id_from_query()
         if not session_id:
-            print("No session ID provided - closing")
             await self._close_with_log(
                 code=CloseCodes.NO_SESSION.code, message=CloseCodes.NO_SESSION.message
             )
@@ -40,25 +38,8 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         # Get user from session
         user = await utils.get_user_from_session(session_id)
         if user is None or not user.is_authenticated:
-            print("Auth Failed: Closing the connection!")
             await self._close_with_log(
                 code=CloseCodes.AUTH_FAILED.code, message=CloseCodes.AUTH_FAILED.message
-            )
-            return
-
-        # User is guaranteed to be authenticated now
-        await self.accept()
-        user = cast(CustomUser, user)
-
-        # Get all meeting questions
-        meeting_questions: list[Question] | None = await database_sync_to_async(
-            utils.get_meeting_questions
-        )(meeting_id=self.meeting_id)
-        if not meeting_questions:
-            # Should never happen, but good to check for it
-            await self._close_with_log(
-                code=CloseCodes.NO_QUESTIONS.code,
-                message=CloseCodes.NO_QUESTIONS.message,
             )
             return
 
@@ -74,16 +55,31 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             return
         self.access_code = access_code
 
+        # Get all meeting questions
+        meeting_questions: list[Question] | None = await database_sync_to_async(
+            utils.get_meeting_questions
+        )(meeting_id=self.meeting_id)
+        if not meeting_questions:
+            await self._close_with_log(
+                code=CloseCodes.NO_QUESTIONS.code,
+                message=CloseCodes.NO_QUESTIONS.message,
+            )
+            return
+
+        # Accept connection before any group operations
+        await self.accept()
+        await cache.aset(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=False, timeout=3600)
         # Add The Host to their dedicated channel group
         self.group_name: str = f"{GroupPrefixes.HOST}{self.access_code}"
         await self.channel_layer.group_add(
             group=self.group_name, channel=self.channel_name
         )
+        self.meeting_locked = False
 
         # Get all meeting question descriptions
         questions: list[str] = [q.description for q in meeting_questions]
 
-        # Send all questions to the host (Questions used for entire meeting length)
+        # Send all questions to the host frontend
         await self._send_json(
             data={
                 "type": MessageTypes.START_MEETING,
@@ -93,80 +89,88 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         )
 
     async def disconnect(self, code: int) -> None:
-        # Remove Host from group then close websocket connection
-        await self.channel_layer.group_discard(
-            f"{GroupPrefixes.HOST}{self.access_code}", self.channel_name
-        )
-        await self._close_with_log(message=CloseCodes.SUCCESSFUL_CLOSE.message)
+        # Remove Host from group if access_code exists
+        if hasattr(self, "access_code") and self.access_code:
+            await self.channel_layer.group_discard(
+                f"{GroupPrefixes.HOST}{self.access_code}", self.channel_name
+            )
+            await self.channel_layer.group_send(
+                group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
+                message={"type": MessageTypes.END_MEETING}
+            )
+            await cache.adelete(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}")
 
     async def receive(
         self, text_data: str | None = None, bytes_data: bytes | None = None
     ) -> None:
         if not text_data:
             return
-        text_data_json: dict[str, Any] = json.loads(text_data)
-        message_type: str = text_data_json["type"]
 
-        # Chose proper function to handle message type
-        if message_type == MessageTypes.START_MEETING:
-            print(text_data_json)
-            await self.start_meeting(event=text_data_json)
-        elif message_type == MessageTypes.NEXT_QUESTION:
-            await self.next_question(event=text_data_json)
-        elif message_type == MessageTypes.END_MEETING:
-            await self.end_meeting(event=text_data_json)
+        try:
+            text_data_json: dict[str, Any] = json.loads(text_data)
+            message_type: str = text_data_json["type"]
 
-    # BELOW ARE HANDLER METHODS FOR THIS HOST CONSUMER
+            if message_type == MessageTypes.START_MEETING:
+                await self.start_meeting(event=text_data_json)
+            elif message_type == MessageTypes.NEXT_QUESTION:
+                await self.next_question(event=text_data_json)
+            elif message_type == MessageTypes.END_MEETING:
+                await self.end_meeting(event=text_data_json)
+        except json.JSONDecodeError:
+            # Ignore invalid JSON
+            pass
+
+    # HANDLER METHODS FOR HOST CONSUMER
 
     async def start_meeting(self, event: dict[str, Any]) -> None:
-        access_code: str = event["access_code"]
-        first_question: str = event["question"]
-        first_question = first_question.strip()
-        await self.channel_layer.group_send(
-            group=f"{GroupPrefixes.PARTICIPANT}{access_code}",
-            message={"type": MessageTypes.START_MEETING, "question": first_question},
-        )
+        await cache.aset(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=True)
+        question: str = event.get("question", "").strip()
+        if question:
+            await self.channel_layer.group_send(
+                group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
+                message={"type": MessageTypes.START_MEETING, "question": question},
+            )
 
     async def next_question(self, event: dict[str, Any]) -> None:
-        access_code: str = event["access_code"]
-        question: str = event["question"]
-        question = question.strip()
-        await self.channel_layer.group_send(
-            group=f"{GroupPrefixes.PARTICIPANT}{access_code}",
-            message={"type": MessageTypes.NEXT_QUESTION, "question": question},
-        )
+        question: str = event.get("question", "").strip()
+        if question:
+            await self.channel_layer.group_send(
+                group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
+                message={"type": MessageTypes.NEXT_QUESTION, "question": question},
+            )
 
-    async def participant_joined(self, event: dict[str, Any]) -> None:
-        participant_channel = event["participant_channel"]
-        await self._send_json(
-            data={
-                "type": MessageTypes.PARTICIPANT_JOINED,
-                "participant": {
-                    "id": participant_channel,
-                    "name": "Anon",
-                    "status": "Connected",
-                },
-                "channel": participant_channel,
-            }
-        )
-    async def participant_left(self, event: dict[str, Any]) -> None:
-        participant_channel = event["id"]
-        await self._send_json(
-            data={
-                "type": MessageTypes.PARTICIPANT_LEFT,
-                "id": participant_channel
-            }
-        )
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self.channel_layer.group_send(
             group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
-            message={"type": MessageTypes.END_MEETING}
+            message={"type": MessageTypes.END_MEETING},
         )
         await self.close()
 
+    async def participant_joined(self, event: dict[str, Any]) -> None:
+        participant_channel = event.get("participant_channel")
+        if participant_channel:
+            await self._send_json(
+                data={
+                    "type": MessageTypes.PARTICIPANT_JOINED,
+                    "participant": {
+                        "id": participant_channel,
+                        "name": "Anon",
+                        "status": "Connected",
+                    },
+                    "channel": participant_channel,
+                }
+            )
+
+    async def participant_left(self, event: dict[str, Any]) -> None:
+        participant_channel = event.get("id")
+        if participant_channel:
+            await self._send_json(
+                data={"type": MessageTypes.PARTICIPANT_LEFT, "id": participant_channel}
+            )
+
 
 """
-BELOW IS THE PARTICIPANT CONSUMER
+PARTICIPANT CONSUMER
 """
 
 
@@ -174,17 +178,21 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
     async def connect(self) -> None:
         url_route: dict[str, Any] | None = self._get_url_route()
         if not url_route:
-            print("No URL route - closing")
             await self._close_with_log(
                 code=CloseCodes.NO_URL_ROUTE.code,
                 message=CloseCodes.NO_URL_ROUTE.message,
             )
             return
-
+        
         # Define model attributes
         self.access_code: str = url_route["kwargs"]["access_code"]
+        if await cache.aget(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}"):
+            await self._close_with_log(message="Meeting is locked", code=4001)
         self.group_name: str = f"{GroupPrefixes.PARTICIPANT}{self.access_code}"
         self.host_group_name: str = f"{GroupPrefixes.HOST}{self.access_code}"
+
+        # Accept connection first
+        await self.accept()
 
         # Add the Participant to the Participant Group Channel
         await self.channel_layer.group_add(
@@ -192,7 +200,6 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         )
 
         # Let the Host Consumer know that a new Participant has joined
-        await self.accept()
         await self.channel_layer.group_send(
             group=self.host_group_name,
             message={
@@ -202,31 +209,51 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         )
 
     async def disconnect(self, code: int) -> None:
-        await self.channel_layer.group_send(
-            group=self.host_group_name,
-            message={"type": MessageTypes.PARTICIPANT_LEFT, "id": self.channel_name}
-        )
+        # Notify host that participant left
+        if hasattr(self, "host_group_name") and self.host_group_name:
+            await self.channel_layer.group_send(
+                group=self.host_group_name,
+                message={
+                    "type": MessageTypes.PARTICIPANT_LEFT,
+                    "id": self.channel_name,
+                },
+            )
+
+        # Remove from participant group
+        if hasattr(self, "group_name") and self.group_name:
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(
         self, text_data: str | None = None, bytes_data: bytes | None = None
     ) -> None:
         if not text_data:
             return
-        text_data_json: dict[str, Any] = json.loads(text_data)
-        message_type: str = text_data_json["type"]
 
-    # BELOW ARE HANDLER METHODS FOR THIS PARTCIPANT CONSUMER
+        # try:
+        #     text_data_json: dict[str, Any] = json.loads(text_data)
+        #     message_type: str = text_data_json.get("type")
+
+        #     # Handle any participant messages here if needed in the future
+        #     # For now, participants only receive messages, don't send meaningful ones
+        #     pass
+        # except json.JSONDecodeError:
+        #     # Ignore invalid JSON
+        #     pass
+
+    # HANDLER METHODS FOR PARTICIPANT CONSUMER
+
     async def start_meeting(self, event: dict[str, Any]) -> None:
+        question = event.get("question", "")
         await self._send_json(
-            data={"type": MessageTypes.START_MEETING, "question": event["question"]}
-        )
-    
-    async def end_meeting(self, event: dict[str, Any]) -> None:
-        await self._send_json(
-            data={"type": MessageTypes.END_MEETING}
+            data={"type": MessageTypes.START_MEETING, "question": question}
         )
 
     async def next_question(self, event: dict[str, Any]) -> None:
+        question = event.get("question", "")
         await self._send_json(
-            data={"type": MessageTypes.NEXT_QUESTION, "question": event["question"]}
+            data={"type": MessageTypes.NEXT_QUESTION, "question": question}
         )
+
+    async def end_meeting(self, event: dict[str, Any]) -> None:
+        await self._send_json(data={"type": MessageTypes.END_MEETING})
+        await self.close()

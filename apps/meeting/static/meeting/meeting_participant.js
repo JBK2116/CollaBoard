@@ -1,8 +1,6 @@
 /*
-Used to route websocket messages to the appropriate handler.
-Must match the defined values in `meeting_host.js`
+WebSocket message types - must match backend constants
 */
-
 const MessageTypes = Object.freeze({
     START_MEETING: "start_meeting",
     END_MEETING: "end_meeting",
@@ -10,122 +8,161 @@ const MessageTypes = Object.freeze({
     SUBMIT_ANSWER: "submit_answer",
 });
 
-// Handle the duration countdown
+// Get access code from URL and establish WebSocket connection
+const access_code = getAccessCode();
+const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${access_code}/participant/`);
+
+// Timer state
 let duration = parseInt(document.getElementById("duration").textContent);
 let durationInSeconds = duration * 60;
 let countdownInterval;
 
-// Access code passed and received during websocket connections
-const access_code = getAccessCode()
-const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${access_code}/participant/`);
-
+// WebSocket event handlers
 ws.onopen = function(event) {
-    console.log('WebSocket connected');
-    document.getElementById('meeting-status').textContent = 'Connected - Waiting for meeting to start...';
+    console.log('Participant WebSocket connected');
+    updateStatus('Connected - Waiting for meeting to start...');
 };
 
 ws.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log('Received:', data);
-    
-    // Placeholder message handling
-    if (data.type === MessageTypes.START_MEETING) {
-        initializeStartMeetingUI(data)
-    }
-    
-    if (data.type === MessageTypes.NEXT_QUESTION) {
-        handleNextQuestionUI(data)
-    }
-    
-    if (data.type === MessageTypes.END_MEETING) {
-        handleMeetingEndedUI()
+    try {
+        const data = JSON.parse(event.data);
+        console.log('Participant received:', data);
+        
+        handleMessage(data);
+    } catch (error) {
+        console.error('Error parsing message:', error);
     }
 };
 
 ws.onclose = function(event) {
-    console.log('WebSocket disconnected');
-    document.getElementById('meeting-status').textContent = 'Disconnected';
+    console.log('Participant WebSocket disconnected');
+    updateStatus('Disconnected');
+    pauseCountdown();
 };
 
 ws.onerror = function(error) {
-    console.log('WebSocket error:', error);
-    document.getElementById('meeting-status').textContent = 'Connection error';
+    console.error('Participant WebSocket error:', error);
+    updateStatus('Connection error');
 };
 
-// Form submission for answering questions
+// Message handling
+function handleMessage(data) {
+    switch (data.type) {
+        case MessageTypes.START_MEETING:
+            handleMeetingStart(data);
+            break;
+        case MessageTypes.NEXT_QUESTION:
+            handleNextQuestion(data);
+            break;
+        case MessageTypes.END_MEETING:
+            handleMeetingEnd();
+            break;
+        default:
+            console.log('Unknown message type:', data.type);
+    }
+}
+
+function handleMeetingStart(data) {
+    if (data.question) {
+        updateStatus('Meeting in progress');
+        updateQuestion(data.question);
+        enableAnswerForm();
+        startCountdown();
+    }
+}
+
+function handleNextQuestion(data) {
+    if (data.question) {
+        updateQuestion(data.question);
+        enableAnswerForm();
+        resetSubmitButton();
+    }
+}
+
+function handleMeetingEnd() {
+    updateStatus('Meeting ended');
+    disableAnswerForm();
+    pauseCountdown();
+}
+
+// Form handling
 document.getElementById('answer-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const answer = document.getElementById('answer-input').value.trim();
     
+    const answer = document.getElementById('answer-input').value.trim();
     if (answer) {
-        ws.send(JSON.stringify({
-            'type': MessageTypes.SUBMIT_ANSWER,
-            'answer': answer
-        }));
-        handlePostSubmissionUI()
+        submitAnswer(answer);
     }
 });
 
-// BELOW ARE THE UI HANDLING FUNCTIONS
-function initializeStartMeetingUI(data) {
-        document.getElementById('meeting-status').textContent = 'Meeting in progress';
-        document.getElementById('current-question').textContent = `Question: ${data.question}`;
-        document.getElementById('answer-input').value = '';
-        document.getElementById('answer-input').disabled = false;
-        document.getElementById('submit-btn').disabled = false;
-        startCountdown()
-    }
-
-function handleNextQuestionUI(data) {
-    document.getElementById('current-question').textContent = `Question: ${data.question}`;
-    document.getElementById('answer-input').value = '';
-    document.getElementById('answer-input').disabled = false;
-    document.getElementById('submit-btn').disabled = false;
+function submitAnswer(answer) {
+    const message = {
+        type: MessageTypes.SUBMIT_ANSWER,
+        answer: answer
+    };
+    
+    sendMessage(message);
+    handleAnswerSubmitted();
 }
 
-function handlePostSubmissionUI() {
+function sendMessage(message) {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(message));
+    } else {
+        console.error('WebSocket is not open');
+    }
+}
+
+// UI management functions
+function updateStatus(message) {
+    document.getElementById('meeting-status').textContent = message;
+}
+
+function updateQuestion(question) {
+    document.getElementById('current-question').textContent = `Question: ${question}`;
+}
+
+function enableAnswerForm() {
+    document.getElementById('answer-input').disabled = false;
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('answer-input').value = '';
+    document.getElementById('answer-input').focus();
+}
+
+function disableAnswerForm() {
+    document.getElementById('answer-input').disabled = true;
+    document.getElementById('submit-btn').disabled = true;
+}
+
+function handleAnswerSubmitted() {
     document.getElementById('answer-input').disabled = true;
     document.getElementById('submit-btn').disabled = true;
     document.getElementById('submit-btn').textContent = 'Answer Submitted';
 }
-function handleMeetingEndedUI() {
-    document.getElementById('meeting-status').textContent = 'Meeting ended';
-    document.getElementById('answer-input').disabled = true;
-    document.getElementById('submit-btn').disabled = true;
-    pauseCountdown()
+
+function resetSubmitButton() {
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').textContent = 'Submit Answer';
 }
 
-// BELOW ARE THE UTIL FUNCTIONS
-function getAccessCode() {
-    // Assuming url is http(s):://domainname/meeting/access_code/participant/
-    const pathParts = window.location.pathname.split('/');
-    const access_code = pathParts[2]
-    return access_code
-}
-
-// THESE SET OF FUNCTIONS HANDLE COUNTDOWN FORMATTING
+// Countdown timer functions
 function startCountdown() {
-    // Clear any existing interval first
     if (countdownInterval) {
         clearInterval(countdownInterval);
     }
     
     countdownInterval = setInterval(() => {
         if (durationInSeconds <= 0) {
-            // Time's up!
             clearInterval(countdownInterval);
             document.getElementById('duration').textContent = "Time's up!";
             return;
         }
         
-        // Calculate minutes and seconds remaining
         const minutes = Math.floor(durationInSeconds / 60);
         const seconds = durationInSeconds % 60;
-        
-        // Format as MM:SS
         const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        document.getElementById('duration').textContent = timeString;
         
+        document.getElementById('duration').textContent = timeString;
         durationInSeconds--;
     }, 1000);
 }
@@ -137,8 +174,8 @@ function pauseCountdown() {
     }
 }
 
-function resumeCountdown() {
-    startCountdown();
+// Utility functions
+function getAccessCode() {
+    const pathParts = window.location.pathname.split('/');
+    return pathParts[2];
 }
-
-
