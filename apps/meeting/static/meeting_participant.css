@@ -90,7 +90,7 @@ body {
 
 #current-question {
     background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    padding: 25px;
+    padding: 12px 25px 12px 12px;
     border-radius: 12px;
     margin-top: 20px;
     border-left: 4px solid #667eea;

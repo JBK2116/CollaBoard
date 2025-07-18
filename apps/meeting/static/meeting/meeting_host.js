@@ -211,7 +211,7 @@ function updateParticipantDisplay() {
         listElement.innerHTML = '<p class="status">No participants yet</p>';
     } else {
         listElement.innerHTML = participants.map(p => 
-            `<p>Participant ${p.name} - <span class="status">${p.status || 'Connected'}</span></p>`
+            `<p>${p.name}<span class="divider"> - </span><span class="status">${p.status || 'Connected'}</span></p>`
         ).join('');
     }
 }

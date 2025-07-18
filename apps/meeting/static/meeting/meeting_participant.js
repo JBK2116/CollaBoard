@@ -119,7 +119,7 @@ function updateStatus(message) {
 }
 
 function updateQuestion(question) {
-    document.getElementById('current-question').textContent = `Question: ${question}`;
+    document.getElementById('current-question').textContent = question;
 }
 
 function enableAnswerForm() {
