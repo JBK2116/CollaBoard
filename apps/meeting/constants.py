@@ -2,14 +2,17 @@
 """
 Meeting-related constants and enums
 """
+
 from enum import Enum
+
 
 class MessageTypes:
     """
-    Message types used to 
+    Message types used to
     determine the appropriate response
     to a websocket message.
     """
+
     START_MEETING = "start_meeting"
     END_MEETING = "end_meeting"
     NEXT_QUESTION = "next_question"
@@ -22,6 +25,7 @@ class GroupPrefixes:
     """
     Prefixes used to create and identify group names.
     """
+
     HOST = "meeting_host_"
     PARTICIPANT = "meeting_"
     MEETING_LOCKED = "meeting_locked_"
@@ -29,9 +33,10 @@ class GroupPrefixes:
 
 class CloseCodes(Enum):
     """
-    Codes sent to frontend on 
+    Codes sent to frontend on
     errors and invalid demands.
     """
+
     NO_QUESTIONS = ("No questions found", 4004)
     NO_URL_ROUTE = ("Missing or invalid URL route", 4001)
     NO_SESSION = ("Missing or invalid session", 4002)

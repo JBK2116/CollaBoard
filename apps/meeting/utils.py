@@ -67,6 +67,7 @@ def get_meeting_by_access_code(access_code: str) -> Meeting | None:
     except Meeting.DoesNotExist:
         return None
 
+
 @database_sync_to_async
 def get_user_from_session(session_key: str) -> CustomUser | None:
     """
@@ -87,4 +88,3 @@ def get_user_from_session(session_key: str) -> CustomUser | None:
     except (Session.DoesNotExist, CustomUser.DoesNotExist):
         return None
     return None
-

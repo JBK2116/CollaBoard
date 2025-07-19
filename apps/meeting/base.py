@@ -15,7 +15,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class BaseMeetingConsumer(AsyncWebsocketConsumer):
     """Base class for meeting consumers with shared functionality"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: tuple[Any], **kwargs: dict[str, Any]):
         """
         Additional Params:
         group_name - The name of the group that the consumer belongs to.

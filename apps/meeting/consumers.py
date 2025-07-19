@@ -68,7 +68,11 @@ class HostMeetingConsumer(BaseMeetingConsumer):
 
         # Accept connection before any group operations
         await self.accept()
-        await cache.aset(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=False, timeout=3600)
+        await cache.aset(
+            key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}",
+            value=False,
+            timeout=3600,
+        )
         # Add The Host to their dedicated channel group
         self.group_name: str = f"{GroupPrefixes.HOST}{self.access_code}"
         await self.channel_layer.group_add(
@@ -96,7 +100,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             )
             await self.channel_layer.group_send(
                 group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
-                message={"type": MessageTypes.END_MEETING}
+                message={"type": MessageTypes.END_MEETING},
             )
             await cache.adelete(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}")
 
@@ -123,7 +127,9 @@ class HostMeetingConsumer(BaseMeetingConsumer):
     # HANDLER METHODS FOR HOST CONSUMER
 
     async def start_meeting(self, event: dict[str, Any]) -> None:
-        await cache.aset(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=True)
+        await cache.aset(
+            key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=True
+        )
         question: str = event.get("question", "").strip()
         if question:
             await self.channel_layer.group_send(
@@ -183,7 +189,7 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
                 message=CloseCodes.NO_URL_ROUTE.message,
             )
             return
-        
+
         # Define model attributes
         self.access_code: str = url_route["kwargs"]["access_code"]
         if await cache.aget(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}"):
