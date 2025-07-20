@@ -1,9 +1,8 @@
-from typing import Any
-
 from django.contrib.auth.decorators import login_not_required, login_required
-from django.http import HttpRequest, HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.http import Http404, HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
+
 from apps.director.models import Meeting
 
 
@@ -34,3 +33,6 @@ def participant_meeting(request: HttpRequest, access_code: str) -> HttpResponse:
         )
     except Meeting.DoesNotExist:
         raise Http404("Meeting not found")
+
+def meeting_locked(request: HttpRequest) -> HttpResponse:
+    return render(request, template_name="meeting/meeting_locked.html")

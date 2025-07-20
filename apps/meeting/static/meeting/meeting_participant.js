@@ -7,6 +7,8 @@ const MessageTypes = Object.freeze({
     NEXT_QUESTION: "next_question",
     SUBMIT_ANSWER: "submit_answer",
 });
+// Used when connection is rejected
+let isRedirecting = false;
 
 // Get access code from URL and establish WebSocket connection
 const access_code = getAccessCode();
@@ -35,9 +37,20 @@ ws.onmessage = function(event) {
 };
 
 ws.onclose = function(event) {
-    console.log('Participant WebSocket disconnected');
-    updateStatus('Disconnected');
-    pauseCountdown();
+    console.log("Close event fired!");
+    console.log("Close code:", event.code);
+    console.log("Close reason:", event.reason);
+    
+    if (event.code === 4401 && !isRedirecting) {
+        isRedirecting = true;
+        const redirect_url = "/meeting/locked"
+        console.log("Redirecting to:", redirect_url);
+        window.location.replace(redirect_url);
+    } else if (event.code !== 4401) {
+        console.log('Participant WebSocket disconnected');
+        updateStatus('Disconnected');
+        pauseCountdown();
+    }
 };
 
 ws.onerror = function(error) {

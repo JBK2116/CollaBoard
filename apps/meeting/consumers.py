@@ -4,6 +4,7 @@ from typing import Any
 
 from channels.db import database_sync_to_async
 from django.core.cache import cache
+from django.urls import reverse
 
 from apps.director.models import Question
 from apps.meeting import utils
@@ -189,16 +190,16 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
                 message=CloseCodes.NO_URL_ROUTE.message,
             )
             return
-
-        # Define model attributes
+        # Accept the connection
+        await self.accept()
         self.access_code: str = url_route["kwargs"]["access_code"]
+        # Immediately close it IF the meeting has already started
         if await cache.aget(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}"):
-            await self._close_with_log(message="Meeting is locked", code=4001)
+            await self.close(code=4401, reason=f"meeting_locked")
+            return
+        # Define model attributes
         self.group_name: str = f"{GroupPrefixes.PARTICIPANT}{self.access_code}"
         self.host_group_name: str = f"{GroupPrefixes.HOST}{self.access_code}"
-
-        # Accept connection first
-        await self.accept()
 
         # Add the Participant to the Participant Group Channel
         await self.channel_layer.group_add(

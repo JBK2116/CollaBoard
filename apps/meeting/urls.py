@@ -9,4 +9,5 @@ urlpatterns = [
         view=views.participant_meeting,
         name="participant-meeting",
     ),
+    path("locked/", view=views.meeting_locked, name="meeting-locked"),
 ]
