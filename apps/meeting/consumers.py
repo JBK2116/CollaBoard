@@ -262,5 +262,7 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         )
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
-        await self._send_json(data={"type": MessageTypes.END_MEETING})
+        await self._send_json(
+            data={"type": MessageTypes.END_MEETING, "url": f"{reverse('post-meeting')}"}
+        )
         await self.close()

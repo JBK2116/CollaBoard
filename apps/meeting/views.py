@@ -34,5 +34,10 @@ def participant_meeting(request: HttpRequest, access_code: str) -> HttpResponse:
     except Meeting.DoesNotExist:
         raise Http404("Meeting not found")
 
+
 def meeting_locked(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="meeting/meeting_locked.html")
+
+
+def post_meeting(request: HttpRequest) -> HttpResponse:
+    return render(request, template_name="meeting/post_meeting.html")

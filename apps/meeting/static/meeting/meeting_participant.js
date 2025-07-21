@@ -68,7 +68,7 @@ function handleMessage(data) {
             handleNextQuestion(data);
             break;
         case MessageTypes.END_MEETING:
-            handleMeetingEnd();
+            handleMeetingEnd(data);
             break;
         default:
             console.log('Unknown message type:', data.type);
@@ -92,10 +92,14 @@ function handleNextQuestion(data) {
     }
 }
 
-function handleMeetingEnd() {
-    updateStatus('Meeting ended');
-    disableAnswerForm();
-    pauseCountdown();
+function handleMeetingEnd(data) {
+    url = data.url
+    console.log("Meeting ended")
+    console.log("Redirecting to:", url);
+    setTimeout(() => {
+        window.location.replace(url);
+    }, 200); // Delay to allow backend to finish
+    window.location.replace(url);
 }
 
 // Form handling

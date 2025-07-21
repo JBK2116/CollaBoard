@@ -1,0 +1,26 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'meeting/post_meeting.css' %}">
+    <title>Meeting Ended</title>
+</head>
+{% django_browser_reload_script %}
+<body>
+    <div class="container">
+        <div class="locked-card">
+            <div class="lock-icon">🎉</div>
+            <h1>Meeting Ended</h1>
+            <p class="message">
+                The meeting has ended.<br>Thanks for participating!
+            </p>
+            <a href="{% url 'landing' %}" class="back-button">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html> 
