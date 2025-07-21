@@ -5,8 +5,10 @@ const MessageTypes = Object.freeze({
     START_MEETING: "start_meeting",
     END_MEETING: "end_meeting",
     NEXT_QUESTION: "next_question",
+    SUBMIT_ANSWER: "submit_answer",
     PARTICIPANT_JOINED: "participant_joined",
     PARTICIPANT_LEFT: "participant_left",
+    ANSWER_SUBMITTED: "answer_submitted", // Add this new message type
 });
 
 const COOKIE_NAME = "sessionid";
@@ -28,6 +30,9 @@ let currentQuestionIndex = 0;
 let duration = parseInt(document.getElementById("duration").textContent);
 let durationInSeconds = duration * 60;
 let countdownInterval;
+
+// Handles tracking answer submission
+let totalSubmissions = 0;
 
 // WebSocket event handlers
 ws.onopen = function(event) {
@@ -70,6 +75,9 @@ function handleMessage(data) {
         case MessageTypes.PARTICIPANT_LEFT:
             handleParticipantLeft(data);
             break;
+        case MessageTypes.ANSWER_SUBMITTED:
+            handleAnswerSubmitted(data);
+            break;
         default:
             console.log('Unknown message type:', data.type);
     }
@@ -91,6 +99,7 @@ function handleParticipantJoined(data) {
     if (data.participant) {
         participants.push(data.participant);
         updateParticipantDisplay();
+        updateSubmissionTracker(); // Update tracker when participants change
         console.log('Participant joined:', data.participant.id);
     }
 }
@@ -109,8 +118,15 @@ function handleParticipantLeft(data) {
         
         // Update the display to show all participants with their current status
         updateParticipantDisplay();
+        updateSubmissionTracker(); // Update tracker when participants change
         console.log('Participant disconnected:', data.id);
     }
+}
+
+function handleAnswerSubmitted(data) {
+    totalSubmissions++;
+    updateSubmissionTracker();
+    console.log(`Answer submitted. Total: ${totalSubmissions}`);
 }
 
 // Button event listeners
@@ -134,6 +150,7 @@ document.getElementById('end-btn').addEventListener('click', function() {
 function startMeeting() {
     meetingStarted = true;
     currentQuestionIndex = 0;
+    totalSubmissions = 0; // Reset submissions for new meeting
     
     const message = {
         type: MessageTypes.START_MEETING,
@@ -148,6 +165,7 @@ function startMeeting() {
 
 function nextQuestion() {
     currentQuestionIndex++;
+    totalSubmissions = 0; // Reset submissions for new question
     
     const message = {
         type: MessageTypes.NEXT_QUESTION,
@@ -158,6 +176,7 @@ function nextQuestion() {
     
     sendMessage(message);
     updateQuestionDisplay();
+    updateSubmissionTracker(); // Update tracker for new question
     
     // Disable next button if this is the last question
     if (currentQuestionIndex >= totalMeetingQuestions - 1) {
@@ -185,12 +204,14 @@ function sendMessage(message) {
 // UI management functions
 function initializeMeetingUI() {
     updateQuestionDisplay();
+    updateSubmissionTracker();
     disableButton('start-btn', false);
     updateStatus('Ready to start');
 }
 
 function updateMeetingUI() {
     updateQuestionDisplay();
+    updateSubmissionTracker();
     disableButton('start-btn', true);
     disableButton('next-btn', false);
     disableButton('end-btn', false);
@@ -211,6 +232,22 @@ function updateQuestionDisplay() {
     
     document.getElementById('current-question-num').textContent = questionNum;
     document.getElementById('question-text').textContent = questionText;
+}
+
+function updateSubmissionTracker() {
+    const connectedCount = participants.filter(p => p.status !== 'Disconnected').length;
+    const submissionElement = document.getElementById('submission-count');
+    
+    if (submissionElement) {
+        submissionElement.textContent = `${totalSubmissions} / ${connectedCount}`;
+        
+        // Add visual feedback for completion percentage
+        const percentage = connectedCount > 0 ? (totalSubmissions / connectedCount) * 100 : 0;
+        const progressBar = document.getElementById('submission-progress');
+        if (progressBar) {
+            progressBar.style.width = `${Math.min(percentage, 100)}%`;
+        }
+    }
 }
 
 function updateParticipantDisplay() {

@@ -20,6 +20,7 @@ class MessageTypes:
     PARTICIPANT_LEFT = "participant_left"
     QUESTIONS = "questions"
     SUBMIT_ANSWER = "submit_answer"
+    ANSWER_SUBMITTED = "answer_submitted"
     SUBMIT_ERROR = "submit_error"
     INVALID_ANSWER = "invalid_answer"
     UPDATE_NAME = "update_name"

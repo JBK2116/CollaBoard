@@ -150,6 +150,10 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
                 message={"type": MessageTypes.NEXT_QUESTION, "question": question},
             )
+    async def submit_answer(self, event: dict[str, Any]) -> None:
+        await self._send_json(data={
+            "type": MessageTypes.ANSWER_SUBMITTED
+        })
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self.channel_layer.group_send(
@@ -321,6 +325,11 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
             await self._send_json(data={"type": MessageTypes.INVALID_ANSWER})
             return  # User submitted invalid info
         await response_obj.asave()
+        # Let the host know
+        await self.channel_layer.group_send(
+            group=f"{GroupPrefixes.HOST}{self.access_code}",
+            message={"type": MessageTypes.SUBMIT_ANSWER}
+        )
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self._send_json(

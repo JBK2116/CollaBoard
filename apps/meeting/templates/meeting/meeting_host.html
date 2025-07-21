@@ -47,6 +47,18 @@
         <div class="question-counter">
             Question <span id="current-question-num">0</span> / <span id="total-questions">{{ meeting.questions.count }}</span>
         </div>
+        <div class="submission-tracker">
+            <h3>📊 Answer Submissions</h3>
+            <div class="submission-display">
+                <div class="submission-count-wrapper">
+                    <span class="submission-label">Submitted:</span>
+                    <span class="submission-count" id="submission-count">0 / 0</span>
+                </div>
+                <div class="submission-progress-container">
+                    <div class="submission-progress-bar" id="submission-progress"></div>
+                </div>
+            </div>
+        </div>
         <div class="current-question" id="question-content">
             <span id="question-text">Meeting not started</span>
         </div>
