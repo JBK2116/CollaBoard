@@ -20,6 +20,8 @@ class MessageTypes:
     PARTICIPANT_LEFT = "participant_left"
     QUESTIONS = "questions"
     SUBMIT_ANSWER = "submit_answer"
+    SUBMIT_ERROR = "submit_error"
+    INVALID_ANSWER = "invalid_answer"
 
 
 class GroupPrefixes:

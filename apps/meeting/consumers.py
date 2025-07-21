@@ -264,22 +264,26 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         answer: str | None = event.get("answer", None)
         question_description: str | None = event.get("question", None)
         if not answer or not question_description:
+            await self._send_json(data={"type": MessageTypes.SUBMIT_ERROR})
             return  # Question won't be counted
         meeting_obj: Meeting | None = await database_sync_to_async(
             utils.get_meeting_by_access_code
         )(access_code=self.access_code)
         if not meeting_obj:
-            return  # Should NEVER happen
+            await self._send_json(data={"type": MessageTypes.SUBMIT_ERROR})
+            return  # SHOULD NEVER HAPPEN
         question_obj: Question | None = await database_sync_to_async(
             utils.get_question
         )(description=question_description, meeting=meeting_obj)
         if not question_obj:
-            return  # Should NEVER happen
+            await self._send_json(data={"type": MessageTypes.SUBMIT_ERROR})
+            return  # SHOULD NEVER HAPPEN
         response_obj: Response | None = await utils.create_response_model(
             meeting=meeting_obj, question=question_obj, response_text=answer
         )
         if not response_obj:
-            return
+            await self._send_json(data={"type": MessageTypes.INVALID_ANSWER})
+            return  # User submitted invalid info
         await response_obj.asave()
         print(response_obj.meeting.title)
         print(response_obj.question.description)

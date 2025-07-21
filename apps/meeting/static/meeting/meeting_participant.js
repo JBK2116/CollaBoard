@@ -6,6 +6,8 @@ const MessageTypes = Object.freeze({
     END_MEETING: "end_meeting",
     NEXT_QUESTION: "next_question",
     SUBMIT_ANSWER: "submit_answer",
+    SUBMIT_ERROR: "submit_error",
+    INVALID_ANSWER: "invalid_answer",
 });
 // Used when connection is rejected
 let isRedirecting = false;
@@ -70,6 +72,12 @@ function handleMessage(data) {
         case MessageTypes.NEXT_QUESTION:
             handleNextQuestion(data);
             break;
+        case MessageTypes.INVALID_ANSWER:
+            handleInvalidQuestionSubmission();
+            break;
+        case MessageTypes.SUBMIT_ERROR:
+            handleQuestionSubmissionError()
+            break;
         case MessageTypes.END_MEETING:
             handleMeetingEnd(data);
             break;
@@ -95,6 +103,14 @@ function handleNextQuestion(data) {
         enableAnswerForm();
         resetSubmitButton();
     }
+}
+
+function handleInvalidQuestionSubmission() {
+    document.getElementById('submit-btn').textContent = 'Invalid Answer';
+}
+
+function handleQuestionSubmissionError() {
+    document.getElementById('submit-btn').textContent = 'Error submitting answer';
 }
 
 function handleMeetingEnd(data) {
