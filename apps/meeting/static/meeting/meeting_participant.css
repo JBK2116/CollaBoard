@@ -167,6 +167,16 @@ button:active:not(:disabled) {
     transform: translateY(0);
 }
 
+.participant-name {
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+    opacity: 0.93;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 15px;

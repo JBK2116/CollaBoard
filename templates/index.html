@@ -51,6 +51,17 @@
                             class="code-input"
                             required
                         >
+                        <input
+                            type="text"
+                            id="participantName"
+                            name="participantName"
+                            placeholder="Your Name"
+                            maxlength="30"
+                            class="code-input"
+                            required
+                            autocomplete="off"
+                            style="min-width: 160px;"
+                        >
                         <button type="submit" class="btn btn-join">Join Meeting</button>
                     </div>
                 </form>
@@ -70,9 +81,16 @@
     document.getElementById("joinForm").addEventListener("submit", function(e) {
         e.preventDefault();
         const code = document.getElementById("accessCode").value;
-        if (code.length === 8) {
+        const name = document.getElementById("participantName").value;
+        if (code.length === 8 && name.length > 0 && name.length <= 30) {
             this.action = `/meeting/${code}/participant/`;
             this.submit();
+        }
+    });
+    // Restrict participant name to 30 characters in real time
+    document.getElementById("participantName").addEventListener("input", function(e) {
+        if (this.value.length > 30) {
+            this.value = this.value.slice(0, 30);
         }
     });
 </script>

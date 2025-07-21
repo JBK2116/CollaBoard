@@ -13,6 +13,7 @@
     <div class="meeting-info">
         <h1>{{ meeting.title }}</h1>
         <div class="host-name">👨‍💼 Host: {{ meeting.director.first_name }}</div>
+        <div class="participant-name" id="participant-name" data-name="{{ participant_name }}"> Joined as: {{ participant_name }}</div>
         <div class="meeting-detail"><strong>Description:</strong> {{ meeting.description|truncatechars:50 }}</div>
         <div class="meeting-detail"><strong>Date:</strong> {{ meeting.created_at|date:"F j Y" }}</div>
         <div class="meeting-detail"><strong>Duration:</strong> <span id="duration">{{meeting.duration}}</span> minutes</div>

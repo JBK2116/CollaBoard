@@ -4,10 +4,12 @@ WebSocket message types - must match backend constants
 const MessageTypes = Object.freeze({
     START_MEETING: "start_meeting",
     END_MEETING: "end_meeting",
+    PARTICIPANT_JOINED: "participant_joined",
     NEXT_QUESTION: "next_question",
     SUBMIT_ANSWER: "submit_answer",
     SUBMIT_ERROR: "submit_error",
     INVALID_ANSWER: "invalid_answer",
+    UPDATE_NAME: "update_name",
 });
 // Used when connection is rejected
 let isRedirecting = false;
@@ -24,10 +26,18 @@ let countdownInterval;
 // Keeps track of current question
 currentQuestion = null
 
+participantName = document.getElementById("participant-name").dataset.name;
+
 // WebSocket event handlers
 ws.onopen = function(event) {
     console.log('Participant WebSocket connected');
     updateStatus('Connected - Waiting for meeting to start...');
+    const message = {
+        type: MessageTypes.PARTICIPANT_JOINED,
+        name: participantName,
+    }
+    sendMessage(message)
+    
 };
 
 ws.onmessage = function(event) {
@@ -69,6 +79,9 @@ function handleMessage(data) {
         case MessageTypes.START_MEETING:
             handleMeetingStart(data);
             break;
+        case MessageTypes.UPDATE_NAME:
+            handleUpdateName(data);
+            break;
         case MessageTypes.NEXT_QUESTION:
             handleNextQuestion(data);
             break;
@@ -103,6 +116,11 @@ function handleNextQuestion(data) {
         enableAnswerForm();
         resetSubmitButton();
     }
+}
+
+function handleUpdateName(data) {
+    participantName = data.name
+    document.getElementById("participant-name").textContent = ` Joined as: ${participantName} `
 }
 
 function handleInvalidQuestionSubmission() {

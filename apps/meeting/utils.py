@@ -103,6 +103,8 @@ async def create_response_model(
     except ValidationError:
         return None
 
+def get_username_cache(access_code: str) -> str:
+    return f"meeting:{access_code}:names"
 
 @database_sync_to_async
 def get_user_from_session(session_key: str) -> CustomUser | None:

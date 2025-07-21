@@ -94,6 +94,9 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             }
         )
 
+        # Set up usernames cache
+        await cache.aset(key=utils.get_username_cache(self.access_code), value=[])
+
     async def disconnect(self, code: int) -> None:
         # Remove Host from group if access_code exists
         if hasattr(self, "access_code") and self.access_code:
@@ -156,13 +159,14 @@ class HostMeetingConsumer(BaseMeetingConsumer):
 
     async def participant_joined(self, event: dict[str, Any]) -> None:
         participant_channel = event.get("participant_channel")
-        if participant_channel:
+        participant_name = event.get("participant_name")
+        if participant_channel and participant_name:
             await self._send_json(
                 data={
                     "type": MessageTypes.PARTICIPANT_JOINED,
                     "participant": {
                         "id": participant_channel,
-                        "name": "Anon",
+                        "name": participant_name,
                         "status": "Connected",
                     },
                     "channel": participant_channel,
@@ -202,20 +206,6 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         self.group_name: str = f"{GroupPrefixes.PARTICIPANT}{self.access_code}"
         self.host_group_name: str = f"{GroupPrefixes.HOST}{self.access_code}"
 
-        # Add the Participant to the Participant Group Channel
-        await self.channel_layer.group_add(
-            group=self.group_name, channel=self.channel_name
-        )
-
-        # Let the Host Consumer know that a new Participant has joined
-        await self.channel_layer.group_send(
-            group=self.host_group_name,
-            message={
-                "type": MessageTypes.PARTICIPANT_JOINED,
-                "participant_channel": self.channel_name,
-            },
-        )
-
     async def disconnect(self, code: int) -> None:
         # Notify host that participant left
         if hasattr(self, "host_group_name") and self.host_group_name:
@@ -239,6 +229,9 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         try:
             text_data_json: dict[str, Any] = json.loads(text_data)
             message_type: str = text_data_json["type"]
+            if message_type == MessageTypes.PARTICIPANT_JOINED:
+                # This message is always received immediately upon connecting.
+                await self.participant_joined(event=text_data_json)
             if message_type == MessageTypes.SUBMIT_ANSWER:
                 await self.submit_answer(event=text_data_json)
         except json.JSONDecodeError:
@@ -252,6 +245,46 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         await self._send_json(
             data={"type": MessageTypes.START_MEETING, "question": question}
         )
+
+    async def participant_joined(self, event: dict[str, Any]) -> None:
+        name: str | None = event.get("name", None)
+        if not name:
+            # Should Never Happen but good check
+            await self.close()
+            return
+        user_names: list[str] | None = await cache.aget(
+            key=utils.get_username_cache(self.access_code)
+        )
+        if user_names is None:
+            await self.close(code=4004) # Joined before host
+            return
+        name_count: int = sum(n == name or n.startswith(f"{name}(") for n in user_names)
+        if name_count > 0:
+            self.name: str = f"{name}({name_count})"
+            # Let the frontend update their new name
+            await self._send_json(data={
+                "type": MessageTypes.UPDATE_NAME,
+                "name": self.name
+            })
+        else:
+            self.name: str = name
+        # Update the usernames list
+        user_names.append(self.name)
+        await cache.aset(key=utils.get_username_cache(self.access_code), value=user_names, timeout=3600)
+        # Add the Participant to the Participant Group Channel
+        await self.channel_layer.group_add(
+            group=self.group_name, channel=self.channel_name
+        )
+        # Let the host know that a participant joined
+        await self.channel_layer.group_send(
+            group=self.host_group_name,
+            message={
+                "type": MessageTypes.PARTICIPANT_JOINED,
+                "participant_name": self.name,
+                "participant_channel": self.channel_name,
+            },
+        )
+
 
     async def next_question(self, event: dict[str, Any]) -> None:
         question = event.get("question", "")

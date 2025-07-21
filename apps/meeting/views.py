@@ -24,12 +24,15 @@ def host_meeting(request: HttpRequest, meeting_id: str) -> HttpResponse:
 @login_not_required
 def participant_meeting(request: HttpRequest, access_code: str) -> HttpResponse:
     # More info will be added later
+    participant_name: str | None = request.POST.get("participantName", None)
+    if not participant_name or len(participant_name) > 30:
+        raise Http404("Invalid Name")
     try:
         meeting: Meeting = Meeting.objects.get(access_code=access_code)
         return render(
             request,
             template_name="meeting/meeting_participant.html",
-            context={"meeting": meeting},
+            context={"meeting": meeting, "participant_name": participant_name},
         )
     except Meeting.DoesNotExist:
         raise Http404("Meeting not found")

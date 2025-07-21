@@ -22,6 +22,7 @@ class MessageTypes:
     SUBMIT_ANSWER = "submit_answer"
     SUBMIT_ERROR = "submit_error"
     INVALID_ANSWER = "invalid_answer"
+    UPDATE_NAME = "update_name"
 
 
 class GroupPrefixes:
