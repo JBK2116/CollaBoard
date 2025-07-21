@@ -19,6 +19,9 @@ let duration = parseInt(document.getElementById("duration").textContent);
 let durationInSeconds = duration * 60;
 let countdownInterval;
 
+// Keeps track of current question
+currentQuestion = null
+
 // WebSocket event handlers
 ws.onopen = function(event) {
     console.log('Participant WebSocket connected');
@@ -77,6 +80,7 @@ function handleMessage(data) {
 
 function handleMeetingStart(data) {
     if (data.question) {
+        currentQuestion = data.question
         updateStatus('Meeting in progress');
         updateQuestion(data.question);
         enableAnswerForm();
@@ -86,6 +90,7 @@ function handleMeetingStart(data) {
 
 function handleNextQuestion(data) {
     if (data.question) {
+        currentQuestion = data.question
         updateQuestion(data.question);
         enableAnswerForm();
         resetSubmitButton();
@@ -115,7 +120,8 @@ document.getElementById('answer-form').addEventListener('submit', function(e) {
 function submitAnswer(answer) {
     const message = {
         type: MessageTypes.SUBMIT_ANSWER,
-        answer: answer
+        answer: answer,
+        question: currentQuestion
     };
     
     sendMessage(message);

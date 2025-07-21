@@ -195,7 +195,7 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         self.access_code: str = url_route["kwargs"]["access_code"]
         # Immediately close it IF the meeting has already started
         if await cache.aget(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}"):
-            await self.close(code=4401, reason=f"meeting_locked")
+            await self.close(code=4401, reason="meeting_locked")
             return
         # Define model attributes
         self.group_name: str = f"{GroupPrefixes.PARTICIPANT}{self.access_code}"
@@ -235,17 +235,14 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
     ) -> None:
         if not text_data:
             return
-
-        # try:
-        #     text_data_json: dict[str, Any] = json.loads(text_data)
-        #     message_type: str = text_data_json.get("type")
-
-        #     # Handle any participant messages here if needed in the future
-        #     # For now, participants only receive messages, don't send meaningful ones
-        #     pass
-        # except json.JSONDecodeError:
-        #     # Ignore invalid JSON
-        #     pass
+        try:
+            text_data_json: dict[str, Any] = json.loads(text_data)
+            message_type: str = text_data_json["type"]
+            if message_type == MessageTypes.SUBMIT_ANSWER:
+                await self.submit_answer(event=text_data_json)
+        except json.JSONDecodeError:
+            # Ignore invalid JSON for now
+            pass
 
     # HANDLER METHODS FOR PARTICIPANT CONSUMER
 
@@ -260,6 +257,14 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         await self._send_json(
             data={"type": MessageTypes.NEXT_QUESTION, "question": question}
         )
+
+    async def submit_answer(self, event: dict[str, Any]) -> None:
+        answer: str | None = event.get("answer", None)
+        question: str | None = event.get("question", None)
+        if not answer or not question:
+            return
+        print(answer)
+        print(question)
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self._send_json(

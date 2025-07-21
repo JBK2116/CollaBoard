@@ -19,6 +19,7 @@ class MessageTypes:
     PARTICIPANT_JOINED = "participant_joined"
     PARTICIPANT_LEFT = "participant_left"
     QUESTIONS = "questions"
+    SUBMIT_ANSWER = "submit_answer"
 
 
 class GroupPrefixes:
