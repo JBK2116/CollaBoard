@@ -8,10 +8,13 @@ The types of functions include "database query functions",
 import uuid
 
 from django.contrib.sessions.models import Session
+from django.core.exceptions import ValidationError
 from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
 from apps.base.models import CustomUser
 from apps.director.models import Meeting, Question
+from apps.meeting.models import Response
 
 
 def get_meeting_questions(meeting_id: uuid.UUID) -> list[Question] | None:
@@ -65,6 +68,39 @@ def get_meeting_by_access_code(access_code: str) -> Meeting | None:
     try:
         return Meeting.objects.get(access_code=access_code)
     except Meeting.DoesNotExist:
+        return None
+
+
+def get_question(description: str, meeting: Meeting) -> Question | None:
+    """
+    Retrieves the question instance of a specific meeting corresponding to the given description.
+
+    Args:
+        description (str): The description code of the question.
+
+    Returns:
+        - Question | None: The Question object if found; otherwise, None.
+    """
+    try:
+        return Question.objects.get(description=description, meeting=meeting)
+    except Question.DoesNotExist:
+        return None
+
+
+async def create_response_model(
+    meeting: Meeting, question: Question, response_text: str
+) -> Response | None:
+    """
+    Creates a response model and ensures that it's valid for use
+    `Returns None IF the model is invalid for use`
+    """
+    new_response_obj: Response = Response(
+        meeting=meeting, question=question, response_text=response_text
+    )
+    try:
+        await sync_to_async(new_response_obj.full_clean)()
+        return new_response_obj
+    except ValidationError:
         return None
 
 

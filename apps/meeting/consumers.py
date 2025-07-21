@@ -6,10 +6,11 @@ from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.urls import reverse
 
-from apps.director.models import Question
+from apps.director.models import Question, Meeting
 from apps.meeting import utils
 from apps.meeting.base import BaseMeetingConsumer
 from apps.meeting.constants import CloseCodes, GroupPrefixes, MessageTypes
+from apps.meeting.models import Response
 
 """
 HOST CONSUMER HERE
@@ -259,12 +260,30 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
         )
 
     async def submit_answer(self, event: dict[str, Any]) -> None:
+        # These return statements will later be updated to return useful info to frontend
         answer: str | None = event.get("answer", None)
-        question: str | None = event.get("question", None)
-        if not answer or not question:
+        question_description: str | None = event.get("question", None)
+        if not answer or not question_description:
+            return  # Question won't be counted
+        meeting_obj: Meeting | None = await database_sync_to_async(
+            utils.get_meeting_by_access_code
+        )(access_code=self.access_code)
+        if not meeting_obj:
+            return  # Should NEVER happen
+        question_obj: Question | None = await database_sync_to_async(
+            utils.get_question
+        )(description=question_description, meeting=meeting_obj)
+        if not question_obj:
+            return  # Should NEVER happen
+        response_obj: Response | None = await utils.create_response_model(
+            meeting=meeting_obj, question=question_obj, response_text=answer
+        )
+        if not response_obj:
             return
+        await response_obj.asave()
+        print(response_obj.meeting.title)
+        print(response_obj.question.description)
         print(answer)
-        print(question)
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self._send_json(
