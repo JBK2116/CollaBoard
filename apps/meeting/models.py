@@ -8,9 +8,6 @@ from apps.director.models import Meeting, Question
 # Create your models here.
 class Response(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-    session_id = models.CharField(
-        max_length=100, help_text="Session ID for anonymous participant", unique=True
-    )
     # Relationship Constraints
     meeting = models.ForeignKey(
         to=Meeting, null=False, blank=False, on_delete=models.CASCADE
