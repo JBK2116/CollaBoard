@@ -6,7 +6,7 @@ from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.urls import reverse
 
-from apps.director.models import Question, Meeting
+from apps.director.models import Meeting, Question
 from apps.meeting import utils
 from apps.meeting.base import BaseMeetingConsumer
 from apps.meeting.constants import CloseCodes, GroupPrefixes, MessageTypes
@@ -108,6 +108,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 message={"type": MessageTypes.END_MEETING},
             )
             await cache.adelete(key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}")
+            await cache.adelete(key=utils.get_username_cache(self.access_code))
 
     async def receive(
         self, text_data: str | None = None, bytes_data: bytes | None = None
@@ -256,21 +257,24 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
             key=utils.get_username_cache(self.access_code)
         )
         if user_names is None:
-            await self.close(code=4004) # Joined before host
+            await self.close(code=4004)  # Joined before host
             return
         name_count: int = sum(n == name or n.startswith(f"{name}(") for n in user_names)
         if name_count > 0:
             self.name: str = f"{name}({name_count})"
             # Let the frontend update their new name
-            await self._send_json(data={
-                "type": MessageTypes.UPDATE_NAME,
-                "name": self.name
-            })
+            await self._send_json(
+                data={"type": MessageTypes.UPDATE_NAME, "name": self.name}
+            )
         else:
             self.name: str = name
         # Update the usernames list
         user_names.append(self.name)
-        await cache.aset(key=utils.get_username_cache(self.access_code), value=user_names, timeout=3600)
+        await cache.aset(
+            key=utils.get_username_cache(self.access_code),
+            value=user_names,
+            timeout=3600,
+        )
         # Add the Participant to the Participant Group Channel
         await self.channel_layer.group_add(
             group=self.group_name, channel=self.channel_name
@@ -284,7 +288,6 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
                 "participant_channel": self.channel_name,
             },
         )
-
 
     async def next_question(self, event: dict[str, Any]) -> None:
         question = event.get("question", "")
@@ -318,9 +321,6 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
             await self._send_json(data={"type": MessageTypes.INVALID_ANSWER})
             return  # User submitted invalid info
         await response_obj.asave()
-        print(response_obj.meeting.title)
-        print(response_obj.question.description)
-        print(answer)
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
         await self._send_json(

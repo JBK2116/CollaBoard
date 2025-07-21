@@ -97,9 +97,19 @@ function handleParticipantJoined(data) {
 
 function handleParticipantLeft(data) {
     if (data.id) {
-        participants = participants.filter(p => p.id !== data.id);
+        // Find the participant and update their status instead of removing them
+        const participant = participants.find(p => p.id === data.id);
+        if (participant) {
+            participant.status = 'Disconnected';
+        }
+        
+        // Update participant count to only count connected participants
+        const connectedCount = participants.filter(p => p.status !== 'Disconnected').length;
+        document.getElementById('participant-count').textContent = connectedCount;
+        
+        // Update the display to show all participants with their current status
         updateParticipantDisplay();
-        console.log('Participant left:', data.id);
+        console.log('Participant disconnected:', data.id);
     }
 }
 
@@ -204,14 +214,19 @@ function updateQuestionDisplay() {
 }
 
 function updateParticipantDisplay() {
-    document.getElementById('participant-count').textContent = participants.length;
+    // Count only connected participants for the main counter
+    const connectedCount = participants.filter(p => p.status !== 'Disconnected').length;
+    document.getElementById('participant-count').textContent = connectedCount;
     
     const listElement = document.getElementById('participants-list');
     if (participants.length === 0) {
         listElement.innerHTML = '<p class="status">No participants yet</p>';
     } else {
         listElement.innerHTML = participants.map(p => 
-            `<p>${p.name}<span class="divider"> - </span><span class="status">${p.status || 'Connected'}</span></p>`
+            `<p>
+                <span class="participant-name">${p.name}</span>
+                <span class="connection-status ${p.status === 'Disconnected' ? 'disconnected' : 'connected'}">${p.status || 'Connected'}</span>
+            </p>`
         ).join('');
     }
 }
