@@ -47,6 +47,9 @@ class Response(models.Model):
     question = models.ForeignKey(
         to=Question, null=False, blank=False, on_delete=models.CASCADE
     )
+    participant_session = models.ForeignKey(
+        to=ParticipantSession, null=True, blank=True, on_delete=models.CASCADE
+    )
     response_text = models.CharField(null=False, blank=False, max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
