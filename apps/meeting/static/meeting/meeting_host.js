@@ -107,7 +107,7 @@ function handleParticipantJoined(data) {
 function handleParticipantLeft(data) {
     if (data.id) {
         // Find the participant and update their status instead of removing them
-        const participant = participants.find(p => p.id === data.id);
+        const participant = participants.find(p => p.name === data.name);
         if (participant) {
             participant.status = 'Disconnected';
         }
@@ -119,7 +119,7 @@ function handleParticipantLeft(data) {
         // Update the display to show all participants with their current status
         updateParticipantDisplay();
         updateSubmissionTracker(); // Update tracker when participants change
-        console.log('Participant disconnected:', data.id);
+        console.log('Participant disconnected:', data.name);
     }
 }
 

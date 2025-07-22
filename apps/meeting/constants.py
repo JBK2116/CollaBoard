@@ -41,7 +41,7 @@ class CloseCodes(Enum):
     Codes sent to frontend on
     errors and invalid demands.
     """
-
+    NO_MEETING = ("Meeting does not exist", 4006)
     NO_QUESTIONS = ("No questions found", 4004)
     NO_URL_ROUTE = ("Missing or invalid URL route", 4001)
     NO_SESSION = ("Missing or invalid session", 4002)
