@@ -29,6 +29,9 @@ class ParticipantSession(models.Model):
     id = models.IntegerField(primary_key=True)
     meeting = models.ForeignKey(to=Meeting, on_delete=models.CASCADE)
     name = models.CharField(null=False, max_length=30, unique=True)
+    total_responses = models.IntegerField(
+        null=False, default=0, validators=[MinValueValidator(0)]
+    )
     sessiontoken = models.CharField(
         null=False,
         max_length=66,
