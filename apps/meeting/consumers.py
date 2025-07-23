@@ -58,7 +58,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             )
             return
         self.access_code: str = meeting_data.access_code
-        self.meeting_duration: int = meeting_data.meeting.duration
+        self.meeting_duration_seconds: int = meeting_data.meeting.duration
         self.participant_count: int = 0
 
         # 5: Ensure questions exist
@@ -94,7 +94,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 "access_code": self.access_code,
             }
         )
-
+        self.total_questions_asked: int = 1
         # 9: Cache -> Create usernames cache to track participant usernames
         await cache.aset(key=utils.get_username_cache_key(self.access_code), value=[])
 
@@ -141,7 +141,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         )
         # Create timer to end the meeting if it exceeds the allowed duration
         self.end_meeting_timer = asyncio.create_task(
-            self.end_meeting_after_duration(self.meeting_duration)
+            self.end_meeting_after_duration(self.meeting_duration_seconds)
         )
         # Create timer to track actual meeting duration
         self.meeting_duration_timer = asyncio.create_task(
@@ -167,30 +167,32 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             pass  # Cancelled on purpose
 
     async def end_meeting(self, event: dict[str, Any]) -> None:
-        # Cancel the end meeting timer if it's still running
+        # NOTE: Cancel all timers
         if (
             hasattr(self, "end_meeting_timer")
             and self.end_meeting_timer
             and not self.end_meeting_timer.done()
         ):
-            # NOTE: Cancel all timers
             self.end_meeting_timer.cancel()
             try:
-                await self.end_meeting_timer  # let it cancel
+                await self.end_meeting_timer
             except asyncio.CancelledError:
-                pass  # Timer successfully cancelled
-        # Cancel the meeting duration timer
-        if (hasattr(self, "meeting_duration_timer") and self.meeting_duration_timer):
+                pass
+        if hasattr(self, "meeting_duration_timer") and self.meeting_duration_timer:
             self.meeting_duration_timer.cancel()
             try:
                 time: int = await self.meeting_duration_timer
-                self.meeting_duration = time
+                self.meeting_duration_seconds = time
             except asyncio.CancelledError:
                 pass
-        print(self.meeting_duration)
-
+        await utils.set_meeting_duration_seconds_field(
+            access_code=self.access_code, seconds=self.meeting_duration_seconds
+        )
         await utils.set_participant_count(
             access_code=self.access_code, count=self.participant_count
+        )
+        await utils.set_total_questions_asked(
+            access_code=self.access_code, question_count=self.total_questions_asked
         )
 
         # Send end meeting message to host frontend
@@ -216,6 +218,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
                 message={"type": MessageTypes.NEXT_QUESTION, "question": question},
             )
+        self.total_questions_asked += 1
 
     async def answer_submitted(self, event: dict[str, Any]) -> None:
         # User submitted an answer

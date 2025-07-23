@@ -13,6 +13,9 @@ class Meeting(models.Model):
     director = models.ForeignKey(to=CustomUser, null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=40, null=False, blank=False)
     description = models.CharField(max_length=300, null=False, blank=False)
+    total_questions_asked = models.PositiveIntegerField(
+        null=False, default=0, help_text="Amount of questions asked during the meeting"
+    )
     duration = models.IntegerField(
         null=False,
         validators=[MinValueValidator(1), MaxValueValidator(60)],
@@ -27,6 +30,23 @@ class Meeting(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+    def format_duration_in_seconds(self) -> str:
+        total_seconds = self.duration_in_seconds
+
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+
+        parts = []
+        if hours:
+            parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+        if minutes:
+            parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+        if seconds or not parts:
+            parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+        return " ".join(parts)
 
 
 class Question(models.Model):

@@ -148,7 +148,7 @@ async def set_participant_count(access_code: str, count: int) -> bool:
     Set's the participants field to the provided `count` value.
 
     Args:
-        meeting_id (str): The id of the meeting.
+        access_code (str): The access code of the meeting.
         count (int): The value to be used.
 
     Returns:
@@ -159,6 +159,40 @@ async def set_participant_count(access_code: str, count: int) -> bool:
         return False  # NOTE: meeting should never be none at this point
     if 0 < count <= 1000:
         meeting.participants = count
+        await database_sync_to_async(meeting.save)()
+        return True
+    else:
+        return False
+
+
+async def set_meeting_duration_seconds_field(access_code: str, seconds: int) -> bool:
+    """
+    Set's the `duration_in_seconds` field to the provided `seconds` value.
+
+    Args:
+        access_code (str): The access code of the meeting.
+        seconds (int): The value to be used.
+
+    Returns:
+        - None
+    """
+    meeting: Meeting | None = await get_meeting_by_access_code(access_code=access_code)
+    if not meeting:
+        return False  # NOTE: meeting should never be none at this point
+    if 0 <= seconds <= 3600:
+        meeting.duration_in_seconds = seconds
+        await database_sync_to_async(meeting.save)()
+        return True
+    else:
+        return False
+
+
+async def set_total_questions_asked(access_code: str, question_count: int) -> bool:
+    meeting: Meeting | None = await get_meeting_by_access_code(access_code=access_code)
+    if not meeting:
+        return False
+    if 0 <= question_count <= 20:
+        meeting.total_questions_asked = question_count
         await database_sync_to_async(meeting.save)()
         return True
     else:
@@ -228,7 +262,7 @@ async def meeting_duration_counter() -> int:
     Tracks the meeting's elapsed time in seconds
     ! IMPORTANT: MUST BE MANUALLY CANCELLED OR IT WILL BE AN INFINITE LOOP
     """
-    counter: int = 0
+    counter: int = 1
     try:
         while True:
             await asyncio.sleep(1)
