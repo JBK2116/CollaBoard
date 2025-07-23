@@ -8,10 +8,10 @@ The types of functions include "database query functions",
 import uuid
 from typing import NamedTuple
 
+from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
-from channels.db import database_sync_to_async
-from asgiref.sync import sync_to_async
 
 from apps.base.models import CustomUser
 from apps.director.models import Meeting, Question

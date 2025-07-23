@@ -78,6 +78,9 @@ function handleMessage(data) {
         case MessageTypes.ANSWER_SUBMITTED:
             handleAnswerSubmitted(data);
             break;
+        case MessageTypes.END_MEETING:
+            handleMeetingEnd();
+            break;
         default:
             console.log('Unknown message type:', data.type);
     }
@@ -105,7 +108,7 @@ function handleParticipantJoined(data) {
 }
 
 function handleParticipantLeft(data) {
-    if (data.id) {
+    if (data.name) {
         // Find the participant and update their status instead of removing them
         const participant = participants.find(p => p.name === data.name);
         if (participant) {
@@ -132,7 +135,13 @@ function handleAnswerSubmitted(data) {
 // Button event listeners
 document.getElementById('start-btn').addEventListener('click', function() {
     if (!meetingStarted && meetingQuestions.length > 0) {
-        startMeeting();
+        participantsAmount = participants.length
+        if (!participantsAmount >  0) {
+            showPopupNotice("You need a participant to begin a meeting")
+        }
+        else {
+            startMeeting()
+        }
     }
 });
 
@@ -190,7 +199,6 @@ function endMeeting() {
     };
     
     sendMessage(message);
-    handleMeetingEnd();
 }
 
 function sendMessage(message) {
@@ -324,4 +332,28 @@ function getCookie(name) {
 function getMeetingID() {
     const pathParts = window.location.pathname.split('/');
     return pathParts[2];
+}
+
+function showPopupNotice(message, duration = 2000) {
+    const popup = document.createElement('div');
+    popup.textContent = message;
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    popup.style.color = 'white';
+    popup.style.padding = '1rem 1.5rem';
+    popup.style.borderRadius = '8px';
+    popup.style.fontWeight = '600';
+    popup.style.fontSize = '1rem';
+    popup.style.zIndex = '9999';
+    popup.style.textAlign = 'center';
+    popup.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        popup.remove();
+    }, duration);
 }

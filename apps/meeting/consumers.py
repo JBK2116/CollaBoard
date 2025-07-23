@@ -1,3 +1,4 @@
+import asyncio
 import json
 import uuid
 from typing import Any
@@ -56,7 +57,8 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 message=CloseCodes.NO_MEETING.message, code=CloseCodes.NO_MEETING.code
             )
             return
-        self.access_code = meeting_data.access_code
+        self.access_code: str = meeting_data.access_code
+        self.meeting_duration: int = meeting_data.meeting.duration
 
         # 5: Ensure questions exist
         if not meeting_data.questions:
@@ -136,6 +138,10 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         await cache.aset(
             key=f"{GroupPrefixes.MEETING_LOCKED}{self.access_code}", value=True
         )
+        # Create timer to end the meeting if it exceeds the allowed duration
+        self.end_meeting_timer = asyncio.create_task(
+            self.end_meeting_after_duration(self.meeting_duration)
+        )
         # Send the first question to all participants
         question: str = event.get("question", "")
         if question:
@@ -144,7 +150,33 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 message={"type": MessageTypes.START_MEETING, "question": question},
             )
 
+    async def end_meeting_after_duration(self, duration: int) -> None:
+        """
+        Sends an `end` meeting message to both frontends after duration time is elapsed
+        DURATION MUST BE IN MINUTES
+        """
+        try:
+            await asyncio.sleep(duration * 60)
+            await self.end_meeting({"type": MessageTypes.END_MEETING})
+        except asyncio.CancelledError:
+            pass  # Cancelled on purpose
+
     async def end_meeting(self, event: dict[str, Any]) -> None:
+        # Cancel the end meeting timer if it's still running
+        if (
+            hasattr(self, "end_meeting_timer")
+            and self.end_meeting_timer
+            and not self.end_meeting_timer.done()
+        ):
+            self.end_meeting_timer.cancel()
+            try:
+                await self.end_meeting_timer  # let it cancel
+            except asyncio.CancelledError:
+                pass  # Timer successfully cancelled
+
+        # Send end meeting message to host frontend
+        await self._send_json(data={"type": MessageTypes.END_MEETING})
+
         # Trigger end meeting for all participants
         await self.channel_layer.group_send(
             group=f"{GroupPrefixes.PARTICIPANT}{self.access_code}",
