@@ -38,9 +38,22 @@ def participant_meeting(request: HttpRequest, access_code: str) -> HttpResponse:
         raise Http404("Meeting not found")
 
 
+@login_required
+def post_meeting_host(request: HttpRequest, meeting_id: str) -> HttpResponse:
+    try:
+        meeting: Meeting = Meeting.objects.get(id=meeting_id)
+        return render(
+            request,
+            template_name="meeting/meeting_summary.html",
+            context={"meeting": meeting},
+        )
+    except Meeting.DoesNotExist:
+        raise Http404("Meeting not found")
+
+
 def meeting_locked(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="meeting/meeting_locked.html")
 
 
-def post_meeting(request: HttpRequest) -> HttpResponse:
+def post_meeting_participant(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="meeting/post_meeting.html")

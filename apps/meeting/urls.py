@@ -10,5 +10,6 @@ urlpatterns = [
         name="participant-meeting",
     ),
     path("locked/", view=views.meeting_locked, name="meeting-locked"),
-    path("ended/", view=views.post_meeting, name="post-meeting")
+    path("<str:meeting_id>/ended/", views.post_meeting_host, name="post-meeting-host"),
+    path("ended/", view=views.post_meeting_participant, name="post-meeting"),
 ]

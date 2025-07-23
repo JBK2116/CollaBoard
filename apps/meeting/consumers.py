@@ -59,6 +59,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             return
         self.access_code: str = meeting_data.access_code
         self.meeting_duration: int = meeting_data.meeting.duration
+        self.participant_count: int = 0
 
         # 5: Ensure questions exist
         if not meeting_data.questions:
@@ -142,6 +143,10 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         self.end_meeting_timer = asyncio.create_task(
             self.end_meeting_after_duration(self.meeting_duration)
         )
+        # Create timer to track actual meeting duration
+        self.meeting_duration_timer = asyncio.create_task(
+            utils.meeting_duration_counter()
+        )
         # Send the first question to all participants
         question: str = event.get("question", "")
         if question:
@@ -168,14 +173,33 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             and self.end_meeting_timer
             and not self.end_meeting_timer.done()
         ):
+            # NOTE: Cancel all timers
             self.end_meeting_timer.cancel()
             try:
                 await self.end_meeting_timer  # let it cancel
             except asyncio.CancelledError:
                 pass  # Timer successfully cancelled
+        # Cancel the meeting duration timer
+        if (hasattr(self, "meeting_duration_timer") and self.meeting_duration_timer):
+            self.meeting_duration_timer.cancel()
+            try:
+                time: int = await self.meeting_duration_timer
+                self.meeting_duration = time
+            except asyncio.CancelledError:
+                pass
+        print(self.meeting_duration)
+
+        await utils.set_participant_count(
+            access_code=self.access_code, count=self.participant_count
+        )
 
         # Send end meeting message to host frontend
-        await self._send_json(data={"type": MessageTypes.END_MEETING})
+        await self._send_json(
+            data={
+                "type": MessageTypes.END_MEETING,
+                "url": f"{reverse(viewname='post-meeting-host', kwargs={'meeting_id': str(self.meeting_id)})}",
+            }
+        )
 
         # Trigger end meeting for all participants
         await self.channel_layer.group_send(
@@ -201,6 +225,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         participant_channel = event.get("participant_channel")
         participant_name = event.get("participant_name")
         if participant_channel and participant_name:
+            self.participant_count += 1
             await self._send_json(
                 data={
                     "type": MessageTypes.PARTICIPANT_JOINED,

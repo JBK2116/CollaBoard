@@ -81,7 +81,7 @@ function handleMessage(data) {
       handleAnswerSubmitted(data);
       break;
     case MessageTypes.END_MEETING:
-      handleMeetingEnd();
+      handleMeetingEnd(data);
       break;
     default:
       console.log("Unknown message type:", data.type);
@@ -230,13 +230,9 @@ function updateMeetingUI() {
   disableButton("end-btn", false);
   startCountdown();
 }
-
-function handleMeetingEnd() {
-  disableButton("start-btn", true);
-  disableButton("next-btn", true);
-  disableButton("end-btn", true);
-  updateStatus("Meeting ended");
-  pauseCountdown();
+// TODO: In this function use data.url to redirect the host to the post meeting page
+function handleMeetingEnd(data) {
+  window.location.replace(data.url)
 }
 
 function updateQuestionDisplay() {

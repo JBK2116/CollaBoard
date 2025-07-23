@@ -1,0 +1,401 @@
+/* Meeting Summary Page Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f8fafc;
+    padding-top: 80px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Main Layout */
+.dashboard-main {
+    padding: 40px 0;
+}
+
+/* Header Section */
+.welcome-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.welcome-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.welcome-title {
+    font-size: clamp(2.5rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.welcome-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+    color: #718096;
+    line-height: 1.6;
+}
+
+/* Action Cards Section */
+.action-section {
+    margin-bottom: 60px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.primary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.primary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+}
+
+.secondary-card {
+    background: white;
+    color: #2d3748;
+}
+
+.card-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.secondary-card .card-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.primary-card .card-icon {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.card-title {
+    font-size: clamp(1.3rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.card-description {
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+.secondary-card .card-description {
+    color: #718096;
+    opacity: 1;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 28px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    position: relative;
+    z-index: 1;
+    border: none;
+    cursor: pointer;
+    min-width: 160px;
+}
+
+.btn-card-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-card-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-card-secondary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.btn-card-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Session Details Section */
+.stats-section {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.stats-title {
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+}
+
+.tips-list li {
+    padding: 12px 0;
+    color: #718096;
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    line-height: 1.6;
+    position: relative;
+    padding-left: 28px;
+    border-bottom: 1px solid #f7fafc;
+}
+
+.tips-list li:last-child {
+    border-bottom: none;
+}
+
+.tips-list li::before {
+    content: '📊';
+    position: absolute;
+    left: 0;
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .action-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    .dashboard-main {
+        padding: 30px 0;
+    }
+    
+    .welcome-section {
+        margin-bottom: 40px;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        max-width: 100%;
+    }
+    
+    .action-card {
+        padding: 28px 20px;
+    }
+    
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 16px;
+    }
+    
+    .card-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .action-section {
+        margin-bottom: 40px;
+    }
+    
+    .stats-card {
+        padding: 24px;
+        margin: 0 16px;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-main {
+        padding: 20px 0;
+    }
+    
+    .welcome-section {
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        padding: 24px 16px;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 14px;
+    }
+    
+    .card-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        width: 100%;
+        max-width: 240px;
+        min-width: auto;
+    }
+    
+    .action-section {
+        margin-bottom: 30px;
+    }
+    
+    .stats-card {
+        padding: 20px;
+    }
+    
+    .tips-list li {
+        padding: 10px 0;
+        padding-left: 24px;
+    }
+}
+
+/* Large screens optimization */
+@media (min-width: 1400px) {
+    .welcome-title {
+        font-size: 3.5rem;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.4rem;
+    }
+    
+    .action-grid {
+        max-width: 1100px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .action-card {
+        padding: 40px 32px;
+    }
+    
+    .card-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
+    }
+    
+    .card-icon svg {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* Special styling for meeting summary specific elements */
+.meeting-summary-highlight {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animation for page load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.action-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.action-card:nth-child(1) { animation-delay: 0.1s; }
+.action-card:nth-child(2) { animation-delay: 0.2s; }
+.action-card:nth-child(3) { animation-delay: 0.3s; }
+.action-card:nth-child(4) { animation-delay: 0.4s; }
+
+.stats-section {
+    animation: fadeInUp 0.6s ease-out 0.5s both;
+}
