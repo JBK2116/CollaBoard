@@ -18,6 +18,9 @@ class Meeting(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(60)],
         help_text="Meeting duration in minutes",
     )
+    duration_in_seconds = models.PositiveIntegerField(
+        null=False, default=0, help_text="Meeting duration in seconds"
+    )
     participants = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

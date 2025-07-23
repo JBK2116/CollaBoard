@@ -5,12 +5,12 @@ The types of functions include "database query functions",
 "authentication functions", and more.
 """
 
+import asyncio
 import uuid
 from typing import NamedTuple
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
-import asyncio
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 
@@ -221,6 +221,7 @@ def get_user_from_session(session_key: str) -> CustomUser | None:
     except (Session.DoesNotExist, CustomUser.DoesNotExist):
         pass
     return None
+
 
 async def meeting_duration_counter() -> int:
     """
