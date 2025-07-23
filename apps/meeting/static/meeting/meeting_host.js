@@ -232,7 +232,7 @@ function updateMeetingUI() {
 }
 // TODO: In this function use data.url to redirect the host to the post meeting page
 function handleMeetingEnd(data) {
-  window.location.replace(data.url)
+  window.location.replace(data.url);
 }
 
 function updateQuestionDisplay() {

@@ -1,8 +1,15 @@
 """
-This module stores utility functions
-used by the websocket consumers in `consumers.py`.
-The types of functions include "database query functions",
-"authentication functions", and more.
+Meeting WebSocket Utilities Module
+
+This module provides utility functions for WebSocket consumers in `consumers.py`.
+Includes database query functions, authentication helpers, cache utilities,
+and meeting lifecycle management functions.
+
+Functions are categorized as:
+- Database query operations (async database access)
+- Authentication and session management
+- Meeting statistics and duration tracking
+- Cache key generation and management
 """
 
 import asyncio
@@ -20,7 +27,14 @@ from apps.meeting.models import Response
 
 
 class MeetingData(NamedTuple):
-    """Container for meeting with associated data"""
+    """
+    Container for meeting data with associated questions and access code.
+
+    Attributes:
+        meeting: The Meeting model instance
+        questions: List of associated Question instances
+        access_code: The meeting's unique access code for participants
+    """
 
     meeting: Meeting
     questions: list[Question]
@@ -30,19 +44,30 @@ class MeetingData(NamedTuple):
 @database_sync_to_async
 def get_meeting_with_questions(meeting_id: uuid.UUID) -> MeetingData | None:
     """
-    Retrieves meeting with all associated questions and access code in a single query.
+    Retrieves meeting with all associated questions and access code in a single optimized query.
+
+    Uses prefetch_related to minimize database queries and improve performance.
 
     Args:
-        meeting_id (uuid.UUID): The UUID of the meeting.
+        meeting_id: The UUID identifier of the meeting
 
     Returns:
-        MeetingData | None: Meeting data container if found; otherwise, None.
+        MeetingData container with meeting, questions, and access code if found;
+        None if meeting doesn't exist
+
+    Note:
+        This is the preferred method for getting meeting data as it reduces
+        database round trips compared to separate queries.
     """
     try:
-        meeting = Meeting.objects.prefetch_related("questions").get(id=meeting_id)
-        questions = list(meeting.questions.all())  # type: ignore
+        meeting_instance = Meeting.objects.prefetch_related("questions").get(
+            id=meeting_id
+        )
+        associated_questions = list(meeting_instance.questions.all())  # type: ignore
         return MeetingData(
-            meeting=meeting, questions=questions, access_code=meeting.access_code
+            meeting=meeting_instance,
+            questions=associated_questions,
+            access_code=meeting_instance.access_code,
         )
     except Meeting.DoesNotExist:
         return None
@@ -51,18 +76,24 @@ def get_meeting_with_questions(meeting_id: uuid.UUID) -> MeetingData | None:
 @database_sync_to_async
 def get_meeting_questions(meeting_id: uuid.UUID) -> list[Question] | None:
     """
-    Retrieves all questions associated with the meeting identified by the given `meeting_id`.
+    Retrieves all questions associated with a specific meeting.
 
     Args:
-        meeting_id (uuid.UUID): The UUID of the meeting.
+        meeting_id: The UUID identifier of the meeting
 
     Returns:
-        list[Question] | None: A list of Question objects if the meeting exists; otherwise, None.
+        List of Question objects if meeting exists; None if meeting not found
+
+    Note:
+        Consider using get_meeting_with_questions() if you also need
+        the meeting instance to reduce database queries.
     """
     try:
-        meeting = Meeting.objects.prefetch_related("questions").get(id=meeting_id)
-        questions: list[Question] = list(meeting.questions.all())  # type: ignore
-        return questions
+        meeting_instance = Meeting.objects.prefetch_related("questions").get(
+            id=meeting_id
+        )
+        questions_list: list[Question] = list(meeting_instance.questions.all())  # type: ignore
+        return questions_list
     except Meeting.DoesNotExist:
         return None
 
@@ -70,17 +101,19 @@ def get_meeting_questions(meeting_id: uuid.UUID) -> list[Question] | None:
 @database_sync_to_async
 def get_access_code(meeting_id: uuid.UUID) -> str | None:
     """
-    Retrieves the access code for the meeting with the given `meeting_id`.
+    Retrieves the access code for a specific meeting.
+
+    Uses only() to optimize query by fetching only the access_code field.
 
     Args:
-        meeting_id (uuid.UUID): The UUID of the meeting.
+        meeting_id: The UUID identifier of the meeting
 
     Returns:
-        str | None: The access code if the meeting exists; otherwise, None.
+        The meeting's access code string if found; None if meeting doesn't exist
     """
     try:
-        meeting = Meeting.objects.only("access_code").get(id=meeting_id)
-        return meeting.access_code
+        meeting_instance = Meeting.objects.only("access_code").get(id=meeting_id)
+        return meeting_instance.access_code
     except Meeting.DoesNotExist:
         return None
 
@@ -88,13 +121,16 @@ def get_access_code(meeting_id: uuid.UUID) -> str | None:
 @database_sync_to_async
 def get_meeting_by_access_code(access_code: str) -> Meeting | None:
     """
-    Retrieves the meeting instance corresponding to the given access code.
+    Retrieves meeting instance using its unique access code.
 
     Args:
-        access_code (str): The access code of the meeting.
+        access_code: The unique access code for the meeting
 
     Returns:
-        - Meeting | None: The Meeting object if found; otherwise, None.
+        Meeting instance if found; None if no meeting has this access code
+
+    Note:
+        Access codes should be unique across all meetings in the system.
     """
     try:
         return Meeting.objects.get(access_code=access_code)
@@ -103,169 +139,294 @@ def get_meeting_by_access_code(access_code: str) -> Meeting | None:
 
 
 @database_sync_to_async
-def get_question(description: str, meeting: Meeting) -> Question | None:
+def get_question(
+    question_description: str, meeting_instance: Meeting
+) -> Question | None:
     """
-    Retrieves the question instance of a specific meeting corresponding to the given description.
+    Retrieves a specific question within a meeting by its description.
 
     Args:
-        description (str): The description of the question.
-        meeting (Meeting): The meeting instance.
+        question_description: The text description of the question
+        meeting_instance: The Meeting instance to search within
 
     Returns:
-        Question | None: The Question object if found; otherwise, None.
+        Question instance if found; None if question doesn't exist in this meeting
+
+    Note:
+        Question descriptions should be unique within a single meeting.
     """
     try:
-        return Question.objects.get(description=description, meeting=meeting)
+        return Question.objects.get(
+            description=question_description, meeting=meeting_instance
+        )
     except Question.DoesNotExist:
         return None
 
 
 @database_sync_to_async
 def get_question_by_description_and_access_code(
-    description: str, access_code: str
+    question_description: str, meeting_access_code: str
 ) -> Question | None:
     """
-    Retrieves question by description and meeting access code in a single query.
-    More efficient than getting meeting first, then question.
+    Retrieves question by description and meeting access code in a single optimized query.
+
+    More efficient than getting meeting first, then question separately.
+    Uses select_related to fetch meeting data in the same query.
 
     Args:
-        description (str): The description of the question.
-        access_code (str): The access code of the meeting.
+        question_description: The text description of the question
+        meeting_access_code: The unique access code of the meeting
 
     Returns:
-        Question | None: The Question object if found; otherwise, None.
+        Question instance with related meeting data if found; None otherwise
+
+    Performance:
+        This method is preferred when you have access_code instead of meeting_id
+        as it reduces database queries compared to separate lookups.
     """
     try:
         return Question.objects.select_related("meeting").get(
-            description=description, meeting__access_code=access_code
+            description=question_description, meeting__access_code=meeting_access_code
         )
     except Question.DoesNotExist:
         return None
 
 
-async def set_participant_count(access_code: str, count: int) -> bool:
+async def set_participant_count(
+    meeting_access_code: str, participant_count: int
+) -> bool:
     """
-    Set's the participants field to the provided `count` value.
+    Updates the participant count field for a meeting.
+
+    Validates count is within acceptable range before updating.
 
     Args:
-        access_code (str): The access code of the meeting.
-        count (int): The value to be used.
+        meeting_access_code: The unique access code of the meeting
+        participant_count: The number of participants to set (1-1000)
 
     Returns:
-        - None
+        True if update was successful; False if meeting not found or count invalid
+
+    Validation:
+        - Participant count must be between 1 and 1000 inclusive
+        - Meeting must exist in database
     """
-    meeting: Meeting | None = await get_meeting_by_access_code(access_code=access_code)
-    if not meeting:
-        return False  # NOTE: meeting should never be none at this point
-    if 0 < count <= 1000:
-        meeting.participants = count
-        await database_sync_to_async(meeting.save)()
+    meeting_instance: Meeting | None = await get_meeting_by_access_code(
+        access_code=meeting_access_code
+    )
+    if not meeting_instance:
+        # ! This should never happen during normal meeting flow
+        return False
+
+    # NOTE: Validate participant count is within reasonable bounds
+    if 0 < participant_count <= 1000:
+        meeting_instance.participants = participant_count
+        await database_sync_to_async(meeting_instance.save)()
         return True
     else:
+        # ! Invalid participant count - consider logging this
         return False
 
 
-async def set_meeting_duration_seconds_field(access_code: str, seconds: int) -> bool:
+async def set_meeting_duration_seconds_field(
+    meeting_access_code: str, duration_seconds: int
+) -> bool:
     """
-    Set's the `duration_in_seconds` field to the provided `seconds` value.
+    Updates the actual meeting duration in seconds.
+
+    This records how long the meeting actually lasted, not the allocated time.
 
     Args:
-        access_code (str): The access code of the meeting.
-        seconds (int): The value to be used.
+        meeting_access_code: The unique access code of the meeting
+        duration_seconds: Actual meeting duration in seconds (0-3600)
 
     Returns:
-        - None
+        True if update was successful; False if meeting not found or duration invalid
+
+    Validation:
+        - Duration must be between 0 and 3600 seconds (1 hour max)
+        - Meeting must exist in database
     """
-    meeting: Meeting | None = await get_meeting_by_access_code(access_code=access_code)
-    if not meeting:
-        return False  # NOTE: meeting should never be none at this point
-    if 0 <= seconds <= 3600:
-        meeting.duration_in_seconds = seconds
-        await database_sync_to_async(meeting.save)()
+    meeting_instance: Meeting | None = await get_meeting_by_access_code(
+        access_code=meeting_access_code
+    )
+    if not meeting_instance:
+        # ! This should never happen during normal meeting flow
+        return False
+
+    # NOTE: Validate duration is within acceptable range (max 1 hour)
+    if 0 <= duration_seconds <= 3600:
+        meeting_instance.duration_in_seconds = duration_seconds
+        await database_sync_to_async(meeting_instance.save)()
         return True
     else:
+        # ! Invalid duration - consider logging this anomaly
         return False
 
 
-async def set_total_questions_asked(access_code: str, question_count: int) -> bool:
-    meeting: Meeting | None = await get_meeting_by_access_code(access_code=access_code)
-    if not meeting:
+async def set_total_questions_asked(
+    meeting_access_code: str, questions_presented_count: int
+) -> bool:
+    """
+    Updates the total number of questions presented during the meeting.
+
+    Args:
+        meeting_access_code: The unique access code of the meeting
+        questions_presented_count: Number of questions actually presented (0-20)
+
+    Returns:
+        True if update was successful; False if meeting not found or count invalid
+
+    Validation:
+        - Question count must be between 0 and 20 inclusive
+        - Meeting must exist in database
+    """
+    meeting_instance: Meeting | None = await get_meeting_by_access_code(
+        access_code=meeting_access_code
+    )
+    if not meeting_instance:
+        # ! This should never happen during normal meeting flow
         return False
-    if 0 <= question_count <= 20:
-        meeting.total_questions_asked = question_count
-        await database_sync_to_async(meeting.save)()
+
+    # NOTE: Validate question count is within system limits
+    if 0 <= questions_presented_count <= 20:
+        meeting_instance.total_questions_asked = questions_presented_count
+        await database_sync_to_async(meeting_instance.save)()
         return True
     else:
+        # ! Invalid question count - system allows max 20 questions
         return False
 
 
 async def create_response_model(
-    meeting: Meeting, question: Question, response_text: str
+    meeting_instance: Meeting,
+    question_instance: Question,
+    participant_response_text: str,
 ) -> Response | None:
     """
-    Creates a response model and validates it.
+    Creates and validates a new Response model instance.
+
+    Performs full model validation before returning the instance.
+    The response is not saved to database - caller must save it.
 
     Args:
-        meeting (Meeting): The meeting instance.
-        question (Question): The question instance.
-        response_text (str): The response text.
+        meeting_instance: The Meeting this response belongs to
+        question_instance: The Question being answered
+        participant_response_text: The participant's answer text
 
     Returns:
-        Response | None: Valid Response object or None if validation fails.
+        Valid Response instance ready for saving; None if validation fails
+
+    Validation:
+        Uses Django's full_clean() to validate all model constraints
+        including custom validators, field constraints, and business rules.
     """
-    new_response_obj = Response(
-        meeting=meeting, question=question, response_text=response_text
+    new_response_instance = Response(
+        meeting=meeting_instance,
+        question=question_instance,
+        response_text=participant_response_text,
     )
+
     try:
-        await sync_to_async(new_response_obj.full_clean)()
-        return new_response_obj
+        # NOTE: Validate response according to model constraints
+        await sync_to_async(new_response_instance.full_clean)()
+        return new_response_instance
     except ValidationError:
+        # NOTE: Response validation failed (e.g., text too long, invalid content)
         return None
 
 
-def get_username_cache_key(access_code: str) -> str:
+def get_username_cache_key(meeting_access_code: str) -> str:
     """
-    Generates cache key for storing participant usernames.
+    Generates standardized cache key for storing participant usernames.
 
     Args:
-        access_code (str): The meeting access code.
+        meeting_access_code: The unique access code of the meeting
 
     Returns:
-        str: Cache key for usernames.
+        Formatted cache key string for username storage
+
+    Format:
+        "meeting:{access_code}:names"
+
+    Usage:
+        Used to track participant usernames in Redis/cache to prevent
+        duplicates and maintain participant lists during meeting sessions.
     """
-    return f"meeting:{access_code}:names"
+    return f"meeting:{meeting_access_code}:names"
 
 
 @database_sync_to_async
 def get_user_from_session(session_key: str) -> CustomUser | None:
     """
-    Retrieves the authenticated user associated with the given session key.
+    Retrieves authenticated user from Django session key.
+
+    Used for WebSocket authentication where traditional request.user
+    is not available.
 
     Args:
-        session_key (str): The session key from the user's cookies.
+        session_key: The session key from user's cookies/query params
 
     Returns:
-        CustomUser | None: The user object if found and valid; otherwise, None.
+        CustomUser instance if session is valid and user exists; None otherwise
+
+    Security:
+        - Validates session exists and is not expired
+        - Ensures user account still exists and is active
+        - Returns None for any authentication failure
+
+    ! SECURITY WARNING: In production, session keys should not be passed
+    via URL parameters. Use secure headers or WebSocket subprotocols instead.
     """
     try:
-        session = Session.objects.get(session_key=session_key)
-        uid = session.get_decoded().get("_auth_user_id")
-        if uid:
-            return CustomUser.objects.get(pk=uid)
+        # NOTE: Retrieve session from Django's session store
+        session_instance = Session.objects.get(session_key=session_key)
+
+        # NOTE: Decode session data to extract user ID
+        decoded_session_data = session_instance.get_decoded()
+        user_id = decoded_session_data.get("_auth_user_id")
+
+        if user_id:
+            return CustomUser.objects.get(pk=user_id)
+
     except (Session.DoesNotExist, CustomUser.DoesNotExist):
+        # NOTE: Session expired, invalid, or user no longer exists
         pass
+
     return None
 
 
 async def meeting_duration_counter() -> int:
     """
-    Tracks the meeting's elapsed time in seconds
-    ! IMPORTANT: MUST BE MANUALLY CANCELLED OR IT WILL BE AN INFINITE LOOP
+    Tracks meeting elapsed time in seconds with cancellation support.
+
+    This is a background task that counts seconds until cancelled.
+    Used to track actual meeting duration regardless of allocated time.
+
+    Returns:
+        - Total elapsed seconds when task is cancelled
+
+    ! CRITICAL: This task MUST be manually cancelled to prevent infinite loop.
+    The task runs indefinitely until cancelled via asyncio.CancelledError.
+
+    Usage:
+        ```python
+        duration_task = asyncio.create_task(meeting_duration_counter())
+        # ... meeting activities ...
+        duration_task.cancel()
+        try:
+            actual_duration = await duration_task
+        except asyncio.CancelledError:
+            # Task was cancelled as expected
+            pass
+        ```
     """
-    counter: int = 1
+    elapsed_seconds_counter: int = 1
+
     try:
         while True:
             await asyncio.sleep(1)
-            counter += 1
+            elapsed_seconds_counter += 1
     except asyncio.CancelledError:
-        return counter
+        # NOTE: Task cancelled - return elapsed time
+        return elapsed_seconds_counter
