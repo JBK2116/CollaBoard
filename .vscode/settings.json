@@ -1,0 +1,24 @@
+{
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // For JS
+  "editor.formatOnSave": true,
+  "[python]": { // For Python (Uses Ruff Settings Defined In pyproject.toml)
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
+  },
+
+  "better-comments.tags": [
+  { "tag": "!", "color": "#FF2D00", "label": "WARNING" },
+  { "tag": "*", "color": "#FFD700", "label": "HIGHLIGHT" },
+  { "tag": "TODO", "color": "#00BFFF", "label": "TODO" },
+  { "tag": "FIXME", "color": "#FF0000", "label": "FIXME" },
+  { "tag": "NOTE", "color": "#00FF00", "label": "NOTE" },
+  { "tag": "?", "color": "#B2B2B2", "label": "QUESTION" }
+]
+}
