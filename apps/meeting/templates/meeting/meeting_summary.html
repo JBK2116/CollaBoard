@@ -36,7 +36,7 @@
                         </div>
                         <h3 class="card-title">Generate Summary</h3>
                         <p class="card-description">Create an automatic summary of all responses and insights from your meeting</p>
-                        <button class="btn btn-card-primary" onclick="generateSummary()">Generate Summary</button>
+                        <button class="btn btn-card-primary" id="generate-btn">Generate Summary</button>
                     </div>
 
                     <!-- Export Summary Card -->
@@ -50,7 +50,7 @@
                         </div>
                         <h3 class="card-title">Export Summary</h3>
                         <p class="card-description">Download your meeting summary as PDF, Word document, or share via email</p>
-                        <button class="btn btn-card-secondary" onclick="exportSummary()">Export Summary</button>
+                        <button class="btn btn-card-secondary" id="export-btn">Export Summary</button>
                     </div>
 
                     <!-- Create Another Meeting Card -->
@@ -81,17 +81,6 @@
             </section>
         </div>
     </main>
-
-    <script>
-        function generateSummary() {
-            // Add your generate summary logic here
-            alert('Generating summary... This will redirect to the summary generation page.');
-        }
-
-        function exportSummary() {
-            // Add your export summary logic here
-            alert('Opening export options... Choose your preferred format (PDF, Word, Email).');
-        }
-    </script>
+    <script src="{% static 'meeting/meeting_summary.js' %}"></script>
 </body>
 </html>
