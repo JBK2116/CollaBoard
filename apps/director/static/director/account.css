@@ -321,6 +321,107 @@ body {
     border-radius: 0 0 16px 16px;
 }
 
+/* Error Popup Styles */
+.error-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 10px 40px rgba(229, 62, 62, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #e53e3e;
+    max-width: 400px;
+    min-width: 320px;
+    z-index: 1001;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.error-popup.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.error-popup.hide {
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.3s ease-in;
+}
+
+.error-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.error-icon {
+    width: 24px;
+    height: 24px;
+    color: #e53e3e;
+    flex-shrink: 0;
+}
+
+.error-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.error-message {
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.error-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.error-close:hover {
+    background: #f7fafc;
+    color: #e53e3e;
+}
+
+/* Progress bar for auto-dismiss */
+.error-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #e53e3e, #c53030);
+    border-radius: 0 0 12px 12px;
+    transform-origin: left;
+    animation: progressBar 4s linear forwards;
+}
+
+@keyframes progressBar {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
@@ -409,6 +510,24 @@ body {
     
     .container {
         padding: 0 16px;
+    }
+    
+    /* Error popup mobile styles */
+    .error-popup {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        min-width: auto;
+        transform: translateY(-120%);
+    }
+
+    .error-popup.show {
+        transform: translateY(0);
+    }
+
+    .error-popup.hide {
+        transform: translateY(-120%);
     }
 }
 

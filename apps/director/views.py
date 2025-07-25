@@ -1,5 +1,5 @@
 from secrets import randbelow
-from typing import Any, cast
+from typing import cast
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -82,14 +82,19 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 def account(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="director/account.html", context={})
 
-# TODO: Finish implementing the view
-# ?: Maybe used claude to make a creation error popup when deletion fails
+
 @login_required
 def delete_account(request: HttpRequest) -> HttpResponse:
-    context: dict[str, Any] = {}
+    # NOTE: This page is supposed to be accessible solely via POST requests
+    if request.method == "GET":
+        return redirect(to="dashboard")
     # NOTE: login_required ensures that user will always be CustomUser
     user: CustomUser = request.user  # type: ignore :)
-    return render(request, template_name="director/account.html", context=context)
+    try:
+        user.delete()
+        return redirect(to="landing")
+    except IntegrityError:
+        return redirect(to=f"{reverse('account')}?deletion_failed=true")
 
 
 def generate_access_code() -> str:
