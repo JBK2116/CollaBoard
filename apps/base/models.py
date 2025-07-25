@@ -45,6 +45,10 @@ class CustomUserManager(BaseUserManager["CustomUser"]):
 class CustomUser(AbstractUser):
     username = None  # type: ignore[assignment]  # Not needed in the application
     email = models.EmailField(max_length=254, unique=True)
+    meetings_created_count = models.PositiveIntegerField(null=False, default=0)
+    total_participants_count = models.PositiveIntegerField(null=False, default=0)
+    total_responses_count = models.PositiveIntegerField(null=False, default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = "email"  # email is now the login field of the model.

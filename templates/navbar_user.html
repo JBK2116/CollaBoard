@@ -21,7 +21,7 @@
                 {% csrf_token %}
                 <button type="submit" class="btn btn-login">Logout</button>
             </form>
-            <a href="#" class="btn btn-signup">My Account</a>
+            <a href="{% url 'account' %}" class="btn btn-signup">My Account</a>
         </div>
     </nav>
 </body>

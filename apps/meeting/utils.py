@@ -52,8 +52,8 @@ def get_meeting_with_questions(meeting_id: uuid.UUID) -> MeetingData | None:
         meeting_id: The UUID identifier of the meeting
 
     Returns:
-        MeetingData container with meeting, questions, and access code if found;
-        None if meeting doesn't exist
+        MeetingData: Container with meeting, questions, and access code if found;
+        OR `None: if meeting doesn't exist`
 
     Note:
         This is the preferred method for getting meeting data as it reduces

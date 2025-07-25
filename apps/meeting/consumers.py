@@ -61,6 +61,8 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 code=CloseCodes.AUTH_FAILED.code, message=CloseCodes.AUTH_FAILED.message
             )
             return
+        
+        self.user = authenticated_user
 
         # NOTE: Retrieve meeting data with associated questions
         meeting_data_bundle: (
@@ -78,6 +80,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             meeting_data_bundle.meeting.duration
         )
         self.active_participant_count: int = 0
+        self.total_responses_count: int = 0
 
         # NOTE: Ensure meeting has questions before proceeding
         if not meeting_data_bundle.questions:
@@ -284,6 +287,13 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             questions_presented_count=self.total_questions_presented,
         )
 
+        # NOTE: Update the user's model with the new meeting stats
+        self.user.meetings_created_count += 1
+        self.user.total_participants_count += self.active_participant_count
+        self.user.total_responses_count += self.total_responses_count
+        await self.user.asave()
+
+
         # NOTE: Send meeting completion notification to host frontend
         await self._send_json(
             data={
@@ -330,6 +340,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         Args:
             event: Message event containing answer submission data
         """
+        self.total_responses_count += 1
         await self._send_json(data={"type": MessageTypes.ANSWER_SUBMITTED})
 
     async def participant_joined(self, event: dict[str, Any]) -> None:

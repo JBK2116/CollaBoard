@@ -1,5 +1,5 @@
 from secrets import randbelow
-from typing import cast
+from typing import Any, cast
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -13,6 +13,7 @@ from apps.director.forms import CreateMeetingForm, QuestionFormSet
 from apps.director.models import Meeting, Question
 
 # Create your views here.
+# TODO: Implement the delete-meeting view
 
 
 @login_required
@@ -81,6 +82,16 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 def account(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="director/account.html", context={})
 
+# TODO: Finish implementing the view
+# ?: Maybe used claude to make a creation error popup when deletion fails
+@login_required
+def delete_account(request: HttpRequest) -> HttpResponse:
+    context: dict[str, Any] = {}
+    # NOTE: login_required ensures that user will always be CustomUser
+    user: CustomUser = request.user  # type: ignore :)
+    return render(request, template_name="director/account.html", context=context)
+
 
 def generate_access_code() -> str:
+    # NOTE: Returns a random 8 digit numerical string
     return "".join(str(randbelow(10)) for _ in range(8))

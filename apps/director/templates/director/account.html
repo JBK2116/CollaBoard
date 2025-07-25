@@ -51,7 +51,7 @@
                             </div>
                             <div class="info-item">
                                 <label class="info-label">Username</label>
-                                <span class="info-value">{{ user.username }}</span>
+                                <span class="info-value">{{ user.get_full_name }}</span>
                             </div>
                             <div class="info-item">
                                 <label class="info-label">Account Created</label>
@@ -73,15 +73,15 @@
                         </div>
                         <div class="card-content">
                             <div class="stat-item">
-                                <div class="stat-number">{{ meetings_created_count }}</div>
+                                <div class="stat-number">{{ user.meetings_created_count }}</div>
                                 <div class="stat-label">Meetings Created</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-number">{{ total_participants }}</div>
+                                <div class="stat-number">{{ user.total_participants_count }}</div>
                                 <div class="stat-label">Total Participants</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-number">{{ total_responses }}</div>
+                                <div class="stat-number">{{ user.total_responses_count }}</div>
                                 <div class="stat-label">Responses Collected</div>
                             </div>
                         </div>
@@ -127,7 +127,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <form method="POST" action="{% url 'delete_account' %}" style="display: inline;">
+                <form method="POST" action="{% url 'delete-account' %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Delete Account</button>
                 </form>
