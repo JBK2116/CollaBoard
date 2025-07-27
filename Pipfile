@@ -14,6 +14,7 @@ daphne = "*"
 redis = "*"
 channels-redis = "*"
 channels-stubs = "*"
+openai = "*"
 
 [dev-packages]
 

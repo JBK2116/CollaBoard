@@ -9,6 +9,7 @@ from apps.base.models import CustomUser
 
 class Meeting(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    summarized_meeting = models.JSONField(null=False, default=dict)
     access_code = models.CharField(max_length=8, null=False, blank=False, unique=True)
     director = models.ForeignKey(to=CustomUser, null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=40, null=False, blank=False)
