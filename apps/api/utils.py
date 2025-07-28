@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from apps.director.models import Meeting, Question
 from apps.meeting.models import Response
@@ -46,9 +47,13 @@ def format_meeting_time(time: datetime) -> dict[str, str]:
     }
     ```
     """
+    # NOTE: local_timezone is a timezone converter to convert a datetimefield into the provided key timezone
+    # NOTE: astimezone accepts a timezone converter and converts the datetime object to that timezone
+    local_timezone: ZoneInfo = ZoneInfo(key="America/Toronto")
+    local_time: datetime = time.astimezone(local_timezone)
     time_dictionary: dict[str, str] = {
-        "created_at": time.strftime("%d %B %Y"),
-        "time_created": time.strftime("%H:%M"),
+        "created_at": local_time.strftime("%d %B %Y"),
+        "time_created": local_time.strftime("%H:%M"),
     }
     return time_dictionary
 

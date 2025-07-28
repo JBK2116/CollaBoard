@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 from typing import Any
 
 from django.db import IntegrityError
@@ -25,9 +26,18 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(data={"type": "error"})
 
         meeting: Meeting | None = meeting_data.get("meeting", None)
+        if not meeting:
+            return JsonResponse(data={"type": "error"})
+
+        # NOTE: Meetings are to be summarized only once! Always check before u generate a summary
+        # ! Make sure to uncomment this check before u deploy
+        if meeting.summarized_meeting and meeting.summarized_meeting != {}:
+            print("Meeting already summarized")
+            return JsonResponse(data={"type": "success"})
+
         questions: list[Question] | None = meeting_data.get("questions", None)
         responses: list[Response] | None = meeting_data.get("responses", None)
-        if not meeting or not questions or not responses:
+        if not questions or not responses:
             return JsonResponse(data={"type": "error"})
 
         question_response_dictionary: dict[str, Any] = utils.format_question_responses(
@@ -36,10 +46,6 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         formatted_times: dict[str, str] = utils.format_meeting_time(
             time=meeting.created_at
         )
-
-        print(meeting.title)
-        print(meeting.director.get_full_name())
-        print(formatted_times)
 
         # ! Summarization PROMPT - only ask AI to analyze questions, not generate metadata
         # NOTE: Look into the util's to see how the AI summary response is fully structured
@@ -113,7 +119,6 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
 
             meeting.summarized_meeting = final_summary
             meeting.save()
-            
 
         except (json.JSONDecodeError, IntegrityError):
             return JsonResponse(data={"type": "error"})
@@ -125,13 +130,41 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
 
 def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
     if request.method == "POST":
-        try:
-            data: dict[str, Any] = json.loads(request.body)
-            export_type: str | None = data.get("type", None)
-            if not export_type:
-                return JsonResponse(data={"type": "error"})
-            print(export_type)
-            return JsonResponse(data={})
-        except json.JSONDecodeError:
-            return JsonResponse(data={})
+        export_type: str | None = _get_export_type(request.body)
+        if not export_type:
+            return JsonResponse(data={"type": "error"})
+        
+        meeting: Meeting | None = _get_meeting_by_id(meeting_id=meeting_id)
+        if not meeting:
+            return JsonResponse(data={"type": "error"})
+
     return JsonResponse(data={})
+
+
+def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
+    """
+    Fetches a meeting object from the database via
+    filtering by the provided `meeting_id`
+
+    Returns: Meeting if found, otherwise None
+    """
+    try:
+        meeting: Meeting | None = Meeting.objects.get(id=uuid.UUID(meeting_id))
+        return meeting
+    except Meeting.DoesNotExist:
+        return None
+
+
+def _get_export_type(data: bytes) -> str | None:
+    """
+    Extracts the `type` value from the provided data
+    Assumes that the value will be a valid export type.
+    """
+    try:
+        json_data: dict[str, Any] = json.loads(data)
+        export_type: str | None = json_data.get("type", None)
+        if not export_type:
+            return None
+        return export_type
+    except json.JSONDecodeError:
+        return None
