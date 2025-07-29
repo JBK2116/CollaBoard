@@ -1,28 +1,67 @@
 import uuid
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from apps.director.models import Meeting, Question
 from apps.meeting.models import Response
+from collaboard import settings
+
+SOFT_MAX_RESPONSES = 200  # Used in validating the AIs provided response count field
 
 """
 Summary dict structure:
 {
     "meeting_title": str,          # Meeting title
+    "meeting_description: str,     # Meeting description
     "date": str,                   # Meeting date (formatted)
     "time_created": str,           # Meeting time (formatted)
     "author": str,                 # Meeting director's full name
     "questions_analysis": [        # List of question analysis dicts
         {
-            "question": str,       # Original question text
             "summary": str,        # 3-sentence response synthesis
+            "question": str,       # Original question text
             "response_count": int  # Number of responses
         }
     ],
     "key_takeaways": [str]         # List of actionable takeaway strings
 }
 """
+
+
+class FileTypes(Enum):
+    # NOTE: Google Doc files don't end with a traditional prefix like .pdf or .docx
+    # ? Google Doc Enum will have to be altered later
+    PDF = ".pdf"
+    MICROSOFT_WORD = ".docx"
+    GOOGLE_DOC = ".doc"
+
+
+FILE_NAME_PREFIX: str = "meeting_"
+EXPORT_PATH: Path = Path(settings.MEDIA_ROOT) / "exports"
+
+
+def get_export_path() -> Path:
+    """
+    Returns the export path where all files are saved
+    """
+    return EXPORT_PATH
+
+
+def generate_filename(meeting_id: str, file_type: FileTypes) -> str:
+    """
+    Returns the dynamically created name of the file
+    """
+    return f"{FILE_NAME_PREFIX}{meeting_id}{file_type.value}"
+
+
+def generate_file_path(export_path: Path, filename: str) -> Path:
+    """
+    Returns the full path to where the file is saved
+    """
+    return export_path / filename
 
 
 def format_meeting_time(time: datetime) -> dict[str, str]:
@@ -56,6 +95,110 @@ def format_meeting_time(time: datetime) -> dict[str, str]:
         "time_created": local_time.strftime("%H:%M"),
     }
     return time_dictionary
+
+
+def get_meeting_metadata(data: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    Extracts the meeting metadata from the provided `data`.
+
+    Meeting Metadata includes:
+        - title
+        - description
+        - date (DD//MM/YYYY)
+        - time created (HH:MM)
+        - author (firstname + lastname)
+
+    Returns:
+        - dict[str, Any]: Meeting Metadata if all fields are valid, None otherwise
+
+    Example Return (if all fields are valid):
+        ```
+        {
+            "title": "Title...",
+            "description": "Description...",
+            "date": "Date",
+            "time_created": "Time Created",
+            "author": "John Doe"
+        }
+        ```
+    """
+    metadata = {
+        "title": data.get("meeting_title", None),
+        "description": data.get("meeting_description", None),
+        "date": data.get("date", None),
+        "time_created": data.get("time_created", None),
+        "author": data.get("author", None),
+    }
+    for key, value in metadata.items():
+        if not value:
+            return None
+    return metadata
+
+
+def get_summarized_meeting_question_analysis(
+    data: dict[str, Any],
+) -> list[dict[str, Any]] | None:
+    """
+    Extracts the list of question analysis dictionaries from the provided `data`.
+
+    Additionally validates all fields in each dictionary, ensuring that no field is None
+
+    Each dictionary looks like this:
+        ```
+        {
+            "summary": str,        # 3-sentence response synthesis
+            "question": str,       # Original question text
+            "response_count": int  # Number of responses
+        }
+        ```
+    Returns:
+        - list[dict[str, Any]] | None: The list of question analysis dictionaries if everything is valid, None otherwise.
+    """
+    questions_analysis_dictionaries: list[dict[str, Any]] | None = data.get(
+        "questions_analysis", None
+    )
+    if not questions_analysis_dictionaries:
+        return None
+    for dictionary in questions_analysis_dictionaries:
+        for key, value in dictionary.items():
+            # NOTE: Explicit check for response count since 0 is considered Falsy but is a valid response from the AI
+            if key == "response_count":
+                if not isinstance(value, (str, int)):
+                    return None
+                str_response_count: str = str(value)
+                if not str_response_count.isdigit():
+                    return None
+                int_response_count: int = int(str_response_count)
+                if int_response_count < 0 or int_response_count > SOFT_MAX_RESPONSES:
+                    return None
+            elif not value:
+                return None
+    return questions_analysis_dictionaries
+
+
+def get_summarized_meeting_key_takeaways(data: dict[str, Any]) -> list[str] | None:
+    """
+    Extracts the list of key takeaways strings from the provided `data`
+
+    Additionally ensures that all strings are valid (NOT NONE)
+
+    Key Takeaways looks like this:
+        "key_takeaways": [str]         # List of actionable takeaway strings
+
+    Returns:
+        - list[str] | None: The list of key takeways if everything is valid, None otherwise.
+
+    Example Return (if all is valid):
+        ```
+        ["First String", "Second String", ...]
+        ```
+    """
+    key_takeaways: list[str] | None = data.get("key_takeaways", None)
+    if not key_takeaways:
+        return None
+    if not all(takeaway and takeaway.strip() for takeaway in key_takeaways):
+        return None
+    return key_takeaways
 
 
 def get_meeting_data(meeting_id: str) -> dict[str, Any] | None:

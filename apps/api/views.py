@@ -111,6 +111,7 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             # NOTE: Manually reconstruct the final summary to minimize ai hallucinations
             final_summary = {
                 "meeting_title": meeting.title,
+                "meeting_description": meeting.description,
                 "date": formatted_times["created_at"],
                 "time_created": formatted_times["time_created"],
                 "author": meeting.director.get_full_name(),
@@ -148,7 +149,6 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         result: tuple[bool, str | None] = generate_docx(
             meeting.summarized_meeting, str(meeting.id)
         )
-        print(result)
         if not result[0] or not result[1]:
             return JsonResponse(data={"type": "error"})
         else:
@@ -156,7 +156,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
     else:
         return JsonResponse(data={"type": "error"})
 
-
+# TODO: Implement a file cleanup signal that deletes the file after its sent to the user
 def download_file(request: HttpRequest, filename: str) -> FileResponse:
     # NOTE: response ensures that the file is downloaded on the user's device
     file_path: Path = settings.MEDIA_ROOT / "exports" / filename
