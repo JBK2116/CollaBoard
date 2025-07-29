@@ -1,17 +1,20 @@
 import json
 import os
 import uuid
+from pathlib import Path
 from typing import Any
 
 from django.db import IntegrityError
-from django.http import HttpRequest, JsonResponse
+from django.http import FileResponse, HttpRequest, JsonResponse
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
 from apps.api import utils
+from apps.api.docx_generator import generate_docx
 from apps.director.models import Meeting, Question
 from apps.meeting.models import Response
+from collaboard import settings
 
 # Create your views here.
 load_dotenv()
@@ -115,8 +118,6 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
                 "key_takeaways": ai_analysis.get("key_takeaways", []),
             }
 
-            print(final_summary)
-
             meeting.summarized_meeting = final_summary
             meeting.save()
 
@@ -133,12 +134,34 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         export_type: str | None = _get_export_type(request.body)
         if not export_type:
             return JsonResponse(data={"type": "error"})
-        
+
         meeting: Meeting | None = _get_meeting_by_id(meeting_id=meeting_id)
         if not meeting:
             return JsonResponse(data={"type": "error"})
 
-    return JsonResponse(data={})
+        if meeting.summarized_meeting and meeting.summarized_meeting == {}:
+            print("Meeting not yet summarized")
+            return JsonResponse(
+                data={"type": "error", "message": "Meeting not summarized yet"}
+            )
+
+        result: tuple[bool, str | None] = generate_docx(
+            meeting.summarized_meeting, str(meeting.id)
+        )
+        print(result)
+        if not result[0] or not result[1]:
+            return JsonResponse(data={"type": "error"})
+        else:
+            return JsonResponse(data={"type": "success", "download_url": result[1]})
+    else:
+        return JsonResponse(data={"type": "error"})
+
+
+def download_file(request: HttpRequest, filename: str) -> FileResponse:
+    # NOTE: response ensures that the file is downloaded on the user's device
+    file_path: Path = settings.MEDIA_ROOT / "exports" / filename
+    response = FileResponse(open(file=file_path, mode="rb"), as_attachment=True)
+    return response
 
 
 def _get_meeting_by_id(meeting_id: str) -> Meeting | None:

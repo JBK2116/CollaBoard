@@ -3,6 +3,7 @@ from django.urls import path
 from apps.api import views
 
 urlpatterns = [
+    path("<str:filename>", views.download_file, name="download-file"),
     path(
         "<str:meeting_id>/summarize/",
         view=views.summarize_meeting,

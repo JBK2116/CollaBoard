@@ -15,6 +15,7 @@ redis = "*"
 channels-redis = "*"
 channels-stubs = "*"
 openai = "*"
+python-docx = "*"
 
 [dev-packages]
 
