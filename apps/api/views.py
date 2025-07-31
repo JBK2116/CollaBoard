@@ -34,9 +34,9 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
 
         # NOTE: Meetings are to be summarized only once! Always check before u generate a summary
         # ! Make sure to uncomment this check before u deploy
-        if meeting.summarized_meeting and meeting.summarized_meeting != {}:
-            print("Meeting already summarized")
-            return JsonResponse(data={"type": "success"})
+        # if meeting.summarized_meeting and meeting.summarized_meeting != {}:
+        #     print("Meeting already summarized")
+        #     return JsonResponse(data={"type": "success"})
 
         questions: list[Question] | None = meeting_data.get("questions", None)
         responses: list[Response] | None = meeting_data.get("responses", None)
@@ -53,43 +53,51 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         # ! Summarization PROMPT - only ask AI to analyze questions, not generate metadata
         # NOTE: Look into the util's to see how the AI summary response is fully structured
         summary_prompt = f"""
-                Analyze the following meeting questions and responses, then provide a JSON summary of ONLY the questions analysis and key takeaways.
+        Analyze the following meeting questions and responses, then provide a JSON summary of ONLY the questions analysis and key takeaways.
 
-                DO NOT generate meeting metadata (title, date, author) - I will add those separately.
+        DO NOT generate meeting metadata (title, date, author) - I will add those separately.
 
-                Format EXACTLY like this (escape all quotes):
-                {{
-                "questions_analysis": [
-                    {{
-                    "question": "[EXACT original question text]",
-                    "summary": "[3-sentence synthesis of all responses. Highlight: 
-                                - Key agreements/disagreements
-                                - Actionable insights
-                                - Unresolved questions]",
-                    "response_count": [integer]
-                    }}
-                ],
-                "key_takeaways": [
-                    "[Most important decision]",
-                    "[Critical unresolved issue]",
-                    "[Next step with owner if mentioned]"
-                ]
-                }}
+        Format EXACTLY like this (escape all quotes):
+        {{
+        "questions_analysis": [
+            {{
+            "question": "[EXACT original question text]",
+            "summary": "[4-5 sentence comprehensive analysis that includes:
+                        - Opening sentence synthesizing the overall theme/consensus
+                        - Specific response perspectives using descriptors ('one participant noted', 'another emphasized')
+                        - Clear identification of agreements, disagreements, or patterns
+                        - Actionable insights or decisions emerging from responses
+                        - Any unresolved questions or conflicting viewpoints]",
+            "response_count": [integer]
+            }}
+        ],
+        "key_takeaways": [
+            "[Most important decision or consensus with context]",
+            "[Critical unresolved issue requiring follow-up]",
+            "[Strategic insight or pattern identified across responses]",
+            "[Next step or recommendation emerging from discussions]"
+        ]
+        }}
 
-                Rules:
-                - Keep summaries CONCISE but SPECIFIC
-                - Include NUMBERS when available ("3 team members opposed")
-                - Flag [DISAGREEMENT] when opinions diverge
-                - Never invent details not in the source
-                - ONLY analyze the provided data, do not generate metadata
+        Rules:
+        - Each summary should be 4-5 complete sentences for comprehensive context
+        - Lead with overall consensus/theme, then explore different viewpoints
+        - Use descriptors like "one participant suggested", "multiple responses indicated", "another viewpoint emphasized"
+        - Quantify agreement patterns ("three of four responses focused on...")
+        - Use specific numbers and metrics when available
+        - Flag clear disagreements with [DISAGREEMENT] at start of summary
+        - Identify trends across anonymous responses
+        - Highlight actionable items and emerging decisions
+        - Never invent details not in the source
+        - Make summaries rich enough to stand alone when read in sequence
 
-                Meeting data to analyze:
-                {json.dumps(question_response_dictionary, indent=2)}
-                """
+        Meeting data to analyze:
+        {json.dumps(question_response_dictionary, indent=2)}
+        """
 
         client: OpenAI = OpenAI(api_key=os.getenv("OPENAI_SECRET_KEY"))
         response: ChatCompletion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
@@ -155,6 +163,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(data={"type": "success", "download_url": result[1]})
     else:
         return JsonResponse(data={"type": "error"})
+
 
 # TODO: Implement a file cleanup signal that deletes the file after its sent to the user
 def download_file(request: HttpRequest, filename: str) -> FileResponse:

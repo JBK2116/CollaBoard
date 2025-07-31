@@ -92,8 +92,16 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
     description_run = description.add_run(text=f"{description_text}")
     description_run.font.size = Pt(12)
 
+    # Add spacing before first question
+    spacer = document.add_paragraph()
+    spacer.paragraph_format.space_before = Pt(24)
+
     for question_summary in questions_analysis_dictionaries:
-        document.add_page_break()
+        # Add visual separation between questions (no page breaks)
+        spacer = document.add_paragraph()
+        spacer.paragraph_format.space_before = Pt(18)
+        spacer.paragraph_format.space_after = Pt(6)
+
         # QUESTION DESCRIPTION
         question_text = question_summary.get("question", "")
         question_description = document.add_heading(text=f"{question_text}", level=2)
@@ -116,8 +124,9 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
             text=f"{question_summary_text}"
         )
         question_summary_run.font.size = Pt(12)
+        question_summary_analysis.paragraph_format.space_after = Pt(12)
 
-    # KEY TAKEAWAYS
+    # KEY TAKEAWAYS - Keep page break for this section as it's the executive summary
     document.add_page_break()
     key_takeaways_header = document.add_heading(text="Key Takeaways", level=2)
     key_takeaways_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
