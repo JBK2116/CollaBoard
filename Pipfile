@@ -7,17 +7,17 @@ name = "pypi"
 django = "==5.2.3"
 python-dotenv = "*"
 psycopg2-binary = "*"
-django-browser-reload = "*"
-django-stubs = {extras = ["compatible-mypy"], version = "*"}
 channels = "*"
 daphne = "*"
 redis = "*"
 channels-redis = "*"
-channels-stubs = "*"
 openai = "*"
 python-docx = "*"
 
 [dev-packages]
+django-browser-reload = "*"
+django-stubs = {extras = ["compatible-mypy"], version = "*"}
+channels-stubs = "*"
 
 [requires]
 python_version = "3.12"
