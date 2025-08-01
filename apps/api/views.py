@@ -165,7 +165,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         return JsonResponse(data={"type": "error"})
 
 
-# TODO: Implement a file cleanup signal that deletes the file after its sent to the user
+# TODO: INSTALL CELERY AND USE IT TO DELETE THE FILE AFTER X SECONDS HAVE PASSED
 def download_file(request: HttpRequest, filename: str) -> FileResponse:
     # NOTE: response ensures that the file is downloaded on the user's device
     file_path: Path = settings.MEDIA_ROOT / "exports" / filename
