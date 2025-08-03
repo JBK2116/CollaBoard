@@ -38,6 +38,12 @@ class FileTypes(Enum):
     MICROSOFT_WORD = ".docx"
     GOOGLE_DOC = ".doc"
 
+class ExportTypes(Enum):
+    # ! This class must be aligned with the return values set in the frontend
+    PDF = "pdf"
+    MICROSOFT_WORD = "docx"
+    GOOGLE_DOC = "gdoc"
+
 
 FILE_NAME_PREFIX: str = "meeting_"
 EXPORT_PATH: Path = Path(settings.MEDIA_ROOT) / "exports"
@@ -93,7 +99,7 @@ def format_meeting_time(time: datetime) -> dict[str, str]:
     time_dictionary: dict[str, str] = {
         "created_at": local_time.strftime("%d %B %Y"),
         "time_created": local_time.strftime("%H:%M"),
-    }
+    } 
     return time_dictionary
 
 

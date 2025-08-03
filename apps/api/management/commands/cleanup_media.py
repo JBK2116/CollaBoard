@@ -7,6 +7,8 @@ from django.core.management.base import BaseCommand, CommandParser
 from collaboard import settings
 
 
+# ! This command is ran every hour via crontab
+# Current Cron Job: 0 * * * * cd /home/jovkb/Projects/collaboard/ && /home/jovkb/.local/bin/pipenv run python manage.py cleanup_media >> /tmp/cleanup.log 2>&1
 class Command(BaseCommand):
     help = "Delete all files in the `media/exports/` directory"
 

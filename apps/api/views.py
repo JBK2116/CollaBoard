@@ -49,6 +49,7 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         formatted_times: dict[str, str] = utils.format_meeting_time(
             time=meeting.created_at
         )
+        print(formatted_times)
 
         # ! Summarization PROMPT - only ask AI to analyze questions, not generate metadata
         # NOTE: Look into the util's to see how the AI summary response is fully structured
@@ -153,10 +154,17 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(
                 data={"type": "error", "message": "Meeting not summarized yet"}
             )
+        
+        result: tuple[bool, str | None] = (False, None) 
 
-        result: tuple[bool, str | None] = generate_docx(
-            meeting.summarized_meeting, str(meeting.id)
-        )
+        match export_type:
+            case utils.ExportTypes.PDF.value:
+                pass
+            case utils.ExportTypes.MICROSOFT_WORD.value:
+                result = generate_docx(meeting.summarized_meeting, str(meeting_id))
+            case utils.ExportTypes.value:
+                pass                
+
         if not result[0] or not result[1]:
             return JsonResponse(data={"type": "error"})
         else:
@@ -165,13 +173,11 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         return JsonResponse(data={"type": "error"})
 
 
-# TODO: INSTALL CELERY AND USE IT TO DELETE THE FILE AFTER X SECONDS HAVE PASSED
 def download_file(request: HttpRequest, filename: str) -> FileResponse:
     # NOTE: response ensures that the file is downloaded on the user's device
     file_path: Path = settings.MEDIA_ROOT / "exports" / filename
     response = FileResponse(open(file=file_path, mode="rb"), as_attachment=True)
     return response
-
 
 def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
     """
@@ -187,6 +193,8 @@ def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
         return None
 
 
+# ! EXPORT TYPES ARE EITHER `pdf` | `docx` | `gdoc` -> 
+# ! IT MUST ALIGN WITH THE FRONTEND
 def _get_export_type(data: bytes) -> str | None:
     """
     Extracts the `type` value from the provided data
@@ -195,6 +203,7 @@ def _get_export_type(data: bytes) -> str | None:
     try:
         json_data: dict[str, Any] = json.loads(data)
         export_type: str | None = json_data.get("type", None)
+        print(export_type)
         if not export_type:
             return None
         return export_type
