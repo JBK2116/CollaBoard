@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Get DOM elements
   const generateBtn = document.getElementById("generate-btn");
-  const exportBtn = document.getElementById("export-btn")
+  const exportBtn = document.getElementById("export-btn");
   const container = document.querySelector(".container");
 
   // ======================
@@ -82,13 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     </svg>
                     Microsoft Word
                 </div>
-                <div class="format-option" data-format="gdoc">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14z"/>
-                        <path fill="currentColor" d="M8 12h8v2H8zm0 4h8v2H8zm0-8h4v2H8z"/>
-                    </svg>
-                    Google Doc
-                </div>
                 <div class="cancel-export">Cancel</div>
             </div>
         `;
@@ -143,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /**
    * Handle meeting export
-   * @param {string} format - Export format (pdf/docx/gdoc)
+   * @param {string} format - Export format (pdf/docx)
    */
   async function handleExport(format) {
     setLoadingState(true);

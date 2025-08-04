@@ -163,7 +163,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
                 result = generate_pdf(meeting.summarized_meeting, str(meeting_id))
             case utils.ExportTypes.MICROSOFT_WORD.value:
                 result = generate_docx(meeting.summarized_meeting, str(meeting_id))
-            case utils.ExportTypes.GOOGLE_DOC.value:
+            case _:
                 pass
 
         if not result[0] or not result[1]:
@@ -195,7 +195,7 @@ def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
         return None
 
 
-# ! EXPORT TYPES ARE EITHER `pdf` | `docx` | `gdoc` ->
+# ! EXPORT TYPES ARE EITHER `pdf` or `docx`
 # ! IT MUST ALIGN WITH THE FRONTEND
 def _get_export_type(data: bytes) -> str | None:
     """

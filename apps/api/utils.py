@@ -36,13 +36,11 @@ class FileTypes(Enum):
     # ? Google Doc Enum will have to be altered later
     PDF = ".pdf"
     MICROSOFT_WORD = ".docx"
-    GOOGLE_DOC = ".doc"
 
 class ExportTypes(Enum):
     # ! This class must be aligned with the return values set in the frontend
     PDF = "pdf"
     MICROSOFT_WORD = "docx"
-    GOOGLE_DOC = "gdoc"
 
 
 FILE_NAME_PREFIX: str = "meeting_"
