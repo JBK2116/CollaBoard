@@ -13,6 +13,7 @@ redis = "*"
 channels-redis = "*"
 openai = "*"
 python-docx = "*"
+fpdf2 = "*"
 
 [dev-packages]
 django-browser-reload = "*"

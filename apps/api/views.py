@@ -12,6 +12,7 @@ from openai.types.chat import ChatCompletion
 
 from apps.api import utils
 from apps.api.docx_generator import generate_docx
+from apps.api.pdf_generator import generate_pdf
 from apps.director.models import Meeting, Question
 from apps.meeting.models import Response
 from collaboard import settings
@@ -154,16 +155,16 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(
                 data={"type": "error", "message": "Meeting not summarized yet"}
             )
-        
-        result: tuple[bool, str | None] = (False, None) 
+
+        result: tuple[bool, str | None] = (False, None)
 
         match export_type:
             case utils.ExportTypes.PDF.value:
-                pass
+                result = generate_pdf(meeting.summarized_meeting, str(meeting_id))
             case utils.ExportTypes.MICROSOFT_WORD.value:
                 result = generate_docx(meeting.summarized_meeting, str(meeting_id))
-            case utils.ExportTypes.value:
-                pass                
+            case utils.ExportTypes.GOOGLE_DOC.value:
+                pass
 
         if not result[0] or not result[1]:
             return JsonResponse(data={"type": "error"})
@@ -179,6 +180,7 @@ def download_file(request: HttpRequest, filename: str) -> FileResponse:
     response = FileResponse(open(file=file_path, mode="rb"), as_attachment=True)
     return response
 
+
 def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
     """
     Fetches a meeting object from the database via
@@ -193,7 +195,7 @@ def _get_meeting_by_id(meeting_id: str) -> Meeting | None:
         return None
 
 
-# ! EXPORT TYPES ARE EITHER `pdf` | `docx` | `gdoc` -> 
+# ! EXPORT TYPES ARE EITHER `pdf` | `docx` | `gdoc` ->
 # ! IT MUST ALIGN WITH THE FRONTEND
 def _get_export_type(data: bytes) -> str | None:
     """
@@ -203,7 +205,6 @@ def _get_export_type(data: bytes) -> str | None:
     try:
         json_data: dict[str, Any] = json.loads(data)
         export_type: str | None = json_data.get("type", None)
-        print(export_type)
         if not export_type:
             return None
         return export_type
