@@ -1,0 +1,31 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard - Error 403</title>
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar_guest.css' %}">
+</head>
+<body>
+    {% include 'navbar_guest.html' %}
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">403 - Forbidden</h1>
+            <p class="hero-description">You don’t have permission to access this page or you've made too many requests. Please try again in a few minutes</p>
+            <div class="hero-actions">
+                <a href="{% url 'landing' %}" class="btn btn-primary">Go Home</a>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Collaboard. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
