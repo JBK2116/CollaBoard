@@ -1,9 +1,20 @@
-from typing import Any
+from typing import Any, cast
 
 from django import forms
 
 
 # Forms used in the frontend for user authentication
+class VerifyEmailForm(forms.Form):
+    verification_code = forms.CharField(max_length=8, required=True)
+
+    def clean_verification_code(self) -> str:
+        code = self.cleaned_data["verification_code"]
+        code = cast(str, code)
+        if not code.isdigit():
+            raise forms.ValidationError(message="Verification code can only contain digits")
+        if len(code) > 8:
+            raise forms.ValidationError(message="Verification code must be eight digits")
+        return code
 class UserRegisterForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)

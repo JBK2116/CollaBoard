@@ -1,0 +1,138 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboard - Verify Email</title>
+    <link rel="stylesheet" href="{% static 'base/register.css' %}">
+    <link rel="stylesheet" href="{% static 'navbar_guest.css' %}">
+    <script src="{% static 'base/verify_email.js' %}" defer></script>
+    <style>
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .popup-close {
+            background: none;
+            border: none;
+            color: #c53030;
+            float: right;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .verification-info {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background-color: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .verification-info p {
+            color: #4a5568;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .code-input {
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        
+        input[name="verification_code"] {
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+{% django_browser_reload_script %}
+<body>
+    {% include 'navbar_guest.html' %}
+    
+    <!-- Invalid Code Popup -->
+    {% if invalid_code %}
+        <div class="popup" id="errorPopup">
+            <button class="popup-close" onclick="closePopup()">&times;</button>
+            <strong>Invalid verification code, please try again.</strong>
+        </div>
+    {% endif %}
+    
+    <!-- Code Expired Popup -->
+    {% if code_expired %}
+        <div class="popup" id="expiredPopup">
+            <button class="popup-close" onclick="closeExpiredPopup()">&times;</button>
+            <strong>Verification code has expired. Please register again.</strong>
+        </div>
+    {% endif %}
+    
+    <main class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1>Verify Your Email</h1>
+                <p>Check your inbox and enter the verification code</p>
+            </div>
+            
+            <div class="verification-info">
+                <p>We've sent a verification code to your email address. Please enter the code below to complete your account registration.</p>
+            </div>
+            
+            <form method="POST" class="register-form" action="{% url 'verify-email' %}">
+                {% csrf_token %}
+                
+                <!-- General form errors -->
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="{{ form.verification_code.id_for_label }}">Verification Code</label>
+                    {{ form.verification_code }}
+                    {% if form.verification_code.errors %}
+                        <div class="field-error">{{ form.verification_code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn-register">Verify Email</button>
+                
+                <div class="register-footer">
+                    <p>Didn't receive the code? <a href="{% url 'register' %}">Try registering again</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

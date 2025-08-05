@@ -24,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# ! SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# ! SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# TODO: UPDATE THIS FOR PROD
 ALLOWED_HOSTS: list[str] = []
 
 
@@ -70,11 +71,21 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 # Session configuration for WebSocket compatibility
+# TODO: UPDATE THIS FOR PROD
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
+
+# Email configuration for email verification
+# TODO: UPDATE THIS FOR PROD
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "jovani.badinga7@gmail.com"
+EMAIL_HOST_PASSWORD = os.getenv("APP_PASSWORD_DEV")
 
 ROOT_URLCONF = "collaboard.urls"
 
@@ -93,6 +104,7 @@ TEMPLATES = [
     },
 ]
 
+# TODO: UPDATE THIS FOR PROD
 WSGI_APPLICATION = "collaboard.wsgi.application"
 ASGI_APPLICATION = "collaboard.asgi.application"
 CHANNEL_LAYERS = {
@@ -108,6 +120,7 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# TODO: UPDATE THIS FOR PROD
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",

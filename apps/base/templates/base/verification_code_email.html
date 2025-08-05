@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Account</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .welcome-text {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .verification-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .code-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .verification-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 8px;
+            margin: 0;
+        }
+        
+        .expiry-notice {
+            font-size: 14px;
+            color: #dc3545;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            font-size: 16px;
+            color: #666;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 25px 30px;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: #999;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e9ecef, transparent);
+            margin: 30px 0;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .verification-code {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+            
+            .footer {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🚀 Welcome!</h1>
+        </div>
+        
+        <div class="content">
+            <p class="welcome-text">
+                Thanks for signing up! We're excited to have you on board.<br>
+                Please verify your account to begin creating meetings.
+            </p>
+            
+            <div class="verification-box">
+                <div class="code-label">Your Verification Code</div>
+                <div class="verification-code">{{ verification_code }}</div>
+                <div class="expiry-notice">⏰ This code expires in 5 minutes</div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="instructions">
+                Enter this code on the verification page to activate your account.<br>
+                If you didn't request this, please ignore this email.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p class="footer-text">
+                This is an automated message, please do not reply to this email.<br>
+                Need help? Contact our support team.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
