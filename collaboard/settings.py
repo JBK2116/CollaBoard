@@ -84,7 +84,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "jovani.badinga7@gmail.com"
+EMAIL_HOST_USER = "jovani.badinga7@gmail.com" # ! Move to .env
 EMAIL_HOST_PASSWORD = os.getenv("APP_PASSWORD_DEV")
 
 ROOT_URLCONF = "collaboard.urls"
@@ -105,13 +105,26 @@ TEMPLATES = [
 ]
 
 # TODO: UPDATE THIS FOR PROD
+# Cache Configs
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Database 1
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# TODO: UPDATE THIS FOR PROD
+# Channels Configs
 WSGI_APPLICATION = "collaboard.wsgi.application"
 ASGI_APPLICATION = "collaboard.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("127.0.0.1", 6379)], # Database 0
         },
     },
 }

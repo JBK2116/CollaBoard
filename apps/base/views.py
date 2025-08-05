@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django_ratelimit.decorators import ratelimit
 
 from apps.base.forms import UserLoginForm, UserRegisterForm, VerifyEmailForm
 from apps.base.models import CustomUser
@@ -22,6 +23,8 @@ def landing_page(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="index.html")
 
 
+@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group=None, key="ip", rate="5/m", method=["POST"], block=True)
 def register(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -49,7 +52,7 @@ def register(request: HttpRequest) -> HttpResponse:
             "email": form.cleaned_data["email"],
             "password": make_password(password=form.cleaned_data["password1"]),
             "verification_code": verification_code,
-            "expires_in": time.monotonic() + 60 * 5,  # Five Minutes
+            "expires_in": time.monotonic() + 60 * 10,  # Ten Minutes
         }
         _send_email(
             verification_code=verification_code, user_email=form.cleaned_data["email"]
@@ -76,9 +79,15 @@ def _send_email(verification_code: str, user_email: str):
         to=[user_email],
     )
     msg.attach_alternative(content=html_message, mimetype="text/html")
-    msg.send()
+    # TODO: Handle this better
+    try:
+        msg.send()
+    except Exception:
+        return redirect("landing")
 
 
+@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group=None, key="ip", rate="10/m", method=["POST"], block=True)
 def verify_email(request: HttpRequest) -> HttpResponse:
     context: dict[str, Any] = {}
     if request.method == "POST":
@@ -117,6 +126,7 @@ def verify_email(request: HttpRequest) -> HttpResponse:
             password=pending_user_info["password"],
         )
         user.save()
+        login(request, user)
         return redirect("dashboard")
     else:
         form: VerifyEmailForm = VerifyEmailForm()
@@ -124,6 +134,8 @@ def verify_email(request: HttpRequest) -> HttpResponse:
         return render(request, template_name="base/verify_email.html", context=context)
 
 
+@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group=None, key="ip", rate="5/m", method=["POST"], block=True)
 def login_user(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
