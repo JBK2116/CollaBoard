@@ -21,6 +21,7 @@ django-ratelimit = "*"
 django-browser-reload = "*"
 django-stubs = {extras = ["compatible-mypy"], version = "*"}
 channels-stubs = "*"
+pytest-django = "*"
 
 [requires]
 python_version = "3.12"

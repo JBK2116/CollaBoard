@@ -1,7 +1,9 @@
 from typing import Any, Optional
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.validators import MinLengthValidator
 from django.db import models
+from django.db.models import CheckConstraint, Q
 
 
 class CustomUserManager(BaseUserManager["CustomUser"]):
@@ -44,21 +46,35 @@ class CustomUserManager(BaseUserManager["CustomUser"]):
 
 class CustomUser(AbstractUser):
     username = None  # type: ignore[assignment]  # Not needed in the application
-    email = models.EmailField(max_length=254, unique=True)
+    email = models.EmailField(max_length=254, unique=True, null=False, blank=False)
+    first_name = models.CharField(
+        max_length=150, blank=False, null=False, validators=[MinLengthValidator(1)]
+    )
+    last_name = models.CharField(
+        max_length=150, blank=False, null=False, validators=[MinLengthValidator(1)]
+    )
     meetings_created_count = models.PositiveIntegerField(null=False, default=0)
     total_participants_count = models.PositiveIntegerField(null=False, default=0)
     total_responses_count = models.PositiveIntegerField(null=False, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    USERNAME_FIELD = "email"  # email is now the login field of the model.
-    REQUIRED_FIELDS = [
+    USERNAME_FIELD = "email" # NOTE: This is used for authentication
+    REQUIRED_FIELDS = [ # NOTE: This only applies when creating a superuser
         "first_name",
         "last_name",
     ]
-    objects = CustomUserManager()  # type: ignore
+    objects = CustomUserManager()  # type: ignore[assignment]
     # objects here is needed to ensure that
-    # Custom User manage is the one used when creating CustomUser models.
+    # CustomUserManager is the one used when creating CustomUser models.
+
+    class Meta:
+        # Database constraints
+        constraints = [
+            CheckConstraint(condition=~Q(email=""), name="email_not_empty"),
+            CheckConstraint(condition=~Q(first_name=""), name="first_name_not_empty"),
+            CheckConstraint(condition=~Q(last_name=""), name="last_name_not_empty"),
+        ]
 
     def __str__(self) -> str:
-        return super().__str__()
+        return f"{self.first_name} {self.last_name}"
