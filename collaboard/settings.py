@@ -69,6 +69,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_ratelimit.middleware.RatelimitMiddleware",
+
 ]
 # Session configuration for WebSocket compatibility
 # TODO: UPDATE THIS FOR PROD
@@ -115,6 +117,8 @@ CACHES = {
         }
     }
 }
+
+RATELIMIT_VIEW = "apps.base.views.ratelimited"
 
 # TODO: UPDATE THIS FOR PROD
 # Channels Configs

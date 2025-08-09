@@ -14,7 +14,11 @@ from apps.base.forms import UserLoginForm, UserRegisterForm, VerifyEmailForm
 from apps.base.models import CustomUser
 from collaboard import settings
 
+
 # Create your views here.
+def ratelimited(request: HttpRequest, exception: Exception) -> HttpResponse:
+    print("RATE LIMIT VIEW CALLED!")  # Add this debug line
+    return render(request, template_name="403.html", status=403)
 
 
 def landing_page(request: HttpRequest) -> HttpResponse:
@@ -23,8 +27,8 @@ def landing_page(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="index.html")
 
 
-@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group=None, key="ip", rate="5/m", method=["POST"], block=True)
+@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def register(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -86,9 +90,11 @@ def _send_email(verification_code: str, user_email: str):
         return redirect("landing")
 
 
-@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group=None, key="ip", rate="10/m", method=["POST"], block=True)
+@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group="limit_per_minute", key="ip", rate="10/m", method=["POST"], block=True)
 def verify_email(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     context: dict[str, Any] = {}
     if request.method == "POST":
         form_result: VerifyEmailForm | HttpResponse = _validate_email_form(
@@ -134,8 +140,8 @@ def verify_email(request: HttpRequest) -> HttpResponse:
         return render(request, template_name="base/verify_email.html", context=context)
 
 
-@ratelimit(key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group=None, key="ip", rate="5/m", method=["POST"], block=True)
+@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def login_user(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
