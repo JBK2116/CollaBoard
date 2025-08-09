@@ -34,10 +34,9 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(data={"type": "error"})
 
         # NOTE: Meetings are to be summarized only once! Always check before u generate a summary
-        # ! Make sure to uncomment this check before u deploy
-        # if meeting.summarized_meeting and meeting.summarized_meeting != {}:
-        #     print("Meeting already summarized")
-        #     return JsonResponse(data={"type": "success"})
+        if meeting.summarized_meeting and meeting.summarized_meeting != {}:
+            print("Meeting already summarized")
+            return JsonResponse(data={"type": "success"})
 
         questions: list[Question] | None = meeting_data.get("questions", None)
         responses: list[Response] | None = meeting_data.get("responses", None)
