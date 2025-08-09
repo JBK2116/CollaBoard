@@ -10,11 +10,14 @@ DJANGO_SETTINGS_MODULE = "collaboard.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 testpaths = ["."]
 addopts = "--reuse-db --nomigrations --tb=short"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests as slow",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "django_db: mark test to use django database",
+    "asyncio: mark test as async",
 ]
 
 [tool.ruff]
