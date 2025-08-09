@@ -1,5 +1,5 @@
 import time
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.cache import cache
@@ -12,13 +12,13 @@ from apps.base.models import CustomUser
 class TestRegistrationFlow:
     """Test the complete registration -> verification -> login flow"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         cache.clear()
 
     @pytest.mark.django_db
     def test_successful_registration_and_verification_flow(
-        self, client: Client, RegisterFormData
-    ):
+        self, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test the main path: register -> verify -> login"""
         # Step 1: Register user
         response = client.post(reverse("register"), data=RegisterFormData)
@@ -52,8 +52,11 @@ class TestRegistrationFlow:
 
     @pytest.mark.django_db
     def test_duplicate_email_registration(
-        self, client: Client, RegisterFormData, authenticated_user
-    ):
+        self,
+        client: Client,
+        RegisterFormData: dict[str, str],
+        authenticated_user: CustomUser,
+    ) -> None:
         """Test that duplicate email registration is blocked"""
         response = client.post(reverse("register"), data=RegisterFormData)
         assert response.status_code == 200  # Stays on register page
@@ -61,7 +64,9 @@ class TestRegistrationFlow:
         assert "pending_user_info" not in client.session
 
     @pytest.mark.django_db
-    def test_verification_with_wrong_code(self, client: Client, RegisterFormData):
+    def test_verification_with_wrong_code(
+        self, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test verification fails with wrong code"""
         # Register first
         client.post(reverse("register"), data=RegisterFormData)
@@ -77,7 +82,9 @@ class TestRegistrationFlow:
         assert not CustomUser.objects.filter(email=RegisterFormData["email"]).exists()
 
     @pytest.mark.django_db
-    def test_verification_code_expires(self, client: Client, RegisterFormData):
+    def test_verification_code_expires(
+        self, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test that expired verification codes don't work"""
         # Register user
         client.post(reverse("register"), data=RegisterFormData)
@@ -101,14 +108,21 @@ class TestLoginFlow:
     """Test login functionality and edge cases"""
 
     @pytest.mark.django_db
-    def test_successful_login(self, client: Client, authenticated_user, LoginFormData):
+    def test_successful_login(
+        self,
+        client: Client,
+        authenticated_user: CustomUser,
+        LoginFormData: dict[str, str],
+    ) -> None:
         """Test successful login redirects to dashboard"""
         response = client.post(reverse("login"), data=LoginFormData)
         assert response.status_code == 302
         assert response["Location"] == reverse("dashboard")
 
     @pytest.mark.django_db
-    def test_invalid_credentials(self, client: Client, authenticated_user):
+    def test_invalid_credentials(
+        self, client: Client, authenticated_user: CustomUser
+    ) -> None:
         """Test login with wrong password fails gracefully"""
         response = client.post(
             reverse("login"),
@@ -119,8 +133,11 @@ class TestLoginFlow:
 
     @pytest.mark.django_db
     def test_remember_me_functionality(
-        self, client: Client, authenticated_user, LoginFormData
-    ):
+        self,
+        client: Client,
+        authenticated_user: CustomUser,
+        LoginFormData: dict[str, str],
+    ) -> None:
         """Test remember me checkbox sets longer session"""
         login_data = LoginFormData.copy()
         login_data["remember_me"] = "on"
@@ -133,8 +150,11 @@ class TestLoginFlow:
 
     @pytest.mark.django_db
     def test_login_without_remember_me(
-        self, client: Client, authenticated_user, LoginFormData
-    ):
+        self,
+        client: Client,
+        authenticated_user: CustomUser,
+        LoginFormData: dict[str, str],
+    ) -> None:
         """Test login without remember me expires on browser close"""
         response = client.post(reverse("login"), data=LoginFormData)
         assert response.status_code == 302
@@ -146,11 +166,11 @@ class TestLoginFlow:
 class TestSessionAndSecurityEdgeCases:
     """Test security-critical edge cases"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         cache.clear()
 
     @pytest.mark.django_db
-    def test_verify_without_pending_session(self, client: Client):
+    def test_verify_without_pending_session(self, client: Client) -> None:
         """Test verification fails gracefully without pending session data"""
         response = client.post(
             reverse("verify-email"), data={"verification_code": "12345678"}
@@ -160,7 +180,9 @@ class TestSessionAndSecurityEdgeCases:
         assert response["Location"] == reverse("register")
 
     @pytest.mark.django_db
-    def test_corrupted_session_data(self, client: Client, RegisterFormData):
+    def test_corrupted_session_data(
+        self, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test handling of corrupted session data"""
         # Register user first
         client.post(reverse("register"), data=RegisterFormData)
@@ -178,7 +200,9 @@ class TestSessionAndSecurityEdgeCases:
         assert response["Location"] == reverse("register")
 
     @pytest.mark.django_db
-    def test_authenticated_user_redirects(self, client: Client, authenticated_user):
+    def test_authenticated_user_redirects(
+        self, client: Client, authenticated_user: CustomUser
+    ) -> None:
         """Test that authenticated users can't access auth pages"""
         client.force_login(authenticated_user)
 
@@ -194,7 +218,9 @@ class TestEmailSending:
 
     @pytest.mark.django_db
     @patch("apps.base.views.EmailMultiAlternatives.send")
-    def test_email_sending_success(self, mock_send, client: Client, RegisterFormData):
+    def test_email_sending_success(
+        self, mock_send: Mock, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test that email is sent during registration"""
         mock_send.return_value = True
 
@@ -207,8 +233,8 @@ class TestEmailSending:
     @pytest.mark.django_db
     @patch("apps.base.views.EmailMultiAlternatives.send")
     def test_email_sending_failure_handling(
-        self, mock_send, client: Client, RegisterFormData
-    ):
+        self, mock_send: Mock, client: Client, RegisterFormData: dict[str, str]
+    ) -> None:
         """Test graceful handling of email sending failures"""
         mock_send.side_effect = Exception("SMTP server error")
 
@@ -221,7 +247,7 @@ class TestHelperFunctions:
     """Test utility functions used in views"""
 
     @pytest.mark.django_db
-    def test_user_exists_function(self, authenticated_user):
+    def test_user_exists_function(self, authenticated_user: CustomUser) -> None:
         """Test _user_exists helper function logic"""
         from apps.base.views import _user_exists
 
@@ -231,7 +257,7 @@ class TestHelperFunctions:
         # Should not find non-existent user
         assert _user_exists("nonexistent@email.com") is False
 
-    def test_verification_code_generation(self):
+    def test_verification_code_generation(self) -> None:
         """Test verification code is properly formatted"""
         from apps.base.views import _generate_verification_code
 

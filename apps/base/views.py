@@ -69,7 +69,7 @@ def register(request: HttpRequest) -> HttpResponse:
         )
 
 
-def _send_email(verification_code: str, user_email: str):
+def _send_email(verification_code: str, user_email: str) -> HttpResponse | None:
     subject: str = "Collaboard - Verify Your Account"
     text_content: str = f"Verify your account to begin creating meetings! Here's your code: {verification_code}"
     html_message = render_to_string(
@@ -86,6 +86,7 @@ def _send_email(verification_code: str, user_email: str):
     # TODO: Handle this better
     try:
         msg.send()
+        return None
     except Exception:
         return redirect("landing")
 
@@ -135,8 +136,7 @@ def verify_email(request: HttpRequest) -> HttpResponse:
         login(request, user)
         return redirect("dashboard")
     else:
-        form: VerifyEmailForm = VerifyEmailForm()
-        context.update({"form": form})
+        context.update({"form": VerifyEmailForm()})
         return render(request, template_name="base/verify_email.html", context=context)
 
 

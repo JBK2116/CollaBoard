@@ -11,7 +11,7 @@ class TestQuestionModel:
     """Test Question model behavior, especially position auto-assignment"""
 
     @pytest.mark.django_db
-    def test_question_position_auto_assignment(self, authenticated_user: CustomUser):
+    def test_question_position_auto_assignment(self, authenticated_user: CustomUser) -> None:
         """Test that positions are automatically assigned correctly"""
         meeting = Meeting.objects.create(
             director=authenticated_user,
@@ -32,7 +32,7 @@ class TestQuestionModel:
         assert q3.position == 3
 
     @pytest.mark.django_db
-    def test_question_position_unique_constraint(self, authenticated_user: CustomUser):
+    def test_question_position_unique_constraint(self, authenticated_user: CustomUser) -> None:
         """Test that duplicate positions in same meeting are prevented"""
         meeting = Meeting.objects.create(
             director=authenticated_user,
@@ -57,7 +57,7 @@ class TestMeetingModel:
     @pytest.mark.django_db
     def test_format_duration_in_seconds_various_durations(
         self, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test duration formatting for different time periods"""
         meeting = Meeting.objects.create(
             director=authenticated_user,
@@ -87,7 +87,7 @@ class TestMeetingModel:
 class TestAccessCodeGeneration:
     """Test access code generation utility"""
 
-    def test_access_code_format(self):
+    def test_access_code_format(self) -> None:
         """Test access code is properly formatted"""
         code = generate_access_code()
 
@@ -95,7 +95,7 @@ class TestAccessCodeGeneration:
         assert code.isdigit()
         assert all(c in "0123456789" for c in code)
 
-    def test_access_code_uniqueness_probability(self):
+    def test_access_code_uniqueness_probability(self) -> None:
         """Test that codes are reasonably unique (statistical test)"""
         # Generate multiple codes and check for uniqueness
         codes = set()
@@ -110,7 +110,7 @@ class TestAccessCodeGeneration:
 class TestForms:
     """Test form validation logic"""
 
-    def test_meeting_form_whitespace_handling(self):
+    def test_meeting_form_whitespace_handling(self) -> None:
         """Test that form properly trims whitespace"""
         form_data = {
             "title": "  Test Meeting  ",
@@ -125,7 +125,7 @@ class TestForms:
         assert form.cleaned_data["title"] == "Test Meeting"
         assert form.cleaned_data["description"] == "Test Description"
 
-    def test_meeting_form_boundary_values(self):
+    def test_meeting_form_boundary_values(self)  -> None:
         """Test form validation at boundary values"""
         # Test minimum duration
         form_data = {
@@ -146,7 +146,7 @@ class TestForms:
         form = CreateMeetingForm(data=form_data)
         assert not form.is_valid()
 
-    def test_question_form_validation(self):
+    def test_question_form_validation(self) -> None:
         """Test question form validation"""
         # Valid question
         form = QuestionForm(data={"description": "Valid question?"})

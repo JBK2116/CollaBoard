@@ -29,7 +29,7 @@ def LoginFormData() -> dict[str, str]:
 
 
 @pytest.fixture
-def authenticated_user(db) -> CustomUser:
+def authenticated_user(db: None) -> CustomUser:
     return CustomUser.objects.create(
         first_name="John",
         last_name="Doe",

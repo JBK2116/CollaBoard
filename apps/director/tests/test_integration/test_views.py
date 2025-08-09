@@ -15,7 +15,7 @@ class TestMeetingCreation:
     @pytest.mark.django_db
     def test_successful_meeting_with_questions_creation(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test complete meeting creation flow"""
         client.force_login(authenticated_user)
 
@@ -56,7 +56,7 @@ class TestMeetingCreation:
     @pytest.mark.django_db(transaction=True)
     def test_meeting_creation_with_access_code_collision(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test handling of access code collisions"""
         client.force_login(authenticated_user)
 
@@ -98,7 +98,7 @@ class TestMeetingCreation:
     @pytest.mark.django_db
     def test_invalid_form_data_handling(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test form validation errors are handled properly"""
         client.force_login(authenticated_user)
 
@@ -129,7 +129,7 @@ class TestViewSecurity:
     """Test view-level security and access control"""
 
     @pytest.mark.django_db
-    def test_create_meeting_requires_login(self, client: Client):
+    def test_create_meeting_requires_login(self, client: Client) -> None:
         """Test that create meeting view requires authentication"""
         response = client.get(reverse("create-meeting"))
 
@@ -140,7 +140,7 @@ class TestViewSecurity:
     @pytest.mark.django_db
     def test_delete_account_post_only(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test delete account only works with POST"""
         client.force_login(authenticated_user)
 
@@ -155,7 +155,7 @@ class TestViewSecurity:
     @pytest.mark.django_db
     def test_successful_account_deletion(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test successful account deletion"""
         client.force_login(authenticated_user)
 
@@ -173,7 +173,7 @@ class TestDashboardAndAccountViews:
     """Test simple authenticated views"""
 
     @pytest.mark.django_db
-    def test_dashboard_requires_authentication(self, client: Client):
+    def test_dashboard_requires_authentication(self, client: Client) -> None:
         """Test dashboard redirects unauthenticated users"""
         response = client.get(reverse("dashboard"))
         assert response.status_code == 302
@@ -182,7 +182,7 @@ class TestDashboardAndAccountViews:
     @pytest.mark.django_db
     def test_dashboard_renders_for_authenticated_users(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test dashboard renders correctly for authenticated users"""
         client.force_login(authenticated_user)
 
@@ -191,7 +191,7 @@ class TestDashboardAndAccountViews:
         assert "director/dashboard.html" in [t.name for t in response.templates]
 
     @pytest.mark.django_db
-    def test_account_requires_authentication(self, client: Client):
+    def test_account_requires_authentication(self, client: Client) -> None:
         """Test account page redirects unauthenticated users"""
         response = client.get(reverse("account"))
         assert response.status_code == 302
@@ -200,7 +200,7 @@ class TestDashboardAndAccountViews:
     @pytest.mark.django_db
     def test_account_renders_for_authenticated_users(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         """Test account page renders correctly for authenticated users"""
         client.force_login(authenticated_user)
 
@@ -210,7 +210,7 @@ class TestDashboardAndAccountViews:
 
 
 class TestCreateMeetingMinuteRateLimit:
-    def setup_method(self):
+    def setup_method(self) -> None:
         cache.clear()
         self.ip = "127.0.0.1"
         self.meeting_data = {
@@ -229,7 +229,7 @@ class TestCreateMeetingMinuteRateLimit:
 
     def test_create_meeting_post_rate_limit(
         self, client: Client, authenticated_user: CustomUser
-    ):
+    ) -> None:
         client.force_login(authenticated_user)
         for i in range(3):
             response = client.post(

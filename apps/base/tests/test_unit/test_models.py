@@ -14,7 +14,7 @@ class TestCustomUserApplicationPattern:
     """Test CustomUser using the same patterns as the actual application."""
 
     @pytest.mark.django_db
-    def test_create_user_like_application(self):
+    def test_create_user_like_application(self) -> None:
         """Test creating a user the same way the application does."""
         from django.contrib.auth.hashers import make_password
 
@@ -36,7 +36,7 @@ class TestCustomUserApplicationPattern:
         assert user.is_superuser is False
 
     @pytest.mark.django_db
-    def test_email_uniqueness_application_pattern(self):
+    def test_email_uniqueness_application_pattern(self) -> None:
         """Test email uniqueness using application pattern."""
         from django.contrib.auth.hashers import make_password
 
@@ -61,7 +61,7 @@ class TestCustomUserApplicationPattern:
             user2.save()
 
     @pytest.mark.django_db
-    def test_user_authentication_with_application_created_user(self):
+    def test_user_authentication_with_application_created_user(self) -> None:
         """Test authentication works with users created using application pattern."""
         from django.contrib.auth import authenticate
         from django.contrib.auth.hashers import make_password
@@ -83,7 +83,7 @@ class TestCustomUserApplicationPattern:
         assert authenticated_user == user
 
     @pytest.mark.django_db
-    def test_password_hashing_consistency(self):
+    def test_password_hashing_consistency(self) -> None:
         """Test that make_password produces consistent, secure hashes."""
         from django.contrib.auth.hashers import check_password, make_password
 
@@ -104,7 +104,7 @@ class TestCustomUserManager:
     """Test the CustomUserManager functionality (for completeness, even though app doesn't use it)."""
 
     @pytest.mark.django_db
-    def test_create_user_manager_method(self):
+    def test_create_user_manager_method(self) -> None:
         """Test the manager's create_user method works correctly."""
         user = CustomUser.objects.create(
             email="test@example.com",
@@ -122,7 +122,7 @@ class TestCustomUserModel:
     """Test the CustomUser model functionality."""
 
     @pytest.fixture
-    def user_data(self):
+    def user_data(self) -> dict[str, str]:
         """Provide valid user data for tests."""
         return {
             "email": "test@example.com",
@@ -132,7 +132,7 @@ class TestCustomUserModel:
         }
 
     @pytest.fixture
-    def user(self):
+    def user(self) -> CustomUser:
         """Create a test user using the same pattern as the application."""
         from django.contrib.auth.hashers import make_password
 
@@ -146,12 +146,12 @@ class TestCustomUserModel:
         return user
 
     @pytest.mark.django_db
-    def test_str_representation(self, user):
+    def test_str_representation(self, user: CustomUser) -> None:
         """Test the string representation of CustomUser."""
         assert str(user) == "John Doe"
 
     @pytest.mark.django_db
-    def test_str_representation_with_empty_names(self):
+    def test_str_representation_with_empty_names(self) -> None:
         """Test string representation with empty names."""
         user = CustomUser.objects.create(
             email="test@example.com", first_name="", last_name=""
@@ -159,7 +159,7 @@ class TestCustomUserModel:
         assert str(user) == " "
 
     @pytest.mark.django_db
-    def test_email_uniqueness(self):
+    def test_email_uniqueness(self) -> None:
         """Test that email must be unique."""
         from django.contrib.auth.hashers import make_password
 
@@ -184,7 +184,7 @@ class TestCustomUserModel:
             user2.save()
 
     @pytest.mark.django_db
-    def test_email_case_sensitivity_uniqueness(self, user):
+    def test_email_case_sensitivity_uniqueness(self, user: CustomUser) -> None:
         """Test that email uniqueness is case-sensitive for local part."""
         # This should work - different local part case
         user2 = CustomUser.objects.create(
@@ -193,30 +193,30 @@ class TestCustomUserModel:
         assert user2.email == "TEST@example.com"
 
     @pytest.mark.django_db
-    def test_username_field_is_email(self):
+    def test_username_field_is_email(self) -> None:
         """Test that USERNAME_FIELD is set to email."""
         assert CustomUser.USERNAME_FIELD == "email"
 
     @pytest.mark.django_db
-    def test_required_fields(self):
+    def test_required_fields(self) -> None:
         """Test that REQUIRED_FIELDS contains first_name and last_name."""
         assert "first_name" in CustomUser.REQUIRED_FIELDS
         assert "last_name" in CustomUser.REQUIRED_FIELDS
 
     @pytest.mark.django_db
-    def test_username_is_none(self, user):
+    def test_username_is_none(self, user: CustomUser) -> None:
         """Test that username field is disabled."""
         assert user.username is None
 
     @pytest.mark.django_db
-    def test_count_fields_default_values(self, user):
+    def test_count_fields_default_values(self, user: CustomUser) -> None:
         """Test that count fields have correct default values."""
         assert user.meetings_created_count == 0
         assert user.total_participants_count == 0
         assert user.total_responses_count == 0
 
     @pytest.mark.django_db
-    def test_count_fields_can_be_updated(self, user):
+    def test_count_fields_can_be_updated(self, user: CustomUser) -> None:
         """Test that count fields can be updated."""
         user.meetings_created_count = 5
         user.total_participants_count = 25
@@ -229,7 +229,7 @@ class TestCustomUserModel:
         assert user.total_responses_count == 100
 
     @pytest.mark.django_db
-    def test_count_fields_are_positive_integers(self):
+    def test_count_fields_are_positive_integers(self) -> None:
         """Test that count fields only accept positive integers."""
         user = CustomUser.objects.create(
             email="test@example.com",
@@ -244,14 +244,14 @@ class TestCustomUserModel:
         assert user.total_responses_count == 200
 
     @pytest.mark.django_db
-    def test_datetime_fields_auto_populated(self, user):
+    def test_datetime_fields_auto_populated(self, user: CustomUser) -> None:
         """Test that created_at and updated_at are auto-populated."""
         assert user.created_at is not None
         assert user.updated_at is not None
         assert user.created_at <= user.updated_at
 
     @pytest.mark.django_db
-    def test_updated_at_changes_on_save(self, user):
+    def test_updated_at_changes_on_save(self, user: CustomUser) -> None:
         """Test that updated_at changes when model is saved."""
         original_updated_at = user.updated_at
         user.first_name = "Jane"
@@ -260,14 +260,14 @@ class TestCustomUserModel:
         assert user.updated_at > original_updated_at
 
     @pytest.mark.django_db
-    def test_created_at_field_type(self, user):
+    def test_created_at_field_type(self, user: CustomUser) -> None:
         """Test that created_at is a DateTimeField."""
         field = user._meta.get_field("created_at")
         assert isinstance(field, models.DateTimeField)
         assert field.auto_now_add is True
 
     @pytest.mark.django_db
-    def test_updated_at_field_type(self, user):
+    def test_updated_at_field_type(self, user: CustomUser) -> None:
         """Test that updated_at is a DateTimeField."""
         field = user._meta.get_field("updated_at")
         assert isinstance(field, models.DateTimeField)
@@ -278,7 +278,7 @@ class TestCustomUserValidation:
     """Test CustomUser model validation."""
 
     @pytest.mark.django_db
-    def test_email_field_validation(self):
+    def test_email_field_validation(self) -> None:
         """Test email field validation."""
         user = CustomUser(email="invalid-email", first_name="John", last_name="Doe")
         with pytest.raises(ValidationError) as exc_info:
@@ -286,7 +286,7 @@ class TestCustomUserValidation:
         assert "email" in exc_info.value.message_dict
 
     @pytest.mark.django_db
-    def test_first_name_min_length_validation(self):
+    def test_first_name_min_length_validation(self) -> None:
         """Test that first_name validates minimum length."""
         user = CustomUser(
             email="test@example.com",
@@ -298,7 +298,7 @@ class TestCustomUserValidation:
         assert "first_name" in exc_info.value.message_dict
 
     @pytest.mark.django_db
-    def test_last_name_min_length_validation(self):
+    def test_last_name_min_length_validation(self) -> None:
         """Test that last_name validates minimum length."""
         user = CustomUser(
             email="test@example.com",
@@ -310,7 +310,7 @@ class TestCustomUserValidation:
         assert "last_name" in exc_info.value.message_dict
 
     @pytest.mark.django_db
-    def test_email_max_length(self):
+    def test_email_max_length(self) -> None:
         """Test email max length constraint."""
         long_email = "a" * 250 + "@example.com"  # Over 254 characters
         user = CustomUser(email=long_email, first_name="John", last_name="Doe")
@@ -319,7 +319,7 @@ class TestCustomUserValidation:
         assert "email" in exc_info.value.message_dict
 
     @pytest.mark.django_db
-    def test_name_max_length(self):
+    def test_name_max_length(self) -> None:
         """Test first_name and last_name max length constraint."""
         long_name = "a" * 151  # Over 150 characters
 
@@ -345,14 +345,14 @@ class TestCustomUserConstraints:
 
     @pytest.mark.skip(reason="SQLite doesn't enforce custom check constraints")
     @pytest.mark.django_db
-    def test_email_not_empty_constraint(self):
+    def test_email_not_empty_constraint(self) -> None:
         """Test that email cannot be empty string at database level."""
         with pytest.raises((IntegrityError, DBIntegrityError)):
             CustomUser.objects.create(email="", first_name="John", last_name="Doe")
 
     @pytest.mark.skip(reason="SQLite doesn't enforce custom check constraints")
     @pytest.mark.django_db
-    def test_first_name_not_empty_constraint(self):
+    def test_first_name_not_empty_constraint(self) -> None:
         """Test that first_name cannot be empty string at database level."""
         with pytest.raises((IntegrityError, DBIntegrityError)):
             CustomUser.objects.create(
@@ -361,7 +361,7 @@ class TestCustomUserConstraints:
 
     @pytest.mark.skip(reason="SQLite doesn't enforce custom check constraints")
     @pytest.mark.django_db
-    def test_last_name_not_empty_constraint(self):
+    def test_last_name_not_empty_constraint(self) -> None:
         """Test that last_name cannot be empty string at database level."""
         with pytest.raises((IntegrityError, DBIntegrityError)):
             CustomUser.objects.create(
@@ -373,7 +373,7 @@ class TestCustomUserAuthentication:
     """Test authentication-related functionality."""
 
     @pytest.mark.django_db
-    def test_authenticate_with_email(self):
+    def test_authenticate_with_email(self) -> None:
         """Test that user can be authenticated using email."""
         from django.contrib.auth import authenticate
         from django.contrib.auth.hashers import make_password
@@ -394,7 +394,7 @@ class TestCustomUserAuthentication:
         assert authenticated_user == user
 
     @pytest.mark.django_db
-    def test_authenticate_with_wrong_password(self):
+    def test_authenticate_with_wrong_password(self) -> None:
         """Test that authentication fails with wrong password."""
         from django.contrib.auth import authenticate
 
@@ -411,7 +411,7 @@ class TestCustomUserAuthentication:
         assert authenticated_user is None
 
     @pytest.mark.django_db
-    def test_authenticate_with_nonexistent_email(self):
+    def test_authenticate_with_nonexistent_email(self) -> None:
         """Test that authentication fails with non-existent email."""
         from django.contrib.auth import authenticate
 
@@ -425,7 +425,7 @@ class TestCustomUserEdgeCases:
     """Test edge cases and special scenarios."""
 
     @pytest.mark.django_db
-    def test_create_user_with_unicode_characters(self):
+    def test_create_user_with_unicode_characters(self) -> None:
         """Test creating user with unicode characters in names."""
         user = CustomUser.objects.create(
             email="test@example.com",
@@ -438,7 +438,7 @@ class TestCustomUserEdgeCases:
         assert str(user) == "José Müller"
 
     @pytest.mark.django_db
-    def test_create_user_with_special_email_characters(self):
+    def test_create_user_with_special_email_characters(self) -> None:
         """Test creating user with valid special characters in email."""
         user = CustomUser.objects.create(
             email="test.email+tag@example.com",
@@ -449,7 +449,7 @@ class TestCustomUserEdgeCases:
         assert user.email == "test.email+tag@example.com"
 
     @pytest.mark.django_db
-    def test_user_with_maximum_valid_lengths(self):
+    def test_user_with_maximum_valid_lengths(self) -> None:
         """Test user creation with maximum valid field lengths."""
         max_email = "a" * 242 + "@example.com"  # 254 chars total
         max_name = "a" * 150  # 150 chars
@@ -466,7 +466,7 @@ class TestCustomUserEdgeCases:
         assert len(user.last_name) == 150
 
     @pytest.mark.django_db
-    def test_user_is_instance_of_abstract_user(self):
+    def test_user_is_instance_of_abstract_user(self) -> None:
         """Test that CustomUser is properly inheriting from AbstractUser."""
         user = CustomUser.objects.create(
             email="test@example.com", first_name="John", last_name="Doe"
@@ -476,7 +476,7 @@ class TestCustomUserEdgeCases:
         assert isinstance(user, AbstractUser)
 
     @pytest.mark.django_db
-    def test_custom_user_manager_is_attached(self):
+    def test_custom_user_manager_is_attached(self) -> None:
         """Test that CustomUserManager is properly attached to the model."""
         from apps.base.models import CustomUserManager
 

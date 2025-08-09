@@ -6,6 +6,7 @@ from typing import Any
 from django.core.cache import cache
 from django.urls import reverse
 
+from apps.base.models import CustomUser
 from apps.director.models import Meeting, Question
 from apps.meeting import utils
 from apps.meeting.base import BaseMeetingConsumer
@@ -41,7 +42,6 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             return
 
         await self.accept()
-        self.user = None
         self.authenticated = False
         self.meeting_uuid: uuid.UUID = url_route_data["kwargs"]["meeting_id"]
 
@@ -108,7 +108,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             print("Authentication Failed")
             await self._send_json(data={"type": MessageTypes.END_MEETING})
             return
-        self.user = await utils.get_user_from_session(sessionid)
+        self.user: CustomUser | None = await utils.get_user_from_session(sessionid)
         self.authenticated = True
         await self.prepare_meeting_data()
 
@@ -545,9 +545,9 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
             or existing_name.startswith(f"{requested_username}(")
             for existing_name in existing_usernames_list
         )
-
+        self.participant_display_name: str = ""
         if username_conflict_count > 0:
-            self.participant_display_name: str = (
+            self.participant_display_name = (
                 f"{requested_username}({username_conflict_count})"
             )
             # NOTE: Inform frontend of modified username
@@ -558,7 +558,7 @@ class ParticipantMeetingConsumer(BaseMeetingConsumer):
                 }
             )
         else:
-            self.participant_display_name: str = requested_username
+            self.participant_display_name = requested_username
 
         # NOTE: Update cached username list with new participant
         existing_usernames_list.append(self.participant_display_name)

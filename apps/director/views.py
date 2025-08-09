@@ -98,7 +98,7 @@ def delete_account(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return redirect(to="dashboard")
     # NOTE: login_required ensures that user will always be CustomUser
-    user: CustomUser = request.user  # type: ignore :)
+    user = cast(CustomUser, request.user)  
     try:
         user.delete()
         return redirect(to="landing")

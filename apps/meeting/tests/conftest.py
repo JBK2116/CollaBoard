@@ -8,7 +8,7 @@ from apps.meeting.models import Response
 
 # ---------- Fixtures ----------
 @pytest.fixture
-def user(db):
+def user(db: None) -> CustomUser:
     """Create a test user."""
     return CustomUser.objects.create(
         email="test@example.com",
@@ -19,7 +19,7 @@ def user(db):
 
 
 @pytest.fixture
-def meeting(user) -> Meeting:
+def meeting(user: CustomUser) -> Meeting:
     """Create a meeting linked to the test user."""
     return Meeting.objects.create(
         summarized_meeting={},
@@ -33,7 +33,7 @@ def meeting(user) -> Meeting:
 
 
 @pytest.fixture
-def question(meeting) -> Question:
+def question(meeting: Meeting) -> Question:
     """Create a question for the meeting."""
     return Question.objects.create(
         meeting=meeting, description="How are we doing?", position=1
@@ -41,7 +41,7 @@ def question(meeting) -> Question:
 
 
 @pytest.fixture
-def response(meeting, question) -> Response:
+def response(meeting: Meeting, question: Question) -> Response:
     return Response.objects.create(
         meeting=meeting, question=question, response_text="All good!"
     )
