@@ -12,10 +12,6 @@ from apps.meeting.base import BaseMeetingConsumer
 from apps.meeting.constants import CloseCodes, GroupPrefixes, MessageTypes
 from apps.meeting.models import Response
 
-# ! SECURITY WARNING: In production, session ID must NOT be passed through URL parameters
-# TODO: Implement secure session handling mechanism before production deployment
-# ? Consider using JWT tokens or secure headers for authentication
-
 
 class HostMeetingConsumer(BaseMeetingConsumer):
     """
@@ -35,7 +31,7 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         Performs authentication, meeting validation, and initial setup.
         Connection is rejected if any validation fails.
         """
-        # NOTE: Validate URL routing accessibility
+        # URL ROUTE is necessary to extract meeting uuid for later use
         url_route_data: dict[str, Any] | None = self._get_url_route()
         if not url_route_data:
             await self._close_with_log(
@@ -44,90 +40,10 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             )
             return
 
-        self.meeting_uuid: uuid.UUID = url_route_data["kwargs"]["meeting_id"]
-
-        # NOTE: Extract session ID from query parameters for authentication
-        session_identifier: str | None = self._get_session_id_from_query()
-        if not session_identifier:
-            await self._close_with_log(
-                code=CloseCodes.NO_SESSION.code, message=CloseCodes.NO_SESSION.message
-            )
-            return
-
-        # NOTE: Validate user authentication through session
-        authenticated_user = await utils.get_user_from_session(session_identifier)
-        if authenticated_user is None or not authenticated_user.is_authenticated:
-            await self._close_with_log(
-                code=CloseCodes.AUTH_FAILED.code, message=CloseCodes.AUTH_FAILED.message
-            )
-            return
-        
-        self.user = authenticated_user
-
-        # NOTE: Retrieve meeting data with associated questions
-        meeting_data_bundle: (
-            utils.MeetingData | None
-        ) = await utils.get_meeting_with_questions(meeting_id=self.meeting_uuid)
-        if not meeting_data_bundle:
-            await self._close_with_log(
-                message=CloseCodes.NO_MEETING.message, code=CloseCodes.NO_MEETING.code
-            )
-            return
-
-        # NOTE: Initialize meeting-specific attributes
-        self.meeting_access_code: str = meeting_data_bundle.access_code
-        self.allocated_meeting_duration_seconds: int = (
-            meeting_data_bundle.meeting.duration
-        )
-        self.active_participant_count: int = 0
-        self.total_responses_count: int = 0
-
-        # NOTE: Ensure meeting has questions before proceeding
-        if not meeting_data_bundle.questions:
-            await self._close_with_log(
-                code=CloseCodes.NO_QUESTIONS.code,
-                message=CloseCodes.NO_QUESTIONS.message,
-            )
-            return
-
-        # NOTE: Accept connection before performing any group operations
         await self.accept()
-
-        # NOTE: Initialize meeting lock status in cache (prevents late joins)
-        await cache.aset(
-            key=f"{GroupPrefixes.MEETING_LOCKED}{self.meeting_access_code}",
-            value=False,
-            timeout=3600,  # ? Consider making cache timeout configurable
-        )
-
-        # NOTE: Add host to dedicated channel group for real-time communication
-        self.host_channel_group_name: str = (
-            f"{GroupPrefixes.HOST}{self.meeting_access_code}"
-        )
-        await self.channel_layer.group_add(
-            group=self.host_channel_group_name, channel=self.channel_name
-        )
-
-        # NOTE: Extract question descriptions for frontend transmission
-        question_descriptions_list: list[str] = [
-            question.description for question in meeting_data_bundle.questions
-        ]
-
-        # NOTE: Send initial meeting data to host frontend
-        await self._send_json(
-            data={
-                "type": MessageTypes.START_MEETING,
-                "questions": question_descriptions_list,
-                "access_code": self.meeting_access_code,
-            }
-        )
-
-        self.total_questions_presented: int = 1
-
-        # NOTE: Initialize participant username tracking cache
-        await cache.aset(
-            key=utils.get_username_cache_key(self.meeting_access_code), value=[]
-        )
+        self.user = None
+        self.authenticated = False
+        self.meeting_uuid: uuid.UUID = url_route_data["kwargs"]["meeting_id"]
 
     async def disconnect(self, code: int) -> None:
         """
@@ -172,7 +88,10 @@ class HostMeetingConsumer(BaseMeetingConsumer):
             message_type_identifier: str = parsed_message_data["type"]
 
             # NOTE: Route message to appropriate handler based on type
+            # NOTE: Meeting flow follows this order
             match message_type_identifier:
+                case MessageTypes.AUTHENTICATE:
+                    await self.authenticate(event=parsed_message_data)
                 case MessageTypes.START_MEETING:
                     await self.handle_start_meeting(event=parsed_message_data)
                 case MessageTypes.NEXT_QUESTION:
@@ -182,6 +101,79 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         except json.JSONDecodeError:
             # ! JSON parsing failed - consider logging this in production
             pass
+
+    async def authenticate(self, event: dict[str, Any]) -> None:
+        sessionid: str | None = event.get("session_id", None)
+        if not sessionid:
+            print("Authentication Failed")
+            await self._send_json(data={"type": MessageTypes.END_MEETING})
+            return
+        self.user = await utils.get_user_from_session(sessionid)
+        self.authenticated = True
+        await self.prepare_meeting_data()
+
+    async def prepare_meeting_data(self) -> None:
+        # NOTE: Retrieve meeting data with associated questions
+        meeting_data_bundle: (
+            utils.MeetingData | None
+        ) = await utils.get_meeting_with_questions(meeting_id=self.meeting_uuid)
+        if not meeting_data_bundle:
+            await self._close_with_log(
+                message=CloseCodes.NO_MEETING.message, code=CloseCodes.NO_MEETING.code
+            )
+            return
+
+        # NOTE: Initialize meeting-specific attributes
+        self.meeting_access_code: str = meeting_data_bundle.access_code
+        self.allocated_meeting_duration_seconds: int = (
+            meeting_data_bundle.meeting.duration
+        )
+        self.active_participant_count: int = 0
+        self.total_responses_count: int = 0
+
+        # NOTE: Ensure meeting has questions before proceeding
+        if not meeting_data_bundle.questions:
+            await self._close_with_log(
+                code=CloseCodes.NO_QUESTIONS.code,
+                message=CloseCodes.NO_QUESTIONS.message,
+            )
+            return
+
+        # NOTE: Initialize meeting lock status in cache (prevents late joins)
+        await cache.aset(
+            key=f"{GroupPrefixes.MEETING_LOCKED}{self.meeting_access_code}",
+            value=False,
+            timeout=3600,
+        )
+
+        # NOTE: Add host to dedicated channel group for real-time communication
+        self.host_channel_group_name: str = (
+            f"{GroupPrefixes.HOST}{self.meeting_access_code}"
+        )
+        await self.channel_layer.group_add(
+            group=self.host_channel_group_name, channel=self.channel_name
+        )
+
+        # NOTE: Extract question descriptions for frontend transmission
+        question_descriptions_list: list[str] = [
+            question.description for question in meeting_data_bundle.questions
+        ]
+
+        # NOTE: Send initial meeting data to host frontend
+        await self._send_json(
+            data={
+                "type": MessageTypes.START_MEETING,
+                "questions": question_descriptions_list,
+                "access_code": self.meeting_access_code,
+            }
+        )
+
+        self.total_questions_presented: int = 1
+
+        # NOTE: Initialize participant username tracking cache
+        await cache.aset(
+            key=utils.get_username_cache_key(self.meeting_access_code), value=[]
+        )
 
     async def handle_start_meeting(self, event: dict[str, Any]) -> None:
         """
@@ -288,11 +280,11 @@ class HostMeetingConsumer(BaseMeetingConsumer):
         )
 
         # NOTE: Update the user's model with the new meeting stats
-        self.user.meetings_created_count += 1
-        self.user.total_participants_count += self.active_participant_count
-        self.user.total_responses_count += self.total_responses_count
-        await self.user.asave()
-
+        if self.authenticated and self.user:
+            self.user.meetings_created_count += 1
+            self.user.total_participants_count += self.active_participant_count
+            self.user.total_responses_count += self.total_responses_count
+            await self.user.asave()
 
         # NOTE: Send meeting completion notification to host frontend
         await self._send_json(

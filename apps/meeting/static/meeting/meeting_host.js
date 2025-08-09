@@ -8,7 +8,8 @@ const MessageTypes = Object.freeze({
   SUBMIT_ANSWER: "submit_answer",
   PARTICIPANT_JOINED: "participant_joined",
   PARTICIPANT_LEFT: "participant_left",
-  ANSWER_SUBMITTED: "answer_submitted", // Add this new message type
+  ANSWER_SUBMITTED: "answer_submitted",
+  AUTHENTICATE: "authenticate",
 });
 
 const COOKIE_NAME = "sessionid";
@@ -16,9 +17,7 @@ const meeting_id = getMeetingID();
 const sessionId = getCookie(COOKIE_NAME);
 
 // WebSocket connection
-const ws = new WebSocket(
-  `ws://localhost:8000/ws/meeting/${meeting_id}/host/?session=${sessionId}`
-);
+const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meeting_id}/host/`);
 
 // Meeting state
 let accessCode = null;
@@ -41,6 +40,12 @@ ws.onopen = function (event) {
   console.log("Host WebSocket connected");
   updateStatus("Connected - Loading questions...");
   disableButton("start-btn", true);
+  ws.send(
+    JSON.stringify({
+      type: MessageTypes.AUTHENTICATE,
+      session_id: sessionId,
+    })
+  );
 };
 
 ws.onmessage = function (event) {
