@@ -6,6 +6,7 @@ from django.db import models
 from apps.director.models import Meeting, Question
 
 
+# ! MeetingSession and ParticipantSession Are Not Yet In Use
 # Create your models here.
 class MeetingSession(models.Model):
     id = models.IntegerField(primary_key=True)
