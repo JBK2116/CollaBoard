@@ -9,7 +9,6 @@ from apps.director.models import Meeting
 # Create your views here.
 @login_required
 def host_meeting(request: HttpRequest, meeting_id: str) -> HttpResponse:
-    # More info will be added later
     try:
         meeting: Meeting = Meeting.objects.get(id=meeting_id)
         return render(
@@ -23,7 +22,6 @@ def host_meeting(request: HttpRequest, meeting_id: str) -> HttpResponse:
 
 @login_not_required
 def participant_meeting(request: HttpRequest, access_code: str) -> HttpResponse:
-    # More info will be added later
     participant_name: str | None = request.POST.get("participantName", None)
     if not participant_name or len(participant_name) > 30:
         raise Http404("Invalid Name")

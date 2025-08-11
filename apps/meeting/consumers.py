@@ -99,7 +99,6 @@ class HostMeetingConsumer(BaseMeetingConsumer):
                 case MessageTypes.END_MEETING:
                     await self.handle_end_meeting(event=parsed_message_data)
         except json.JSONDecodeError:
-            # ! JSON parsing failed - consider logging this in production
             pass
 
     async def authenticate(self, event: dict[str, Any]) -> None:
