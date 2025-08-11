@@ -35,7 +35,6 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
 
         # NOTE: Meetings are to be summarized only once! Always check before u generate a summary
         if meeting.summarized_meeting and meeting.summarized_meeting != {}:
-            print("Meeting already summarized")
             return JsonResponse(data={"type": "success"})
 
         questions: list[Question] | None = meeting_data.get("questions", None)
@@ -49,7 +48,6 @@ def summarize_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         formatted_times: dict[str, str] = utils.format_meeting_time(
             time=meeting.created_at
         )
-        print(formatted_times)
 
         # ! Summarization PROMPT - only ask AI to analyze questions, not generate metadata
         # NOTE: Look into the util's to see how the AI summary response is fully structured
@@ -150,7 +148,6 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
             return JsonResponse(data={"type": "error"})
 
         if meeting.summarized_meeting and meeting.summarized_meeting == {}:
-            print("Meeting not yet summarized")
             return JsonResponse(
                 data={"type": "error", "message": "Meeting not summarized yet"}
             )
@@ -160,6 +157,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         match export_type:
             case utils.ExportTypes.PDF.value:
                 result = generate_pdf(meeting.summarized_meeting, str(meeting_id))
+                print(result)
             case utils.ExportTypes.MICROSOFT_WORD.value:
                 result = generate_docx(meeting.summarized_meeting, str(meeting_id))
             case _:

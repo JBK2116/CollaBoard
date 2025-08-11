@@ -36,7 +36,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
-DEBUG = False  # ! False in Prod, True in Dev
+DEBUG = True  # ! False in Prod, True in Dev
 
 # TODO: UPDATE THIS FOR PROD
 ALLOWED_HOSTS: list[str] = ["*"]
