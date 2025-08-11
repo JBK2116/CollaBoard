@@ -39,7 +39,7 @@ SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 DEBUG = True  # ! False in Prod, True in Dev
 
 # TODO: UPDATE THIS FOR PROD
-ALLOWED_HOSTS: list[str] = ["*"]
+ALLOWED_HOSTS: list[str] = ["3.23.68.183", "localhost"]
 
 
 # Redirection destinations
@@ -150,11 +150,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_env_var("DB_NAME"),
-        "USER": get_env_var("DB_USER"),
-        "PASSWORD": get_env_var("DB_PASSWORD"),
-        "HOST": get_env_var("DB_HOST"),
-        "PORT": get_env_var("DB_PORT"),
+        "NAME": get_env_var("DB_NAME_PROD"),
+        "USER": get_env_var("DB_USER_PROD"),
+        "PASSWORD": get_env_var("DB_PASSWORD_PROD"),
+        "HOST": get_env_var("DB_HOST_PROD"),
+        "PORT": get_env_var("DB_PORT_PROD"),
     }
 }
 
