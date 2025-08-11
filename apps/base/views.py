@@ -1,5 +1,7 @@
 import time
 from secrets import randbelow
+from smtplib import SMTPException
+from socket import gaierror
 from typing import Any, cast
 
 from django.contrib.auth import authenticate, login
@@ -24,7 +26,6 @@ from collaboard import settings
 
 # Create your views here.
 def ratelimited(request: HttpRequest, exception: Exception) -> HttpResponse:
-    print("RATE LIMIT VIEW CALLED!")  # Add this debug line
     return render(request, template_name="403.html", status=403)
 
 
@@ -44,7 +45,7 @@ def register(request: HttpRequest) -> HttpResponse:
             request=request, form=UserRegisterForm(request.POST)
         )
         if isinstance(form_result, HttpResponse):
-            return form_result  # User provided invalid info OR an error occurred
+            return form_result
 
         form = form_result
         if _user_exists(form.cleaned_data["email"]):
@@ -63,11 +64,17 @@ def register(request: HttpRequest) -> HttpResponse:
             "email": form.cleaned_data["email"],
             "password": make_password(password=form.cleaned_data["password1"]),
             "verification_code": verification_code,
-            "expires_in": time.monotonic() + 60 * 10,  # Ten Minutes
+            "expires_in": time.monotonic() + 60 * 10,
         }
-        _send_email_verification_code(
+        email_result = _send_email_verification_code(
             verification_code=verification_code, user_email=form.cleaned_data["email"]
         )
+        if email_result:
+            return render(
+                request,
+                template_name="base/register.html",
+                context={"form": form, "email_error": email_result},
+            )
         return redirect("verify-email")
     else:
         form = UserRegisterForm()
@@ -78,7 +85,7 @@ def register(request: HttpRequest) -> HttpResponse:
 
 def _send_email_verification_code(
     verification_code: str, user_email: str
-) -> HttpResponse | None:
+) -> str | None:
     subject: str = "Collaboard - Verify Your Account"
     text_content: str = f"Verify your account to begin creating meetings! Here's your code: {verification_code}"
     html_message = render_to_string(
@@ -92,12 +99,15 @@ def _send_email_verification_code(
         to=[user_email],
     )
     msg.attach_alternative(content=html_message, mimetype="text/html")
-    # TODO: Handle this better
     try:
         msg.send()
         return None
+    except SMTPException:
+        return "Email service temporarily unavailable. Please try again."
+    except gaierror:
+        return "Network error. Please check your connection and try again."
     except Exception:
-        return redirect("landing")
+        return "Failed to send verification email. Please try again."
 
 
 @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
@@ -111,7 +121,7 @@ def verify_email(request: HttpRequest) -> HttpResponse:
             request=request, form=VerifyEmailForm(request.POST)
         )
         if isinstance(form_result, HttpResponse):
-            return form_result  # User submitted invalid info OR an error occurred
+            return form_result
         form = form_result
 
         pending_user_info: dict[str, Any] | HttpResponse = _get_pending_user_fields(
@@ -158,9 +168,8 @@ def login_user(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form_result = _validate_login_form(request, form=UserLoginForm(request.POST))
         if isinstance(form_result, HttpResponse):
-            return form_result  # User inputted invalid info or an error occurred
+            return form_result
 
-        # At this point, we know form_result is a UserLoginForm
         form = form_result
         user = authenticate(
             request,
@@ -195,7 +204,7 @@ def forgot_password(request: HttpRequest) -> HttpResponse:
             )
         )
         if isinstance(form_result, HttpResponse):
-            return form_result  # Invalid information provided
+            return form_result
         valid_form = form_result
         user = _get_user(email=valid_form.cleaned_data["email"])
         if not user:
@@ -206,7 +215,15 @@ def forgot_password(request: HttpRequest) -> HttpResponse:
             user=user
         )  # token str and expiry time is auto generated
         token_obj.save()
-        _send_email_reset_password_link(request=request, token_obj=token_obj)
+        email_result: str | None = _send_email_reset_password_link(
+            request=request, token_obj=token_obj
+        )
+        if email_result:
+            return render(
+                request,
+                template_name="base/forgot_password_email.html",
+                context={"email_error": email_result},
+            )
         return render(
             request,
             template_name="base/forgot_password_email.html",
@@ -222,7 +239,7 @@ def forgot_password(request: HttpRequest) -> HttpResponse:
 
 def _send_email_reset_password_link(
     request: HttpRequest, token_obj: PasswordResetToken
-):
+) -> str | None:
     link = reverse(viewname="reset-password", kwargs={"token": token_obj.token})
     full_url = request.build_absolute_uri(link)
     subject: str = "Collaboard - Reset Password"
@@ -238,11 +255,15 @@ def _send_email_reset_password_link(
         to=[token_obj.user.email],
     )
     msg.attach_alternative(content=html_message, mimetype="text/html")
-    # TODO: Handle this better
     try:
         msg.send()
+        return None
+    except SMTPException:
+        return "Email service temporarily unavailable. Please try again."
+    except gaierror:
+        return "Network error. Please check your connection and try again."
     except Exception:
-        return redirect("landing")
+        return "Failed to send verification email. Please try again."
 
 
 @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
@@ -253,7 +274,7 @@ def reset_password(request: HttpRequest, token: str) -> HttpResponse:
             request, ResetPasswordForm(request.POST)
         )
         if isinstance(form_result, HttpResponse):
-            return form_result  # Invalid information provided
+            return form_result
         valid_form: ResetPasswordForm = form_result
         try:
             token_obj: PasswordResetToken = PasswordResetToken.objects.get(token=token)

@@ -22,6 +22,13 @@
             
             <form method="POST" class="register-form" action="{% url 'register' %}">
                 {% csrf_token %}
+
+                <!-- Email sending error -->
+                {% if email_error %}
+                    <div class="form-errors">
+                        {{ email_error }}
+                    </div>
+                {% endif %}
                 
                 <!-- General form errors -->
                 {% if form.non_field_errors %}
