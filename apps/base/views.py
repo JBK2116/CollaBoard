@@ -8,10 +8,17 @@ from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django_ratelimit.decorators import ratelimit
 
-from apps.base.forms import UserLoginForm, UserRegisterForm, VerifyEmailForm
-from apps.base.models import CustomUser
+from apps.base.forms import (
+    ResetPasswordEmailForm,
+    ResetPasswordForm,
+    UserLoginForm,
+    UserRegisterForm,
+    VerifyEmailForm,
+)
+from apps.base.models import CustomUser, PasswordResetToken
 from collaboard import settings
 
 
@@ -58,7 +65,7 @@ def register(request: HttpRequest) -> HttpResponse:
             "verification_code": verification_code,
             "expires_in": time.monotonic() + 60 * 10,  # Ten Minutes
         }
-        _send_email(
+        _send_email_verification_code(
             verification_code=verification_code, user_email=form.cleaned_data["email"]
         )
         return redirect("verify-email")
@@ -69,11 +76,13 @@ def register(request: HttpRequest) -> HttpResponse:
         )
 
 
-def _send_email(verification_code: str, user_email: str) -> HttpResponse | None:
+def _send_email_verification_code(
+    verification_code: str, user_email: str
+) -> HttpResponse | None:
     subject: str = "Collaboard - Verify Your Account"
     text_content: str = f"Verify your account to begin creating meetings! Here's your code: {verification_code}"
     html_message = render_to_string(
-        template_name="base/verification_code_email.html",
+        template_name="base/emails/verify_email.html",
         context={"verification_code": verification_code},
     )
     msg = EmailMultiAlternatives(
@@ -133,6 +142,7 @@ def verify_email(request: HttpRequest) -> HttpResponse:
             password=pending_user_info["password"],
         )
         user.save()
+        del request.session["pending_user_info"]
         login(request, user)
         return redirect("dashboard")
     else:
@@ -173,6 +183,104 @@ def login_user(request: HttpRequest) -> HttpResponse:
     else:
         form = UserLoginForm()
         return render(request, "base/login.html", context={"form": form})
+
+
+@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+def forgot_password(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form_result: ResetPasswordEmailForm | HttpResponse = (
+            _validate_reset_password_email_form(
+                request, form=ResetPasswordEmailForm(request.POST)
+            )
+        )
+        if isinstance(form_result, HttpResponse):
+            return form_result  # Invalid information provided
+        valid_form = form_result
+        user = _get_user(email=valid_form.cleaned_data["email"])
+        if not user:
+            return render(
+                request, "base/forgot_password_email.html", context={"email_sent": True}
+            )
+        token_obj = PasswordResetToken(
+            user=user
+        )  # token str and expiry time is auto generated
+        token_obj.save()
+        _send_email_reset_password_link(request=request, token_obj=token_obj)
+        return render(
+            request,
+            template_name="base/forgot_password_email.html",
+            context={"email_sent": True},
+        )
+    else:
+        return render(
+            request,
+            template_name="base/forgot_password_email.html",
+            context={"form": ResetPasswordEmailForm()},
+        )
+
+
+def _send_email_reset_password_link(
+    request: HttpRequest, token_obj: PasswordResetToken
+):
+    link = reverse(viewname="reset-password", kwargs={"token": token_obj.token})
+    full_url = request.build_absolute_uri(link)
+    subject: str = "Collaboard - Reset Password"
+    text_content: str = f"You have requested to reset your password. Here's your one time link: {full_url}"
+    html_message = render_to_string(
+        template_name="base/emails/forgot_password.html",
+        context={"link": full_url},
+    )
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[token_obj.user.email],
+    )
+    msg.attach_alternative(content=html_message, mimetype="text/html")
+    # TODO: Handle this better
+    try:
+        msg.send()
+    except Exception:
+        return redirect("landing")
+
+
+@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+def reset_password(request: HttpRequest, token: str) -> HttpResponse:
+    if request.method == "POST":
+        form_result = _validate_reset_password_form(
+            request, ResetPasswordForm(request.POST)
+        )
+        if isinstance(form_result, HttpResponse):
+            return form_result  # Invalid information provided
+        valid_form: ResetPasswordForm = form_result
+        try:
+            token_obj: PasswordResetToken = PasswordResetToken.objects.get(token=token)
+        except PasswordResetToken.DoesNotExist:
+            return render(
+                request,
+                template_name="base/rest_password",
+                context={"general_error": True},
+            )
+        if not token_obj.is_valid:
+            return render(
+                request,
+                template_name="base/reset_password.html",
+                context={"token_expired": True},
+            )
+        token_obj.is_used = True
+        token_obj.save()
+        token_user: CustomUser = token_obj.user
+        token_user.set_password(valid_form.cleaned_data["password1"])
+        token_user.save()
+        return redirect("login")
+    else:
+        return render(
+            request,
+            template_name="base/reset_password.html",
+            context={"form": ResetPasswordForm()},
+        )
 
 
 def _get_pending_user_fields(
@@ -239,6 +347,26 @@ def _validate_login_form(
     return render(request, template_name="base/login.html", context={"form": form})
 
 
+def _validate_reset_password_email_form(
+    request: HttpRequest, form: ResetPasswordEmailForm
+) -> ResetPasswordEmailForm | HttpResponse:
+    if form.is_valid():
+        return form
+    return render(
+        request, template_name="base/forgot_password.html", context={"form": form}
+    )
+
+
+def _validate_reset_password_form(
+    request: HttpRequest, form: ResetPasswordForm
+) -> ResetPasswordForm | HttpResponse:
+    if form.is_valid():
+        return form
+    return render(
+        request, template_name="base/reset_password.html", context={"form": form}
+    )
+
+
 def _user_exists(email: str) -> bool:
     """
     Performs a simple existence check query in the database
@@ -246,6 +374,16 @@ def _user_exists(email: str) -> bool:
     as the one provided to the function
     """
     return CustomUser.objects.filter(email=email).exists()
+
+
+def _get_user(email: str) -> CustomUser | None:
+    """
+    Retrieves a user from the database using the provided email
+    """
+    try:
+        return CustomUser.objects.get(email=email)
+    except CustomUser.DoesNotExist:
+        return None
 
 
 def _generate_verification_code() -> str:

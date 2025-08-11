@@ -1,9 +1,12 @@
+import secrets
+from datetime import timedelta
 from typing import Any, Optional
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
+from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager["CustomUser"]):
@@ -59,8 +62,8 @@ class CustomUser(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    USERNAME_FIELD = "email" # NOTE: This is used for authentication
-    REQUIRED_FIELDS = [ # NOTE: This only applies when creating a superuser
+    USERNAME_FIELD = "email"  # NOTE: This is used for authentication
+    REQUIRED_FIELDS = [  # NOTE: This only applies when creating a superuser
         "first_name",
         "last_name",
     ]
@@ -78,3 +81,24 @@ class CustomUser(AbstractUser):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(
+        to=CustomUser, null=False, blank=False, on_delete=models.CASCADE
+    )
+    token = models.CharField(max_length=100, unique=True, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=False, blank=False)
+    is_used = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.token:
+            self.token = secrets.token_urlsafe(nbytes=32)
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=1)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_valid(self) -> bool:
+        return not self.is_used and self.expires_at > timezone.now()
