@@ -38,8 +38,8 @@ SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
 DEBUG = False
 
-# TODO: UPDATE THIS FOR PROD
-ALLOWED_HOSTS: list[str] = ["my-elastic-ip", "localhost", "my-domain.com"]
+# TODO: Purchase a domain name and add it to list
+ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost"]
 
 
 # Redirection destinations
