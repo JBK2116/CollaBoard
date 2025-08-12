@@ -18,7 +18,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'collaboard.settings')
 django_asgi_app = get_asgi_application()
 
 # Import your WebSocket routing
-from apps.meeting.routing import websocket_urlpatterns
+from apps.meeting.routing import websocket_urlpatterns  # noqa: E402
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

@@ -36,10 +36,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
-DEBUG = False
+DEBUG = True
 
-# TODO: UPDATE THIS FOR PROD
-ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost"]
+ALLOWED_HOSTS: list[str] = ["*"]
 
 
 # Redirection destinations
@@ -76,7 +75,6 @@ MIDDLEWARE = [
     "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 # Session configuration for WebSocket compatibility
-# TODO: UPDATE THIS FOR PROD
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
@@ -111,7 +109,6 @@ TEMPLATES = [
     },
 ]
 
-# TODO: UPDATE THIS FOR PROD
 # Cache Configs
 CACHES = {
     "default": {
@@ -125,7 +122,6 @@ CACHES = {
 
 RATELIMIT_VIEW = "apps.base.views.ratelimited"
 
-# TODO: UPDATE THIS FOR PROD
 # Channels Configs
 WSGI_APPLICATION = "collaboard.wsgi.application"
 ASGI_APPLICATION = "collaboard.asgi.application"
@@ -146,11 +142,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_env_var("DB_NAME_PROD"),
-        "USER": get_env_var("DB_USER_PROD"),
-        "PASSWORD": get_env_var("DB_PASSWORD_PROD"),
-        "HOST": get_env_var("DB_HOST_PROD"),
-        "PORT": get_env_var("DB_PORT_PROD"),
+        "NAME": get_env_var("DB_NAME"),
+        "USER": get_env_var("DB_USER"),
+        "PASSWORD": get_env_var("DB_PASSWORD"),
+        "HOST": get_env_var("DB_HOST"),
+        "PORT": get_env_var("DB_PORT"),
     }
 }
 
@@ -189,7 +185,7 @@ USE_TZ = True
 
 # Media files (exports)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = "/home/ubuntu/Collaboard/mediafiles/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -199,7 +195,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static"  # global static folder
 ]
-STATIC_ROOT = "/home/ubuntu/Collaboard/staticfiles/"  # for production (via collectstatic)
+STATIC_ROOT = BASE_DIR / "staticfiles"  # for production (via collectstatic)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
