@@ -38,8 +38,8 @@ SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
 DEBUG = False
 
-# TODO: Purchase a domain name and add it to list
-ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost", "my-domain.com"]
+# TODO: UPDATE THIS FOR PROD
+ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost"]
 
 
 # Redirection destinations
@@ -76,19 +76,16 @@ MIDDLEWARE = [
     "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 # Session configuration for WebSocket compatibility
+# TODO: UPDATE THIS FOR PROD
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
-SESSION_COOKIE_AGE = 3600  # 3600 seconds = 1 hour
+SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
-SECURE_SSL_REDIRECT = False
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
 
 # Email configuration for email verification
+
 # TODO: UPDATE THIS AFTER PROD TO A BETTER EMAIL PROVIDER (AMAZON SES)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = get_env_var("EMAIL_HOST")
@@ -145,6 +142,7 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# TODO: UPDATE THIS FOR PROD
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
