@@ -189,7 +189,7 @@ USE_TZ = True
 
 # Media files (exports)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = "/home/ubuntu/Collaboard/mediafiles/"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -199,7 +199,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static"  # global static folder
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"  # for production (via collectstatic)
+STATIC_ROOT = "/home/ubuntu/Collaboard/staticfiles/"  # for production (via collectstatic)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
