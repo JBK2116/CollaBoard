@@ -7,7 +7,6 @@ consumer classes in `consumers.py`
 
 import json
 from typing import Any
-from urllib.parse import parse_qs
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -29,12 +28,6 @@ class BaseMeetingConsumer(AsyncWebsocketConsumer):
     Below are the instance methods 
     for THIS class
     """
-
-    def _get_session_id_from_query(self) -> str | None:
-        """Extract session ID from query parameters"""
-        query_string = self.scope.get("query_string", b"").decode()
-        query_params = parse_qs(query_string)
-        return query_params.get("session", [None])[0]
 
     def _get_url_route(self) -> dict[str, Any] | None:
         """Get URL route from scope"""

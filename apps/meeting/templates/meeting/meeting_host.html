@@ -1,4 +1,3 @@
-{% load django_browser_reload %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +7,6 @@
     <link rel="stylesheet" href="{% static 'meeting/meeting_host.css' %}">
     <title>Meeting - Host Control</title>
 </head>
-{% django_browser_reload_script %}
 <body>
     <div class="meeting-info">
         <h1>{{ meeting.title }} - Host Control</h1>

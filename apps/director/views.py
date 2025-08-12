@@ -13,8 +13,6 @@ from apps.base.models import CustomUser
 from apps.director.forms import CreateMeetingForm, QuestionFormSet
 from apps.director.models import Meeting, Question
 
-# Create your views here.
-
 
 @login_required
 @ratelimit(
@@ -94,16 +92,16 @@ def account(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def delete_account(request: HttpRequest) -> HttpResponse:
-    # NOTE: This page is supposed to be accessible solely via POST requests
-    if request.method == "GET":
+    # NOTE: This view is supposed to be accessible solely via POST requests
+    if request.method == "POST":
+        user = cast(CustomUser, request.user)
+        try:
+            user.delete()
+            return redirect(to="landing")
+        except IntegrityError:
+            return redirect(to=f"{reverse('account')}?deletion_failed=true")
+    else:
         return redirect(to="dashboard")
-    # NOTE: login_required ensures that user will always be CustomUser
-    user = cast(CustomUser, request.user)  
-    try:
-        user.delete()
-        return redirect(to="landing")
-    except IntegrityError:
-        return redirect(to=f"{reverse('account')}?deletion_failed=true")
 
 
 def generate_access_code() -> str:

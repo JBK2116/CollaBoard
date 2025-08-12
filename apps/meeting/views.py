@@ -6,7 +6,6 @@ from django.urls import reverse
 from apps.director.models import Meeting
 
 
-# Create your views here.
 @login_required
 def host_meeting(request: HttpRequest, meeting_id: str) -> HttpResponse:
     try:

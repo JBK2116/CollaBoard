@@ -36,10 +36,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
-DEBUG = True  # ! False in Prod, True in Dev
+DEBUG = False
 
 # TODO: UPDATE THIS FOR PROD
-ALLOWED_HOSTS: list[str] = ["3.23.68.183", "localhost"]
+ALLOWED_HOSTS: list[str] = ["my-elastic-ip", "localhost", "my-domain.com"]
 
 
 # Redirection destinations
@@ -53,11 +53,9 @@ collaboard_apps: list[str] = [
     "apps.meeting",
     "apps.api",
 ]
-additional_dev_apps: list[str] = [
-    "django_browser_reload",
-]
+
 INSTALLED_APPS = [
-    "daphne",  # IMPORTANT: used for channels
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -65,13 +63,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     *collaboard_apps,
-    *additional_dev_apps,
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -80,16 +76,19 @@ MIDDLEWARE = [
     "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 # Session configuration for WebSocket compatibility
-# TODO: UPDATE THIS FOR PROD
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
-SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_COOKIE_AGE = 3600  # 3600 seconds = 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
+SECURE_SSL_REDIRECT = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 # Email configuration for email verification
-
 # TODO: UPDATE THIS AFTER PROD TO A BETTER EMAIL PROVIDER (AMAZON SES)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = get_env_var("EMAIL_HOST")
@@ -146,7 +145,6 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# TODO: UPDATE THIS FOR PROD
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",

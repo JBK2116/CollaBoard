@@ -1,0 +1,66 @@
+
+.popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #fed7d7;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+    max-width: 300px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    color: #c53030;
+    float: right;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.verification-info {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 20px;
+    background-color: #f7fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.verification-info p {
+    color: #4a5568;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.code-input {
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+input[name="verification_code"] {
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
