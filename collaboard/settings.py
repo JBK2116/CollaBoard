@@ -39,7 +39,7 @@ SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 DEBUG = False
 
 # TODO: Purchase a domain name and add it to list
-ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost"]
+ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost", "my-domain.com"]
 
 
 # Redirection destinations
@@ -81,7 +81,7 @@ SESSION_COOKIE_AGE = 3600  # 3600 seconds = 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
