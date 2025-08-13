@@ -133,6 +133,12 @@ def get_meeting_metadata(data: dict[str, Any]) -> dict[str, Any] | None:
         "time_created": data.get("time_created", None),
         "author": data.get("author", None),
     }
+    print(f"Metadata check: {metadata}")  # Add this
+    for key, value in metadata.items():
+        if not value:
+            print(f"Failed on: {key} = {value}")  # Add this
+            return None
+    return metadata
     for key, value in metadata.items():
         if not value:
             return None
@@ -161,6 +167,7 @@ def get_summarized_meeting_question_analysis(
     questions_analysis_dictionaries: list[dict[str, Any]] | None = data.get(
         "questions_analysis", None
     )
+    print(questions_analysis_dictionaries)
     if not questions_analysis_dictionaries:
         return None
     for dictionary in questions_analysis_dictionaries:
@@ -168,12 +175,15 @@ def get_summarized_meeting_question_analysis(
             # NOTE: Explicit check for response count since 0 is considered Falsy but is a valid response from the AI
             if key == "response_count":
                 if not isinstance(value, (str, int)):
+                    print(key)
                     return None
                 str_response_count: str = str(value)
                 if not str_response_count.isdigit():
+                    print(str_response_count)
                     return None
                 int_response_count: int = int(str_response_count)
                 if int_response_count < 0 or int_response_count > SOFT_MAX_RESPONSES:
+                    print(int_response_count)
                     return None
             elif not value:
                 return None
@@ -198,6 +208,7 @@ def get_summarized_meeting_key_takeaways(data: dict[str, Any]) -> list[str] | No
         ```
     """
     key_takeaways: list[str] | None = data.get("key_takeaways", None)
+    print(key_takeaways)
     if not key_takeaways:
         return None
     if not all(takeaway and takeaway.strip() for takeaway in key_takeaways):
