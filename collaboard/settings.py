@@ -195,7 +195,7 @@ USE_TZ = True
 
 # Media files (exports)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = "/home/ubuntu/Collaboard/mediafiles/"
+MEDIA_ROOT = "/home/ubuntu/CollaBoard/mediafiles/"
 
 
 # Static files (CSS, JavaScript, Images)
