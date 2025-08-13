@@ -37,6 +37,7 @@ class FileTypes(Enum):
     PDF = ".pdf"
     MICROSOFT_WORD = ".docx"
 
+
 class ExportTypes(Enum):
     # ! This class must be aligned with the return values set in the frontend
     PDF = "pdf"
@@ -51,6 +52,8 @@ def get_export_path() -> Path:
     """
     Returns the export path where all files are saved
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_export_path called, returning: {EXPORT_PATH}\n")
     return EXPORT_PATH
 
 
@@ -58,14 +61,24 @@ def generate_filename(meeting_id: str, file_type: FileTypes) -> str:
     """
     Returns the dynamically created name of the file
     """
-    return f"{FILE_NAME_PREFIX}{meeting_id}{file_type.value}"
+    filename = f"{FILE_NAME_PREFIX}{meeting_id}{file_type.value}"
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"generate_filename called with meeting_id={meeting_id}, file_type={file_type.value}, returning: {filename}\n"
+        )
+    return filename
 
 
 def generate_file_path(export_path: Path, filename: str) -> Path:
     """
     Returns the full path to where the file is saved
     """
-    return export_path / filename
+    file_path = export_path / filename
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"generate_file_path called with export_path={export_path}, filename={filename}, returning: {file_path}\n"
+        )
+    return file_path
 
 
 def format_meeting_time(time: datetime) -> dict[str, str]:
@@ -90,6 +103,9 @@ def format_meeting_time(time: datetime) -> dict[str, str]:
     }
     ```
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"format_meeting_time called with time={time}\n")
+
     # NOTE: local_timezone is a timezone converter to convert a datetimefield into the provided key timezone
     # NOTE: astimezone accepts a timezone converter and converts the datetime object to that timezone
     local_timezone: ZoneInfo = ZoneInfo(key="America/Toronto")
@@ -97,7 +113,11 @@ def format_meeting_time(time: datetime) -> dict[str, str]:
     time_dictionary: dict[str, str] = {
         "created_at": local_time.strftime("%d %B %Y"),
         "time_created": local_time.strftime("%H:%M"),
-    } 
+    }
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"format_meeting_time returning: {time_dictionary}\n")
+
     return time_dictionary
 
 
@@ -126,6 +146,9 @@ def get_meeting_metadata(data: dict[str, Any]) -> dict[str, Any] | None:
         }
         ```
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_meeting_metadata called with data keys: {list(data.keys())}\n")
+
     metadata = {
         "title": data.get("meeting_title", None),
         "description": data.get("meeting_description", None),
@@ -133,18 +156,19 @@ def get_meeting_metadata(data: dict[str, Any]) -> dict[str, Any] | None:
         "time_created": data.get("time_created", None),
         "author": data.get("author", None),
     }
-    # Debug to file
-    with open('/tmp/debug.log', 'a') as f:
-        f.write(f"Raw data keys: {list(data.keys())}\n")
-        f.write(f"Metadata: {metadata}\n")
-        for key, value in metadata.items():
-            if not value:
-                f.write(f"FAILED on {key} = {repr(value)}\n")
-                return None
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_meeting_metadata extracted metadata: {metadata}\n")
+
     for key, value in metadata.items():
         if not value:
+            with open("/tmp/debug.log", "a") as f:
+                f.write(f"get_meeting_metadata FAILED on {key} = {repr(value)}\n")
             return None
 
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_meeting_metadata SUCCESS, returning: {metadata}\n")
+    return metadata
 
 
 def get_summarized_meeting_question_analysis(
@@ -166,29 +190,70 @@ def get_summarized_meeting_question_analysis(
     Returns:
         - list[dict[str, Any]] | None: The list of question analysis dictionaries if everything is valid, None otherwise.
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write("get_summarized_meeting_question_analysis called\n")
+
     questions_analysis_dictionaries: list[dict[str, Any]] | None = data.get(
         "questions_analysis", None
     )
-    print(questions_analysis_dictionaries)
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"get_summarized_meeting_question_analysis extracted: {questions_analysis_dictionaries}\n"
+        )
+
     if not questions_analysis_dictionaries:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(
+                "get_summarized_meeting_question_analysis FAILED - questions_analysis_dictionaries is None/empty\n"
+            )
         return None
-    for dictionary in questions_analysis_dictionaries:
+
+    for i, dictionary in enumerate(questions_analysis_dictionaries):
+        with open("/tmp/debug.log", "a") as f:
+            f.write(
+                f"get_summarized_meeting_question_analysis checking dictionary {i}: {dictionary}\n"
+            )
+
         for key, value in dictionary.items():
             # NOTE: Explicit check for response count since 0 is considered Falsy but is a valid response from the AI
             if key == "response_count":
+                with open("/tmp/debug.log", "a") as f:
+                    f.write(
+                        f"get_summarized_meeting_question_analysis checking response_count: {value} (type: {type(value)})\n"
+                    )
+
                 if not isinstance(value, (str, int)):
-                    print(key)
+                    with open("/tmp/debug.log", "a") as f:
+                        f.write(
+                            f"get_summarized_meeting_question_analysis FAILED - response_count not str/int: {value}\n"
+                        )
                     return None
                 str_response_count: str = str(value)
                 if not str_response_count.isdigit():
-                    print(str_response_count)
+                    with open("/tmp/debug.log", "a") as f:
+                        f.write(
+                            f"get_summarized_meeting_question_analysis FAILED - response_count not digit: {str_response_count}\n"
+                        )
                     return None
                 int_response_count: int = int(str_response_count)
                 if int_response_count < 0 or int_response_count > SOFT_MAX_RESPONSES:
-                    print(int_response_count)
+                    with open("/tmp/debug.log", "a") as f:
+                        f.write(
+                            f"get_summarized_meeting_question_analysis FAILED - response_count out of range: {int_response_count}\n"
+                        )
                     return None
             elif not value:
+                with open("/tmp/debug.log", "a") as f:
+                    f.write(
+                        f"get_summarized_meeting_question_analysis FAILED - {key} is empty: {repr(value)}\n"
+                    )
                 return None
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"get_summarized_meeting_question_analysis SUCCESS, returning: {questions_analysis_dictionaries}\n"
+        )
     return questions_analysis_dictionaries
 
 
@@ -209,12 +274,37 @@ def get_summarized_meeting_key_takeaways(data: dict[str, Any]) -> list[str] | No
         ["First String", "Second String", ...]
         ```
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write("get_summarized_meeting_key_takeaways called\n")
+
     key_takeaways: list[str] | None = data.get("key_takeaways", None)
-    print(key_takeaways)
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_summarized_meeting_key_takeaways extracted: {key_takeaways}\n")
+
     if not key_takeaways:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(
+                "get_summarized_meeting_key_takeaways FAILED - key_takeaways is None/empty\n"
+            )
         return None
-    if not all(takeaway and takeaway.strip() for takeaway in key_takeaways):
-        return None
+
+    for i, takeaway in enumerate(key_takeaways):
+        with open("/tmp/debug.log", "a") as f:
+            f.write(
+                f"get_summarized_meeting_key_takeaways checking takeaway {i}: {repr(takeaway)}\n"
+            )
+        if not takeaway or not takeaway.strip():
+            with open("/tmp/debug.log", "a") as f:
+                f.write(
+                    f"get_summarized_meeting_key_takeaways FAILED - takeaway {i} is empty/whitespace\n"
+                )
+            return None
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"get_summarized_meeting_key_takeaways SUCCESS, returning: {key_takeaways}\n"
+        )
     return key_takeaways
 
 
@@ -239,6 +329,9 @@ def get_meeting_data(meeting_id: str) -> dict[str, Any] | None:
         }
         ```
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write(f"get_meeting_data called with meeting_id: {meeting_id}\n")
+
     try:
         meeting: Meeting = Meeting.objects.prefetch_related(
             "questions", "response_set"
@@ -246,8 +339,18 @@ def get_meeting_data(meeting_id: str) -> dict[str, Any] | None:
         # NOTE: The ignore comments are because the IDE does not recognize the attributes.
         questions: list[Question] = meeting.questions.all()  # type: ignore
         responses: list[Response] = meeting.response_set.all()  # type: ignore
-        return {"meeting": meeting, "questions": questions, "responses": responses}
-    except (ValueError, Meeting.DoesNotExist):
+
+        result = {"meeting": meeting, "questions": questions, "responses": responses}
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(
+                f"get_meeting_data SUCCESS - found meeting: {meeting.title}, questions: {len(questions)}, responses: {len(responses)}\n"
+            )
+
+        return result
+    except (ValueError, Meeting.DoesNotExist) as e:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"get_meeting_data FAILED - exception: {e}\n")
         return None
 
 
@@ -271,11 +374,22 @@ def format_question_responses(
         }
         ```
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"format_question_responses called with {len(questions)} questions, {len(responses)} responses\n"
+        )
+
     # NOTE: This algorithm will be optimized in the future
     all_questions_descriptions: list[str] = [
         f"Question {question.position}: {question.description}"
         for question in questions
     ]
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"format_question_responses generated questions: {all_questions_descriptions}\n"
+        )
+
     all_responses_descriptions: list[list[str]] = []
     for question in questions:
         response_descriptions: list[str] = [
@@ -288,4 +402,10 @@ def format_question_responses(
     qa_dictionary: dict[str, Any] = {
         k: v for (k, v) in zip(all_questions_descriptions, all_responses_descriptions)
     }
+
+    with open("/tmp/debug.log", "a") as f:
+        f.write(
+            f"format_question_responses returning dictionary with {len(qa_dictionary)} entries\n"
+        )
+
     return qa_dictionary
