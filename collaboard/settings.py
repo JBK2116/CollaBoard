@@ -38,8 +38,7 @@ SECRET_KEY = get_env_var("DJANGO_SECRET_KEY")
 
 DEBUG = False
 
-# TODO: UPDATE THIS FOR PROD
-ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost"]
+ALLOWED_HOSTS: list[str] = ["18.189.119.43", "localhost", "collaboard.site"]
 
 
 # Redirection destinations
@@ -76,7 +75,6 @@ MIDDLEWARE = [
     "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 # Session configuration for WebSocket compatibility
-# TODO: UPDATE THIS FOR PROD
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
