@@ -80,15 +80,15 @@ SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://collaboard.site',
-    'https://www.collaboard.site'
-]
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://collaboard.site',
+#     'https://www.collaboard.site'
+# ]
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Email configuration for email verification
 
@@ -146,7 +146,6 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# TODO: UPDATE THIS FOR PROD
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
