@@ -12,15 +12,31 @@ FILE_TYPE: utils.FileTypes = utils.FileTypes.PDF
 
 class MeetingSummaryPDF(FPDF):
     def __init__(self):
+        with open("/tmp/debug.log", "a") as f:
+            f.write("MeetingSummaryPDF.__init__ called\n")
+
         super().__init__()
+
         font_path = (
             Path(settings.STATICFILES_DIRS[0]) / "fonts" / "dejavu-sans.book.ttf"
         )
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"Font path: {font_path}\n")
+            f.write(f"Font exists: {font_path.exists()}\n")
+
         if not font_path.exists():
             raise FileNotFoundError(f"Font file not found: {font_path}")
+
         self.add_font("DejaVuSans", "", str(font_path), uni=True)
+        with open("/tmp/debug.log", "a") as f:
+            f.write("Font added successfully\n")
+
         self.set_font("DejaVuSans", "", 12)  # default font
         self.set_auto_page_break(auto=True, margin=15)
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("MeetingSummaryPDF.__init__ completed\n")
 
     # --- HEADER / FOOTER ---
     def header(self):
@@ -100,6 +116,9 @@ def generate_pdf(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | Non
     """
     Creates a PDF meeting summary and saves it.
     """
+    with open("/tmp/debug.log", "a") as f:
+        f.write("=== PDF GENERATION START ===\n")
+
     try:
         export_path: Path = utils.get_export_path()
         filename: str = utils.generate_filename(
@@ -109,24 +128,43 @@ def generate_pdf(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | Non
             export_path=export_path, filename=filename
         )
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"PDF paths generated - file_path: {file_path}\n")
+
         meeting_metadata: dict[str, Any] | None = utils.get_meeting_metadata(data=data)
         if not meeting_metadata:
+            with open("/tmp/debug.log", "a") as f:
+                f.write("PDF FAILED: meeting_metadata is None\n")
             return (False, None)
 
         questions_analysis_dictionaries: list[dict[str, Any]] | None = (
             utils.get_summarized_meeting_question_analysis(data=data)
         )
         if not questions_analysis_dictionaries:
+            with open("/tmp/debug.log", "a") as f:
+                f.write("PDF FAILED: questions_analysis_dictionaries is None\n")
             return (False, None)
 
         key_takeaways: list[str] | None = utils.get_summarized_meeting_key_takeaways(
             data=data
         )
         if not key_takeaways:
+            with open("/tmp/debug.log", "a") as f:
+                f.write("PDF FAILED: key_takeaways is None\n")
             return (False, None)
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write("PDF: All validations passed, creating PDF object...\n")
+
         pdf = MeetingSummaryPDF()
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("PDF: MeetingSummaryPDF object created successfully\n")
+
         pdf.add_page()
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("PDF: Page added successfully\n")
 
         # Title page
         pdf.add_title_page(
@@ -137,20 +175,41 @@ def generate_pdf(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | Non
             meeting_metadata.get("author", ""),
         )
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write("PDF: Title page added successfully\n")
+
         # Questions & Summaries
-        for question_summary in questions_analysis_dictionaries:
+        for i, question_summary in enumerate(questions_analysis_dictionaries):
             pdf.add_question_section(
                 question_summary.get("question", ""),
                 question_summary.get("response_count", ""),
                 question_summary.get("summary", ""),
             )
+            with open("/tmp/debug.log", "a") as f:
+                f.write(f"PDF: Question section {i} added successfully\n")
 
         # Key Takeaways
         pdf.add_key_takeaways_section(key_takeaways)
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write("PDF: Key takeaways section added successfully\n")
+
         # Save PDF
         pdf.output(str(file_path))
 
-        return (True, f"{reverse('download-file', kwargs={'filename': filename})}")
-    except Exception:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"PDF: File saved successfully to {file_path}\n")
+
+        download_url = f"{reverse('download-file', kwargs={'filename': filename})}"
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"PDF: Download URL generated: {download_url}\n")
+            f.write("=== PDF GENERATION SUCCESS ===\n")
+
+        return (True, download_url)
+    except Exception as e:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"PDF GENERATION EXCEPTION: {str(e)}\n")
+            f.write(f"Exception type: {type(e).__name__}\n")
+            f.write("=== PDF GENERATION FAILED ===\n")
         return (False, None)
