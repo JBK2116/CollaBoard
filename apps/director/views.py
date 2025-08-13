@@ -15,15 +15,15 @@ from apps.director.models import Meeting, Question
 
 
 @login_required
-@ratelimit(
-    group="limit_per_day", key="user_or_ip", rate="20/d", method=["POST"], block=True
-)
-@ratelimit(
-    group="limit_per_hour", key="user_or_ip", rate="10/h", method=["POST"], block=True
-)
-@ratelimit(
-    group="limit_per_minute", key="user_or_ip", rate="3/m", method=["POST"], block=True
-)
+# @ratelimit(
+#     group="limit_per_day", key="user_or_ip", rate="20/d", method=["POST"], block=True
+# )
+# @ratelimit(
+#     group="limit_per_hour", key="user_or_ip", rate="10/h", method=["POST"], block=True
+# )
+# @ratelimit(
+#     group="limit_per_minute", key="user_or_ip", rate="3/m", method=["POST"], block=True
+# )
 def create_meeting(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         # More handling will be done later

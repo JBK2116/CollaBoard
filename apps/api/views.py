@@ -173,7 +173,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
 
 def download_file(request: HttpRequest, filename: str) -> FileResponse:
     # NOTE: response ensures that the file is downloaded on the user's device
-    file_path: Path = settings.MEDIA_ROOT / "exports" / filename
+    file_path = Path(settings.MEDIA_ROOT) / "exports" / filename
     response = FileResponse(open(file=file_path, mode="rb"), as_attachment=True)
     return response
 
