@@ -29,24 +29,43 @@ def add_section_divider(document, thickness=1, color="B4B4B4"):
 
 
 def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | None]:
+    with open("/tmp/debug.log", "a") as f:
+        f.write("=== DOCX GENERATION START ===\n")
+
     try:
         export_path = utils.get_export_path()
         filename = utils.generate_filename(meeting_id=meeting_id, file_type=FILE_TYPE)
         file_path = utils.generate_file_path(export_path=export_path, filename=filename)
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"DOCX paths generated - file_path: {file_path}\n")
 
         meeting_metadata = utils.get_meeting_metadata(data=data)
         questions = utils.get_summarized_meeting_question_analysis(data=data)
         key_takeaways = utils.get_summarized_meeting_key_takeaways(data=data)
 
         if not (meeting_metadata and questions and key_takeaways):
+            with open("/tmp/debug.log", "a") as f:
+                f.write(
+                    f"DOCX FAILED: Validation failed - metadata: {bool(meeting_metadata)}, questions: {bool(questions)}, takeaways: {bool(key_takeaways)}\n"
+                )
             return (False, None)
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: All validations passed, creating Document object...\n")
+
         doc = Document()
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: Document object created successfully\n")
 
         # Title page
         title = doc.add_paragraph(meeting_metadata.get("title", ""))
         title.style = "Title"
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: Title added successfully\n")
 
         desc = doc.add_paragraph(meeting_metadata.get("description", ""))
         desc.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -54,6 +73,9 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
         run.font.size = Pt(14)
         run.font.color.rgb = RGBColor(90, 90, 90)
         desc.paragraph_format.space_after = Pt(20)
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: Description added successfully\n")
 
         meta_table = doc.add_table(rows=1, cols=3)
         meta_table.autofit = True
@@ -83,10 +105,13 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
             for border in borders[0]:
                 border.set(qn("w:val"), "nil")
 
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: Metadata table added successfully\n")
+
         doc.add_paragraph()  # spacing
 
         # Questions
-        for q in questions:
+        for i, q in enumerate(questions):
             heading = doc.add_heading(q.get("question", ""), level=2)
             run = heading.runs[0] if heading.runs else heading.add_run()
             run.font.color.rgb = RGBColor(0, 51, 102)  # navy blue
@@ -108,6 +133,9 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
 
             add_section_divider(doc)
 
+            with open("/tmp/debug.log", "a") as f:
+                f.write(f"DOCX: Question {i} added successfully\n")
+
         # Key Takeaways
         kt_heading = doc.add_heading("Key Takeaways", level=2)
         run = kt_heading.runs[0] if kt_heading.runs else kt_heading.add_run()
@@ -121,8 +149,25 @@ def generate_docx(data: dict[str, Any], meeting_id: str) -> tuple[bool, str | No
             run.font.size = Pt(11)
             p.paragraph_format.space_after = Pt(6)
 
-        doc.save(str(file_path))
-        return (True, f"{reverse('download-file', kwargs={'filename': filename})}")
+        with open("/tmp/debug.log", "a") as f:
+            f.write("DOCX: Key takeaways section added successfully\n")
 
-    except Exception:
+        doc.save(str(file_path))
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"DOCX: File saved successfully to {file_path}\n")
+
+        download_url = f"{reverse('download-file', kwargs={'filename': filename})}"
+
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"DOCX: Download URL generated: {download_url}\n")
+            f.write("=== DOCX GENERATION SUCCESS ===\n")
+
+        return (True, download_url)
+
+    except Exception as e:
+        with open("/tmp/debug.log", "a") as f:
+            f.write(f"DOCX GENERATION EXCEPTION: {str(e)}\n")
+            f.write(f"Exception type: {type(e).__name__}\n")
+            f.write("=== DOCX GENERATION FAILED ===\n")
         return (False, None)

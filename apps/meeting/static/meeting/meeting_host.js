@@ -17,7 +17,7 @@ const meeting_id = getMeetingID();
 const sessionId = getCookie(COOKIE_NAME);
 
 // WebSocket connection
-const ws = new WebSocket(`ws://localhost:8000/ws/meeting/${meeting_id}/host/`);
+const ws = new WebSocket(`wss://collaboard.site/ws/meeting/${meeting_id}/host/`);
 
 // Meeting state
 let accessCode = null;

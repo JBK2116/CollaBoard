@@ -35,8 +35,8 @@ def landing_page(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="index.html")
 
 
-@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+# @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+# @ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def register(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -110,8 +110,8 @@ def _send_email_verification_code(
         return "Failed to send verification email. Please try again."
 
 
-@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group="limit_per_minute", key="ip", rate="10/m", method=["POST"], block=True)
+# @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+# @ratelimit(group="limit_per_minute", key="ip", rate="10/m", method=["POST"], block=True)
 def verify_email(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -160,8 +160,8 @@ def verify_email(request: HttpRequest) -> HttpResponse:
         return render(request, template_name="base/verify_email.html", context=context)
 
 
-@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+# @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+# @ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def login_user(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -194,8 +194,8 @@ def login_user(request: HttpRequest) -> HttpResponse:
         return render(request, "base/login.html", context={"form": form})
 
 
-@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+# @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+# @ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def forgot_password(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form_result: ResetPasswordEmailForm | HttpResponse = (
@@ -266,8 +266,8 @@ def _send_email_reset_password_link(
         return "Failed to send verification email. Please try again."
 
 
-@ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
-@ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
+# @ratelimit(group="limit_per_hour", key="ip", rate="20/h", method=["POST"], block=True)
+# @ratelimit(group="limit_per_minute", key="ip", rate="5/m", method=["POST"], block=True)
 def reset_password(request: HttpRequest, token: str) -> HttpResponse:
     if request.method == "POST":
         form_result = _validate_reset_password_form(

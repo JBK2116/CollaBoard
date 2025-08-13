@@ -22,7 +22,7 @@ class Command(BaseCommand):
         """
         Deletes all the files in the `media/exports/` directory
         """
-        directory: Path = settings.MEDIA_ROOT / "exports"
+        directory: Path = Path(settings.MEDIA_ROOT) / "exports"
         if not directory.exists():
             print(f"Path: {directory} not found")
         for file in directory.iterdir():

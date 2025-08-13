@@ -147,7 +147,7 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
         if not meeting:
             return JsonResponse(data={"type": "error"})
 
-        if meeting.summarized_meeting and meeting.summarized_meeting == {}:
+        if not meeting.summarized_meeting or meeting.summarized_meeting == {}:
             return JsonResponse(
                 data={"type": "error", "message": "Meeting not summarized yet"}
             )
@@ -164,16 +164,16 @@ def export_meeting(request: HttpRequest, meeting_id: str) -> JsonResponse:
                 pass
 
         if not result[0] or not result[1]:
-            return JsonResponse(data={"type": "error"})
+            return JsonResponse(data={"type": "error", "message": "Missing summary generation result"})
         else:
             return JsonResponse(data={"type": "success", "download_url": result[1]})
     else:
-        return JsonResponse(data={"type": "error"})
+        return JsonResponse(data={"type": "error", "message": "Invalid Protocol Type"})
 
 
 def download_file(request: HttpRequest, filename: str) -> FileResponse:
     # NOTE: response ensures that the file is downloaded on the user's device
-    file_path: Path = settings.MEDIA_ROOT / "exports" / filename
+    file_path = Path(settings.MEDIA_ROOT) / "exports" / filename
     response = FileResponse(open(file=file_path, mode="rb"), as_attachment=True)
     return response
 
