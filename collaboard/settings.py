@@ -81,6 +81,11 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False  # Allow WebSocket access
 SESSION_COOKIE_SAMESITE = "Lax"
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://collaboard.site',
+    'https://www.collaboard.site'
+]
+
 
 # Email configuration for email verification
 
