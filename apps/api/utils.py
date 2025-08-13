@@ -133,16 +133,18 @@ def get_meeting_metadata(data: dict[str, Any]) -> dict[str, Any] | None:
         "time_created": data.get("time_created", None),
         "author": data.get("author", None),
     }
-    print(f"Metadata check: {metadata}")  # Add this
+    # Debug to file
+    with open('/tmp/debug.log', 'a') as f:
+        f.write(f"Raw data keys: {list(data.keys())}\n")
+        f.write(f"Metadata: {metadata}\n")
+        for key, value in metadata.items():
+            if not value:
+                f.write(f"FAILED on {key} = {repr(value)}\n")
+                return None
     for key, value in metadata.items():
         if not value:
-            print(f"Failed on: {key} = {value}")  # Add this
             return None
-    return metadata
-    for key, value in metadata.items():
-        if not value:
-            return None
-    return metadata
+
 
 
 def get_summarized_meeting_question_analysis(
