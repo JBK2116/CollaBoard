@@ -29,11 +29,17 @@ Unlike traditional meeting tools, CollaBoard is designed for **quick, recreation
 ## 🛠 Tech Stack
 
 **Frontend:** HTML, CSS, Vanilla JavaScript
+
 **Backend:** Django
+
 **Real-time Communication:** WebSockets
+
 **ASGI Server:** Daphne (handles both HTTP & WebSocket traffic)
+
 **AI Integration:** OpenAI API (GPT-4o mini)
+
 **Deployment:** AWS EC2, Nginx (reverse proxy)
+
 **Exporting:** ReportLab (PDF), python-docx (DOCX)
 
 ---
@@ -63,14 +69,14 @@ Unlike traditional meeting tools, CollaBoard is designed for **quick, recreation
 
 ## 📸 Screenshots / Demo
 
-**Demo Video Coming Soon** — For now, try it live: [collaboard.site](https://collaboard.site)
+**Demo Video Coming Soon** —> For now, try it live: [collaboard.site](https://collaboard.site)
 
 ---
 
 ## ⚠ Known Limitations / Future Improvements
 
 * Host or participant disconnect mid-meeting currently ends their session. Planned enhancement: **graceful reconnection support**.
-* No meeting persistence — sessions and summaries are deleted after use.
+* No meeting persistence — sessions and summaries are deleted shortly after use.
 
 ---
 
@@ -79,9 +85,4 @@ Unlike traditional meeting tools, CollaBoard is designed for **quick, recreation
 © 2025 CollaBoard. All rights reserved.
 
 The source code may be **viewed for educational purposes only**. Modification, redistribution, or commercial use is **not allowed**.
-
----
-
-If you want, I can also draft a **concise, recruiter-friendly 2–3 sentence blurb** from this README for your resume so it fits neatly in a portfolio section. Do you want me to do that?
-
 
