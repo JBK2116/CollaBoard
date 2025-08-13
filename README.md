@@ -7,7 +7,7 @@
 
 ## 📖 Overview
 
-CollaBoard is a lightweight, real-time meeting application inspired by a family game night conversation. The goal: create and join meetings in under 2 minutes, have participants respond to open-ended questions, and instantly summarize the results with AI.
+CollaBoard is a lightweight, real-time meeting application inspired by a family game night conversation. The goal was to make an app that is able to create and join meetings in under 2 minutes, have participants respond to open-ended questions, and instantly summarize the results with AI.
 
 Unlike traditional meeting tools, CollaBoard is designed for **quick, recreational sessions** rather than corporate or sensitive data. It’s fast, accessible, and requires no complicated setup.
 
