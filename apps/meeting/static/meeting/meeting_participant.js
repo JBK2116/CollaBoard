@@ -17,7 +17,7 @@ let isRedirecting = false;
 // Get access code from URL and establish WebSocket connection
 const access_code = getAccessCode();
 const ws = new WebSocket(
-  `ws://localhost:8000/ws/meeting/${access_code}/participant/`
+  `wss://collaboard.site/ws/meeting/${access_code}/participant/`
 );
 
 // Timer state
